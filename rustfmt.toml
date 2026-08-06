@@ -1,0 +1,9 @@
+# Formatting policy. Without this file `cargo fmt --all --check` (a CI gate)
+# disagrees with the style the tree is written in, so the fmt job fails on
+# untouched code.
+#
+# "Max" keeps short structs, matches and calls on one line, which suits the
+# dense FFI and crypto code here: fewer wrapped lines means more of a security
+# routine fits on screen at once.
+max_width = 100
+use_small_heuristics = "Max"

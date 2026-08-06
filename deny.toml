@@ -28,7 +28,9 @@ allow = [
     "Unicode-DFS-2016",
     "Zlib",
     "CC0-1.0",
-    "GPL-3.0",
+    # Our own crates. cargo-deny matches SPDX ids exactly, so the "-or-later"
+    # form must be listed explicitly; plain "GPL-3.0" does not cover it.
+    "GPL-3.0-or-later",
 ]
 confidence-threshold = 0.9
 
