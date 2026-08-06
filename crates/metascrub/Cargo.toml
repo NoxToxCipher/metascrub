@@ -1,0 +1,46 @@
+[package]
+name = "metascrub"
+description = "Format-aware metadata removal for images and documents"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+# lopdf (the `pdf` feature) and its dependency tree require a newer toolchain
+# than the workspace floor, so this crate declares its own.
+rust-version = "1.88"
+keywords = ["metadata", "exif", "privacy", "sanitize"]
+categories = ["multimedia::images", "command-line-utilities"]
+
+[features]
+# Image containers are hand-parsed and pull in no dependencies at all.
+#
+# Only `image` is on by default, because it is the only backend whose modules
+# are complete. `pdf`, `ooxml` and `cli` still reference files that do not
+# exist yet (`pdf.rs`, `ooxml.rs`, `xmlscrub.rs`, `zip.rs`,
+# `src/bin/metascrub.rs`), so defaulting them on makes the whole workspace
+# unbuildable. Move each into `default` as its modules land.
+default = ["image"]
+image = []
+ooxml = ["dep:miniz_oxide"]
+pdf = ["dep:lopdf"]
+cli = []
+
+[[bin]]
+name = "metascrub"
+path = "src/bin/metascrub.rs"
+required-features = ["cli"]
+
+[dependencies]
+thiserror = { workspace = true }
+# Raw DEFLATE for the OOXML/ODF ZIP container. Pure Rust, no_std-capable,
+# cross-compiles cleanly to the Android NDK targets.
+miniz_oxide = { version = "0.8", optional = true }
+# PDF object model. Needed for the cases a byte-level rewrite cannot reach:
+# cross-reference streams and objects packed inside /ObjStm.
+lopdf = { version = "0.44", default-features = false, optional = true }
+
+[dev-dependencies]
+# Test-only. Used to generate genuinely encoded fixtures and to prove that a
+# sanitized file still decodes to bit-identical pixels. Never shipped.
+image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp"] }
