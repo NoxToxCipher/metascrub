@@ -15,12 +15,10 @@ categories = ["multimedia::images", "command-line-utilities"]
 [features]
 # Image containers are hand-parsed and pull in no dependencies at all.
 #
-# Only `image` is on by default, because it is the only backend whose modules
-# are complete. `pdf`, `ooxml` and `cli` still reference files that do not
-# exist yet (`pdf.rs`, `ooxml.rs`, `xmlscrub.rs`, `zip.rs`,
-# `src/bin/metascrub.rs`), so defaulting them on makes the whole workspace
-# unbuildable. Move each into `default` as its modules land.
-default = ["image"]
+# `cli` is held out of the default set: it declares a binary at
+# `src/bin/metascrub.rs` that has not been written yet, and a missing target
+# fails the build and the fmt gate for everyone. Add it once the file lands.
+default = ["image", "ooxml", "pdf"]
 image = []
 ooxml = ["dep:miniz_oxide"]
 pdf = ["dep:lopdf"]
