@@ -174,14 +174,7 @@ impl Archive {
             }
 
             let stored = locate_data(input, local_offset as usize, comp_size as usize)?;
-            entries.push(Entry {
-                name,
-                method,
-                crc,
-                stored,
-                size,
-                utf8: flags & FLAG_UTF8 != 0,
-            });
+            entries.push(Entry { name, method, crc, stored, size, utf8: flags & FLAG_UTF8 != 0 });
         }
 
         if dropped_extra > 0 {

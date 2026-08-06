@@ -153,10 +153,7 @@ fn find_tag_end(xml: &[u8], start: usize) -> Option<usize> {
 /// Rewrite one complete tag, applying the rules to its attributes.
 fn rewrite_tag(tag: &[u8], rules: &[Rule], out: &mut Vec<u8>, counts: &mut Counts) {
     // Copy the element name and anything before the first space.
-    let name_end = tag
-        .iter()
-        .position(|&b| b.is_ascii_whitespace())
-        .unwrap_or(tag.len());
+    let name_end = tag.iter().position(|&b| b.is_ascii_whitespace()).unwrap_or(tag.len());
     out.extend_from_slice(&tag[..name_end]);
 
     let mut i = name_end;
@@ -246,7 +243,8 @@ fn rule_for(rules: &[Rule], local: &[u8]) -> Option<Action> {
         .iter()
         .find(|r| {
             if r.prefix_match {
-                local.len() >= r.name.len() && local[..r.name.len()].eq_ignore_ascii_case(r.name.as_bytes())
+                local.len() >= r.name.len()
+                    && local[..r.name.len()].eq_ignore_ascii_case(r.name.as_bytes())
             } else {
                 local.eq_ignore_ascii_case(r.name.as_bytes())
             }
@@ -280,7 +278,9 @@ pub(crate) fn remove_elements(xml: &[u8], local_names: &[&str]) -> (Vec<u8>, usi
         };
         let tag = &xml[i..tag_end];
 
-        match element_name(tag).filter(|n| local_names.iter().any(|w| n.eq_ignore_ascii_case(w.as_bytes()))) {
+        match element_name(tag)
+            .filter(|n| local_names.iter().any(|w| n.eq_ignore_ascii_case(w.as_bytes())))
+        {
             Some(name) => {
                 removed += 1;
                 if tag.ends_with(b"/>") {
@@ -348,10 +348,7 @@ fn skip_to_close(xml: &[u8], from: usize, name: &[u8]) -> usize {
 
 fn closing_name(tag: &[u8]) -> Option<&[u8]> {
     let body = tag.strip_prefix(b"</")?;
-    let end = body
-        .iter()
-        .position(|&b| b.is_ascii_whitespace() || b == b'>')
-        .unwrap_or(body.len());
+    let end = body.iter().position(|&b| b.is_ascii_whitespace() || b == b'>').unwrap_or(body.len());
     let name = &body[..end];
     Some(match name.iter().rposition(|&b| b == b':') {
         Some(colon) => &name[colon + 1..],

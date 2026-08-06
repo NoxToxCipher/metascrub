@@ -51,9 +51,9 @@ impl Error {
         Error::Malformed { format, detail: detail.into() }
     }
 
-    // Used by the pdf/ooxml backends, which are feature-gated off until their
-    // modules land, so this is unreferenced in an image-only build.
-    #[allow(dead_code)]
+    // Only the archive backends decline a structure they can read; an
+    // image-only build never reaches this.
+    #[cfg_attr(not(feature = "ooxml"), allow(dead_code))]
     pub(crate) fn unsupported(format: &'static str, detail: impl Into<String>) -> Self {
         Error::Unsupported { format, detail: detail.into() }
     }

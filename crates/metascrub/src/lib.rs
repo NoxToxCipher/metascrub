@@ -222,10 +222,14 @@ pub fn sanitize_file(
             Err(e) => return Err(e.into()),
         }
     }
-    Err(last_err.unwrap_or_else(|| {
-        std::io::Error::new(std::io::ErrorKind::AlreadyExists, "could not create a temporary file")
-    })
-    .into())
+    Err(last_err
+        .unwrap_or_else(|| {
+            std::io::Error::new(
+                std::io::ErrorKind::AlreadyExists,
+                "could not create a temporary file",
+            )
+        })
+        .into())
 }
 
 /// Fill `buf` with OS randomness, falling back to address and time entropy.

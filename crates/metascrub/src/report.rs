@@ -149,10 +149,8 @@ impl Report {
 
     /// Merge a nested report (an image inside a document) into this one,
     /// prefixing each location with the archive path it came from.
-    // Merges a nested container's findings into the parent's. Only the archive
-    // backends (ooxml) nest, and those are feature-gated off until their
-    // modules land.
-    #[allow(dead_code)]
+    // Only the archive backends nest a sanitizer inside another one.
+    #[cfg_attr(not(feature = "ooxml"), allow(dead_code))]
     pub(crate) fn absorb(&mut self, prefix: &str, other: Report) {
         for item in other.removed {
             self.removed.push(Removed {
@@ -228,10 +226,7 @@ mod tests {
         r.found_location = true;
         assert!(r.summary().contains("GPS"));
 
-        let unknown = Report {
-            assurance: Assurance::None,
-            ..Report::new(Format::Unknown, 10)
-        };
+        let unknown = Report { assurance: Assurance::None, ..Report::new(Format::Unknown, 10) };
         assert!(unknown.summary().contains("not sanitized"));
         assert!(!unknown.summary().contains("no metadata"));
     }

@@ -73,7 +73,11 @@ fn classify(marker: u8, payload: &[u8]) -> App {
     }
 }
 
-pub(crate) fn sanitize(input: &[u8], policy: &Policy, report: &mut Report) -> crate::Result<Vec<u8>> {
+pub(crate) fn sanitize(
+    input: &[u8],
+    policy: &Policy,
+    report: &mut Report,
+) -> crate::Result<Vec<u8>> {
     let mut r = Reader::new(input);
     if r.take(2) != Some(&[0xFF, SOI]) {
         return Err(Error::malformed(FORMAT, "missing start-of-image marker"));
@@ -85,8 +89,10 @@ pub(crate) fn sanitize(input: &[u8], policy: &Policy, report: &mut Report) -> cr
     loop {
         // Markers may be preceded by any number of 0xFF fill bytes.
         let Some(mut byte) = r.u8() else {
-            report.warn("the file ends without an end-of-image marker, so it was truncated \
-                         before it reached us; one has been added");
+            report.warn(
+                "the file ends without an end-of-image marker, so it was truncated \
+                         before it reached us; one has been added",
+            );
             out.extend_from_slice(&[0xFF, EOI]);
             break;
         };
@@ -124,7 +130,10 @@ pub(crate) fn sanitize(input: &[u8], policy: &Policy, report: &mut Report) -> cr
         }
 
         let Some(len) = r.u16_be() else {
-            return Err(Error::malformed(FORMAT, format!("truncated {marker:#04x} segment header")));
+            return Err(Error::malformed(
+                FORMAT,
+                format!("truncated {marker:#04x} segment header"),
+            ));
         };
         if len < 2 {
             return Err(Error::malformed(FORMAT, format!("{marker:#04x} declares length {len}")));
@@ -406,7 +415,7 @@ mod tests {
             p.extend_from_slice(&1u32.to_be_bytes());
             p.extend_from_slice(&(gps_at as u32).to_be_bytes());
             p.extend_from_slice(&0u32.to_be_bytes()); // no next IFD
-            // The GPS sub-IFD: one latitude entry.
+                                                      // The GPS sub-IFD: one latitude entry.
             p.extend_from_slice(&1u16.to_be_bytes());
             p.extend_from_slice(&0x0002u16.to_be_bytes());
             p.extend_from_slice(&5u16.to_be_bytes());
@@ -429,12 +438,8 @@ mod tests {
         ]);
         let (out, report) = run(&input, &Policy::default());
 
-        for needle in [
-            &b"Exif\0\0"[..],
-            b"ns.adobe.com",
-            b"Photoshop 3.0",
-            b"taken with my phone",
-        ] {
+        for needle in [&b"Exif\0\0"[..], b"ns.adobe.com", b"Photoshop 3.0", b"taken with my phone"]
+        {
             assert!(
                 !out.windows(needle.len()).any(|w| w == needle),
                 "{:?} survived",

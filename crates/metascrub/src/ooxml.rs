@@ -90,7 +90,11 @@ const OPAQUE: &[(&str, &str)] = &[
     ("embeddings/", "an embedded file, which carries its own separate metadata"),
 ];
 
-pub(crate) fn sanitize(input: &[u8], policy: &Policy, report: &mut Report) -> crate::Result<Vec<u8>> {
+pub(crate) fn sanitize(
+    input: &[u8],
+    policy: &Policy,
+    report: &mut Report,
+) -> crate::Result<Vec<u8>> {
     // Parts are edited rather than rebuilt, and unknown parts are kept because
     // in these formats they are usually content.
     report.assurance = Assurance::BestEffort;
@@ -105,7 +109,9 @@ pub(crate) fn sanitize(input: &[u8], policy: &Policy, report: &mut Report) -> cr
         // original content inspected, let alone carried forward.
         let replacement = match path.as_str() {
             CORE => Some((EMPTY_CORE, Kind::DocumentInfo, "creator, last editor, revision, dates")),
-            APP => Some((EMPTY_APP, Kind::DocumentInfo, "application, company, manager, edit time")),
+            APP => {
+                Some((EMPTY_APP, Kind::DocumentInfo, "application, company, manager, edit time"))
+            }
             CUSTOM => Some((EMPTY_CUSTOM, Kind::CustomProperty, "custom properties")),
             OD_META => Some((EMPTY_OD_META, Kind::DocumentInfo, "creator, editing cycles, dates")),
             _ => None,
@@ -178,7 +184,9 @@ fn scrub_embedded(entry: &mut crate::zip::Entry, policy: &Policy, report: &mut R
             }
             report.absorb(path, clean.report);
         }
-        Err(e) => report.warn(format!("{path} could not be sanitized ({e}), so it was left as it is")),
+        Err(e) => {
+            report.warn(format!("{path} could not be sanitized ({e}), so it was left as it is"))
+        }
     }
 }
 
@@ -222,10 +230,7 @@ fn scrub_xml_part(
 /// Exposed so the rule table cannot drift from what the documentation claims.
 #[cfg(test)]
 fn blanks_to(local_name: &str) -> Option<xmlscrub::Action> {
-    DOCUMENT_RULES
-        .iter()
-        .find(|r| r.name == local_name)
-        .map(|r| r.action)
+    DOCUMENT_RULES.iter().find(|r| r.name == local_name).map(|r| r.action)
 }
 
 #[cfg(test)]
@@ -312,13 +317,14 @@ mod tests {
 </w:p></w:body></w:document>"#;
         let comments = br#"<w:comments><w:comment w:id="1" w:author="Bob Reviewer" w:initials="BR" w:date="2026-03-05T11:00:00Z"><w:p><w:t>check this</w:t></w:p></w:comment></w:comments>"#;
 
-        let (out, report) = run(&docx(&[
-            ("word/document.xml", document),
-            ("word/comments.xml", comments),
-        ]));
+        let (out, report) =
+            run(&docx(&[("word/document.xml", document), ("word/comments.xml", comments)]));
 
         for needle in ["Jane Q. Author", "Bob Reviewer", "2026-03-04", "00A12B34"] {
-            assert!(!out.windows(needle.len()).any(|w| w == needle.as_bytes()), "{needle} survived");
+            assert!(
+                !out.windows(needle.len()).any(|w| w == needle.as_bytes()),
+                "{needle} survived"
+            );
         }
         // The content itself is untouched.
         assert!(part(&out, "word/document.xml").contains("added"));

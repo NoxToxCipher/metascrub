@@ -1,0 +1,32 @@
+[package]
+name = "metascrub-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+# Excluded from the workspace: libfuzzer-sys needs a nightly toolchain and a
+# sanitizer runtime, which should not be a requirement for building the library.
+# See tests/mutation.rs for the portable floor that runs everywhere.
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+
+[dependencies.metascrub]
+path = ".."
+
+[[bin]]
+name = "sanitize_any"
+path = "fuzz_targets/sanitize_any.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "sanitize_idempotent"
+path = "fuzz_targets/sanitize_idempotent.rs"
+test = false
+doc = false
+bench = false

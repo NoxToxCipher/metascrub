@@ -13,12 +13,10 @@ keywords = ["metadata", "exif", "privacy", "sanitize"]
 categories = ["multimedia::images", "command-line-utilities"]
 
 [features]
-# Image containers are hand-parsed and pull in no dependencies at all.
-#
-# `cli` is held out of the default set: it declares a binary at
-# `src/bin/metascrub.rs` that has not been written yet, and a missing target
-# fails the build and the fmt gate for everyone. Add it once the file lands.
-default = ["image", "ooxml", "pdf"]
+# Image containers are hand-parsed and pull in no dependencies at all; the
+# archive and PDF backends each pull exactly one. All are on by default, so a
+# plain `cargo install metascrub` handles everything the tool claims to.
+default = ["image", "ooxml", "pdf", "cli"]
 image = []
 ooxml = ["dep:miniz_oxide"]
 pdf = ["dep:lopdf"]

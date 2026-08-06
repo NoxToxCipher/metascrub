@@ -67,7 +67,11 @@ enum ItemKind {
     Xmp,
 }
 
-pub(crate) fn sanitize(input: &[u8], _policy: &Policy, report: &mut Report) -> crate::Result<Vec<u8>> {
+pub(crate) fn sanitize(
+    input: &[u8],
+    _policy: &Policy,
+    report: &mut Report,
+) -> crate::Result<Vec<u8>> {
     // The container is overwritten in place, never rebuilt, so we cannot claim
     // the allowlist guarantee the other image formats get.
     report.assurance = Assurance::BestEffort;
@@ -275,11 +279,7 @@ fn parse_iinf(buf: &[u8], children: &[BoxSpan], report: &mut Report) -> Vec<(u32
     let Some(version) = r.u8() else { return Vec::new() };
     let _flags = r.take(3);
 
-    let count = if version == 0 {
-        r.u16_be().map(u32::from)
-    } else {
-        r.u32_be()
-    };
+    let count = if version == 0 { r.u16_be().map(u32::from) } else { r.u32_be() };
     let Some(count) = count else { return Vec::new() };
     if count as usize > MAX_ITEMS {
         report.warn("the item table declares an implausible number of entries; it was ignored");
@@ -403,7 +403,9 @@ fn parse_iloc(
 
         let mut extents = Vec::new();
         for _ in 0..extent_count {
-            if (version == 1 || version == 2) && index_size > 0 && read_sized(&mut r, index_size).is_none()
+            if (version == 1 || version == 2)
+                && index_size > 0
+                && read_sized(&mut r, index_size).is_none()
             {
                 return map;
             }

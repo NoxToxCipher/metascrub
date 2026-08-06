@@ -52,7 +52,11 @@ fn describe(ty: &[u8; 4]) -> Option<Kind> {
     }
 }
 
-pub(crate) fn sanitize(input: &[u8], policy: &Policy, report: &mut Report) -> crate::Result<Vec<u8>> {
+pub(crate) fn sanitize(
+    input: &[u8],
+    policy: &Policy,
+    report: &mut Report,
+) -> crate::Result<Vec<u8>> {
     let mut r = Reader::new(input);
     if r.take(8) != Some(&MAGIC) {
         return Err(Error::malformed(FORMAT, "missing PNG signature"));
@@ -100,8 +104,10 @@ pub(crate) fn sanitize(input: &[u8], policy: &Policy, report: &mut Report) -> cr
             if actual != stated_crc {
                 return Err(Error::malformed(
                     FORMAT,
-                    format!("{} fails its CRC ({actual:#010x} against {stated_crc:#010x})",
-                        type_name(&ty)),
+                    format!(
+                        "{} fails its CRC ({actual:#010x} against {stated_crc:#010x})",
+                        type_name(&ty)
+                    ),
                 ));
             }
             out.extend_from_slice(&len.to_be_bytes());
@@ -135,13 +141,15 @@ pub(crate) fn sanitize(input: &[u8], policy: &Policy, report: &mut Report) -> cr
 /// input is untrusted, so non-printable bytes are escaped rather than assumed.
 fn type_name(ty: &[u8; 4]) -> String {
     ty.iter()
-        .map(|&b| {
-            if b.is_ascii_graphic() {
-                (b as char).to_string()
-            } else {
-                format!("\\x{b:02x}")
-            }
-        })
+        .map(
+            |&b| {
+                if b.is_ascii_graphic() {
+                    (b as char).to_string()
+                } else {
+                    format!("\\x{b:02x}")
+                }
+            },
+        )
         .collect()
 }
 
@@ -167,7 +175,10 @@ mod tests {
         for c in extra {
             v.extend_from_slice(c);
         }
-        v.extend_from_slice(&chunk(b"IDAT", &[0x78, 0x9C, 0x63, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01]));
+        v.extend_from_slice(&chunk(
+            b"IDAT",
+            &[0x78, 0x9C, 0x63, 0x00, 0x00, 0x00, 0x02, 0x00, 0x01],
+        ));
         v.extend_from_slice(&chunk(b"IEND", b""));
         v
     }
@@ -241,7 +252,7 @@ mod tests {
     #[test]
     fn iccp_follows_the_policy() {
         let icc = chunk(b"iCCP", b"my monitor profile\0\0body");
-        let (dropped, report) = run(&png(&[icc.clone()]), &Policy::strict());
+        let (dropped, report) = run(&png(std::slice::from_ref(&icc)), &Policy::strict());
         assert!(!dropped.windows(4).any(|w| w == b"iCCP"));
         assert_eq!(report.removed[0].kind, Kind::ColorProfile);
 

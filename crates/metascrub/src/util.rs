@@ -99,8 +99,8 @@ impl<'a> Reader<'a> {
 /// Table-free: PNG files have few chunks and ZIP entries are hashed once each,
 /// so the bitwise form is not worth a 1 KiB static table.
 // PNG hashes chunks through `crc32_parts`; the whole-buffer form is for ZIP
-// entries, and the ooxml backend that needs it is feature-gated off for now.
-#[allow(dead_code)]
+// entries, so an image-only build does not reach it.
+#[cfg_attr(not(feature = "ooxml"), allow(dead_code))]
 pub(crate) fn crc32(data: &[u8]) -> u32 {
     let mut crc = 0xFFFF_FFFFu32;
     for &byte in data {

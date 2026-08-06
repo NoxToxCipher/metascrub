@@ -66,7 +66,11 @@ const SWEEP_KEYS: &[&[u8]] = &[b"Metadata", b"PieceInfo", b"LastModified"];
 /// producers derive from the machine.
 const ANNOT_KEYS: &[&[u8]] = &[b"T", b"M", b"CreationDate", b"NM", b"RC"];
 
-pub(crate) fn sanitize(input: &[u8], _policy: &Policy, report: &mut Report) -> crate::Result<Vec<u8>> {
+pub(crate) fn sanitize(
+    input: &[u8],
+    _policy: &Policy,
+    report: &mut Report,
+) -> crate::Result<Vec<u8>> {
     report.assurance = Assurance::BestEffort;
 
     let mut doc = Document::load_mem(input)
@@ -115,11 +119,7 @@ fn strip_info(doc: &mut Document, report: &mut Report) {
     }
 
     if !present.is_empty() {
-        report.removed(
-            Kind::DocumentInfo,
-            format!("document info ({})", present.join(", ")),
-            0,
-        );
+        report.removed(Kind::DocumentInfo, format!("document info ({})", present.join(", ")), 0);
     }
     if present.iter().any(|k| k == "CreationDate" || k == "ModDate") {
         report.removed(Kind::Timestamp, "document info dates", 0);

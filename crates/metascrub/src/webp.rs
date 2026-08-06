@@ -29,7 +29,11 @@ const FLAG_ICC: u8 = 0x20;
 const FLAG_EXIF: u8 = 0x08;
 const FLAG_XMP: u8 = 0x04;
 
-pub(crate) fn sanitize(input: &[u8], policy: &Policy, report: &mut Report) -> crate::Result<Vec<u8>> {
+pub(crate) fn sanitize(
+    input: &[u8],
+    policy: &Policy,
+    report: &mut Report,
+) -> crate::Result<Vec<u8>> {
     let mut r = Reader::new(input);
     if r.take(4) != Some(b"RIFF") {
         return Err(Error::malformed(FORMAT, "missing RIFF header"));
@@ -131,8 +135,12 @@ fn clear_vp8x_flags(vp8x: &mut [u8], policy: &Policy) {
 
 fn name(ty: &[u8; 4]) -> String {
     ty.iter()
-        .map(|&b| if b.is_ascii_graphic() || b == b' ' { (b as char).to_string() } else {
-            format!("\\x{b:02x}")
+        .map(|&b| {
+            if b.is_ascii_graphic() || b == b' ' {
+                (b as char).to_string()
+            } else {
+                format!("\\x{b:02x}")
+            }
         })
         .collect::<String>()
         .trim_end()

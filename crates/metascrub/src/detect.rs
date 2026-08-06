@@ -171,13 +171,7 @@ mod tests {
 
     #[test]
     fn truncated_inputs_do_not_panic() {
-        let samples: [&[u8]; 5] = [
-            b"",
-            b"\xFF",
-            b"RIFF",
-            b"PK\x03\x04",
-            b"\x00\x00\x00\x18ftyp",
-        ];
+        let samples: [&[u8]; 5] = [b"", b"\xFF", b"RIFF", b"PK\x03\x04", b"\x00\x00\x00\x18ftyp"];
         for s in samples {
             let _ = detect(s);
         }
