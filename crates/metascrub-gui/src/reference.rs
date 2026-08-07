@@ -226,6 +226,178 @@ pub const PRNU: &[Section] = &[
     },
 ];
 
+/// A widely repeated claim, and what is actually the case.
+pub struct Myth {
+    pub claim: &'static str,
+    pub reality: &'static str,
+}
+
+/// Things people are commonly told, which are wrong or half true.
+///
+/// Included because bad advice here is worse than no advice: someone who
+/// believes a file is clean behaves as though it is.
+pub const MYTHS: &[Myth] = &[
+    Myth {
+        claim: "Sending a photo through a messaging app removes everything.",
+        reality: "Most large platforms do strip EXIF when you send a picture as \
+                  a photo, so the location usually goes. Two catches. Sending \
+                  the same file as a *document* or *file attachment*, which is \
+                  an option on several apps, uploads the original untouched, \
+                  metadata and all. And none of them touch the sensor pattern \
+                  in the pixels, because that is not metadata.",
+    },
+    Myth {
+        claim: "Taking a screenshot removes the metadata.",
+        reality: "Largely true, and it also disrupts the sensor pattern, since \
+                  you are capturing what the screen displayed rather than what \
+                  the sensor recorded. But the screenshot carries its own new \
+                  metadata, the quality is much worse than a proper clean copy, \
+                  and the common mistake is to screenshot for safety and then \
+                  send the original by accident.",
+    },
+    Myth {
+        claim: "Renaming the file, or putting it in a zip, removes metadata.",
+        reality: "Neither does anything at all. A filename is not part of the \
+                  file's contents, and an archive preserves the file exactly so \
+                  that it comes out the other side unchanged. That is the whole \
+                  purpose of an archive.",
+    },
+    Myth {
+        claim: "Converting to PNG strips the metadata.",
+        reality: "PNG has its own metadata chunks, including a full EXIF chunk \
+                  and free-text fields, and many converters copy the tags \
+                  across rather than dropping them. Changing format is not the \
+                  same as removing information.",
+    },
+    Myth {
+        claim: "I turned location services off, so my photos are fine.",
+        reality: "That removes GPS coordinates, which is the biggest single \
+                  item, and it is worth doing. Everything else remains: camera \
+                  model, lens, serial number in the maker note, exact timestamp, \
+                  the embedded thumbnail, and editing history.",
+    },
+    Myth {
+        claim: "Just compress the photo and the camera fingerprint is gone.",
+        reality: "This is the most common piece of advice and the weakest of \
+                  the useful operations. The pattern survives moderate JPEG \
+                  compression comfortably. Compression helps at the margin; \
+                  resizing and denoising do the real work.",
+    },
+    Myth {
+        claim: "Changing the colours or white balance defeats the fingerprint.",
+        reality: "It does nothing. The comparison is a normalised correlation, \
+                  which divides out any uniform per-channel scaling or offset \
+                  before the two are compared. A global colour change is \
+                  removed by the arithmetic before it can have any effect.",
+    },
+    Myth {
+        claim: "Cropping the photo defeats the fingerprint.",
+        reality: "It helps, because it shifts the alignment the comparison \
+                  depends on, but an analyst can search across possible crop \
+                  positions. It also leaves the pattern intact in whatever \
+                  pixels remain.",
+    },
+    Myth {
+        claim: "Sensor fingerprinting is theoretical, or something from films.",
+        reality: "It is a documented technique with a research literature going \
+                  back to 2006 and use in real casework. Treating it as fiction \
+                  is as much a mistake as treating it as infallible.",
+    },
+    Myth {
+        claim: "Sensor fingerprinting means you can always be identified.",
+        reality: "Equally wrong in the other direction. Matching requires a \
+                  reference pattern for your specific camera, built from the \
+                  physical device or from photographs already known to be \
+                  yours. Without one, there is nothing to compare against. It \
+                  links photographs to each other; it does not produce a name.",
+    },
+    Myth {
+        claim: "This only matters if you are a journalist or an activist.",
+        reality: "The most common real harm is domestic. A photograph posted \
+                  publicly can carry the coordinates of the place it was taken, \
+                  and a thumbnail can carry the version of the picture that was \
+                  cropped for a reason.",
+    },
+];
+
+/// What the published research actually supports, including where it limits
+/// what this tool can claim.
+pub const EVIDENCE: &[Section] = &[
+    Section {
+        heading: "Where the technique comes from",
+        body: "Sensor fingerprinting was established by Lukáš, Fridrich and \
+               Goljan in 'Digital Camera Identification from Sensor Pattern \
+               Noise', published in IEEE Transactions on Information Forensics \
+               and Security in 2006. It is the foundational paper and remains \
+               the basis of the field.\n\n\
+               Their method: build a reference pattern for a camera by taking \
+               many photographs from it, denoising each one, keeping the \
+               residual, and averaging those residuals so that the fixed \
+               component reinforces while the random component cancels. A \
+               questioned photograph is then denoised the same way and its \
+               residual correlated against that reference.",
+    },
+    Section {
+        heading: "Why a reference pattern is the whole story",
+        body: "Because the reference is built by averaging across many images \
+               from one camera, an analyst must already have either the device \
+               or a body of photographs attributed to it.\n\n\
+               This is the single most important fact about the threat, and it \
+               is the one most often left out. The technique answers 'did these \
+               come from the same sensor?' It does not answer 'whose camera is \
+               this?' unless somebody has already supplied the answer.",
+    },
+    Section {
+        heading: "What the evidence says about resizing",
+        body: "This is where the honesty matters most, because resizing is the \
+               main thing this tool does.\n\n\
+               The literature is consistent: identification from downscaled \
+               images remains possible, but performance degrades \
+               significantly. Resizing acts as a low-pass filter, and different \
+               scale factors preserve different parts of the signal. An analyst \
+               who knows or guesses the scale factor can compensate for it.\n\n\
+               So downscaling is the most effective operation available here, \
+               and it is still not a defeat. 'Significantly degrades' is the \
+               honest description, and it is the one this app uses.",
+    },
+    Section {
+        heading: "What the evidence says about counter-forensics",
+        body: "Counter-forensic methods against sensor fingerprints are an \
+               active research area rather than a solved problem. Published \
+               approaches include upscaling with one interpolation method and \
+               downscaling with another, so that the pixel values are \
+               plausible but no longer aligned with the original grid, and \
+               various forms of noise suppression and injection.\n\n\
+               None is presented in that literature as a guarantee. They are \
+               described as making attribution harder, which is a different \
+               claim, and it is the claim made here.",
+    },
+    Section {
+        heading: "What is genuinely contested",
+        body: "Reliability under real conditions is debated. Recent work asks \
+               how well the technique holds up on modern smartphones, where \
+               heavy computational processing, aggressive noise reduction and \
+               digital stabilisation all interfere with the pattern before the \
+               file is even written.\n\n\
+               There is also ongoing discussion about whether the field has a \
+               settled standard for casework. Anyone who tells you the answer \
+               is simple, in either direction, is ahead of the evidence.",
+    },
+    Section {
+        heading: "What this means for you",
+        body: "Metadata removal is the part that is provable. The information \
+               is in defined places, it is removed, and the result can be \
+               checked with another tool.\n\n\
+               Sensor fingerprint reduction is statistical. It lowers the \
+               confidence of a match by an amount nobody can state precisely \
+               for your specific photograph, camera and adversary.\n\n\
+               Those are different kinds of claim and this app keeps them \
+               visibly apart for that reason. If your safety depends on being \
+               unlinkable, treat the fingerprint work as one layer among \
+               several, not as the thing that solves it.",
+    },
+];
+
 /// Shown the first time pixel washing is switched on.
 pub const FIRST_USE: &str = "\
 Your camera leaves a faint pattern in the pixels of every photograph it takes. \

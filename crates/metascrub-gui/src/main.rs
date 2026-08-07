@@ -617,6 +617,94 @@ impl App {
                     ui.label(RichText::new(section.body).size(12.5).color(theme::INK_DIM));
                     ui.add_space(14.0);
                 }
+
+                ui.add_space(6.0);
+                ui.separator();
+                ui.add_space(12.0);
+
+                ui.label(
+                    RichText::new("Things you may have been told")
+                        .size(17.0)
+                        .strong()
+                        .color(theme::INK),
+                );
+                ui.label(
+                    RichText::new(
+                        "Bad advice is worse than none, because someone who believes a file is \
+                         clean will act as though it is.",
+                    )
+                    .size(12.5)
+                    .color(theme::INK_FAINT),
+                );
+                ui.add_space(10.0);
+
+                for myth in reference::MYTHS {
+                    egui::Frame::default()
+                        .fill(theme::PANEL)
+                        .stroke(Stroke::new(1.0, theme::LINE))
+                        .corner_radius(6.0)
+                        .inner_margin(10.0)
+                        .show(ui, |ui| {
+                            ui.horizontal_top(|ui| {
+                                ui.label(RichText::new("claim").font(mono(9.5)).color(theme::WARN));
+                                ui.label(
+                                    RichText::new(myth.claim)
+                                        .size(12.5)
+                                        .italics()
+                                        .color(theme::INK),
+                                );
+                            });
+                            ui.add_space(5.0);
+                            ui.horizontal_top(|ui| {
+                                ui.label(RichText::new("truth").font(mono(9.5)).color(theme::OK));
+                                ui.label(
+                                    RichText::new(myth.reality).size(12.5).color(theme::INK_DIM),
+                                );
+                            });
+                        });
+                    ui.add_space(6.0);
+                }
+
+                ui.add_space(16.0);
+                ui.separator();
+                ui.add_space(12.0);
+
+                ui.label(
+                    RichText::new("What the research actually shows")
+                        .size(17.0)
+                        .strong()
+                        .color(theme::INK),
+                );
+                ui.label(
+                    RichText::new(
+                        "Including the parts that limit what this tool is allowed to claim.",
+                    )
+                    .size(12.5)
+                    .color(theme::INK_FAINT),
+                );
+                ui.add_space(10.0);
+
+                for section in reference::EVIDENCE {
+                    ui.label(
+                        RichText::new(section.heading).size(14.0).strong().color(theme::ACCENT),
+                    );
+                    ui.add_space(4.0);
+                    ui.label(RichText::new(section.body).size(12.5).color(theme::INK_DIM));
+                    ui.add_space(14.0);
+                }
+
+                ui.add_space(8.0);
+                ui.label(
+                    RichText::new(
+                        "Sources: Lukáš, Fridrich & Goljan, 'Digital Camera Identification from \
+                         Sensor Pattern Noise', IEEE Transactions on Information Forensics and \
+                         Security, 2006. Subsequent work on robustness under downscaling, on \
+                         counter-forensic resampling, and on smartphone reliability.",
+                    )
+                    .size(11.0)
+                    .color(theme::INK_FAINT),
+                );
+                ui.add_space(8.0);
             });
         self.reference_open = open;
     }
