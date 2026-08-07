@@ -869,6 +869,7 @@ impl App {
     }
 
     fn file_card(&mut self, ui: &mut egui::Ui, index: usize) {
+        let mut save_as: Option<usize> = None;
         let entry = &self.entries[index];
         let name = entry
             .path
@@ -924,6 +925,21 @@ impl App {
                                     .size(12.5)
                                     .strong()
                                     .color(theme::DANGER),
+                            );
+                        }
+
+                        // "Nothing was found" and "nothing was reported" look
+                        // identical if the list is simply absent, and the second
+                        // reads as a broken tool. Say which it was.
+                        if report.removed.is_empty() {
+                            ui.add_space(6.0);
+                            ui.label(
+                                RichText::new(
+                                    "No metadata found. The file was rebuilt anyway, so \
+                                     anything unrecognised was dropped in the process.",
+                                )
+                                .size(12.0)
+                                .color(theme::INK_FAINT),
                             );
                         }
 
@@ -993,10 +1009,70 @@ impl App {
                                     .font(mono(10.5))
                                     .color(theme::OK),
                             );
+                        } else if s.report.assurance != Assurance::None {
+                            // A per-file save, because the automatic name is
+                            // derived from the original and the original name is
+                            // often not one you would choose. Windows screenshots
+                            // are called things like "Screenshot 2026-08-07
+                            // 235753.png", and a date and time in a filename is
+                            // itself information you may not want to hand over.
+                            ui.add_space(6.0);
+                            ui.horizontal(|ui| {
+                                if ui
+                                    .button("Save as...")
+                                    .on_hover_text("Choose the name and folder yourself")
+                                    .clicked()
+                                {
+                                    save_as = Some(index);
+                                }
+                                ui.label(
+                                    RichText::new(format!(
+                                        "otherwise saved as {}",
+                                        clean_name(&entry.path)
+                                            .file_name()
+                                            .map(|s| s.to_string_lossy().into_owned())
+                                            .unwrap_or_default()
+                                    ))
+                                    .font(mono(10.0))
+                                    .color(theme::INK_FAINT),
+                                );
+                            });
                         }
                     }
                 }
             });
+
+        // Acted on after the frame closes, so the dialog does not run while the
+        // entry is still borrowed for drawing.
+        if let Some(i) = save_as {
+            self.save_one_as(i);
+        }
+    }
+
+    /// Save a single entry under a name the user picks.
+    fn save_one_as(&mut self, index: usize) {
+        let Some(entry) = self.entries.get(index) else { return };
+        let Ok(sanitized) = &entry.result else { return };
+
+        let suggested = clean_name(&entry.path);
+        let dialog = rfd::FileDialog::new().set_file_name(
+            suggested.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default(),
+        );
+        let dialog = match entry.path.parent() {
+            Some(dir) => dialog.set_directory(dir),
+            None => dialog,
+        };
+
+        let Some(dst) = dialog.save_file() else { return };
+        let data = sanitized.data.clone();
+        match write_atomic(&dst, &data) {
+            Ok(()) => {
+                if let Some(e) = self.entries.get_mut(index) {
+                    e.saved_to = Some(dst);
+                }
+            }
+            Err(e) => self.error = Some(format!("could not write {}: {e}", dst.display())),
+        }
     }
 }
 
