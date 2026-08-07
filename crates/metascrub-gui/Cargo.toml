@@ -1,0 +1,33 @@
+[package]
+name = "metascrub-gui"
+description = "Desktop interface for metascrub: remove metadata from files"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+# Inherited from metascrub, whose lopdf dependency needs a newer toolchain than
+# the workspace floor.
+rust-version = "1.88"
+
+[dependencies]
+metascrub = { workspace = true }
+pixelwash = { workspace = true }
+
+# egui rather than a webview toolkit. The whole claim of this tool is that it is
+# small and auditable, and a bundled browser engine plus a JavaScript build
+# chain would be a larger dependency surface than the sanitizer it wraps.
+eframe = { version = "0.36", default-features = false, features = [
+    "default_fonts",
+    "glow",       # OpenGL: fewer moving parts than wgpu, and this draws rectangles
+    "wayland",
+    "x11",
+] }
+egui = "0.36"
+# Native "open file" dialogs. Drag and drop is the primary path; this is for
+# people who reach for a button.
+rfd = "0.17"
+
+[[bin]]
+name = "metascrub-gui"
+path = "src/main.rs"

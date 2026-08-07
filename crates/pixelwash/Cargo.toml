@@ -1,0 +1,27 @@
+[package]
+name = "pixelwash"
+description = "Reduce sensor-fingerprint (PRNU) linkability in photographs"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+rust-version = "1.88"
+keywords = ["prnu", "privacy", "forensics", "photography"]
+categories = ["multimedia::images"]
+
+[dependencies]
+thiserror = { workspace = true }
+rand = { workspace = true }
+
+# Decoding is the reason this is a separate crate from metascrub. metascrub
+# never looks at pixels; it copies the compressed bitstream through untouched.
+# Reaching into the pixels means running a decoder over a file from a stranger,
+# and image decoders are historically one of the richest sources of memory
+# corruption. Keeping that behind its own crate boundary means the metadata
+# tool's guarantees do not quietly depend on a decoder's.
+image = { version = "0.25", default-features = false, features = [
+    "jpeg",
+    "png",
+    "webp",
+] }
