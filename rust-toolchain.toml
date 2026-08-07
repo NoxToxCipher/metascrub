@@ -1,0 +1,11 @@
+# Pin the toolchain so a build here and a build somewhere else produce the same
+# binary from the same source. Without this, "reproducible" means "reproducible
+# if you happen to have the compiler I had", which is not a claim anybody can
+# check.
+#
+# Bump deliberately, and note it in the release, since a toolchain change is a
+# change to the shipped artifact even when no source changed.
+[toolchain]
+channel = "1.97.1"
+components = ["rustfmt", "clippy"]
+profile = "minimal"

@@ -21,12 +21,14 @@
 
 use std::path::PathBuf;
 use std::sync::mpsc::{channel, Receiver, Sender};
+use zeroize::Zeroizing;
 
 use eframe::egui;
 use egui::{Color32, FontFamily, FontId, RichText, Stroke};
 use metascrub::{Assurance, ColorProfile, Orientation, Policy, Sanitized};
 use pixelwash::{Strength, WashReport};
 
+mod privacy;
 mod reference;
 
 // ---------------------------------------------------------------------------
@@ -265,8 +267,11 @@ fn process(
     policy: &Policy,
     wash: Option<Strength>,
 ) -> (Result<Sanitized, String>, Option<Result<WashReport, String>>) {
+    // Wiped when this returns. The buffer holds the original file, metadata and
+    // all, so a freed heap page could otherwise keep someone's coordinates
+    // readable to whatever allocates next, or to a memory dump.
     let bytes = match std::fs::read(path) {
-        Ok(b) => b,
+        Ok(b) => Zeroizing::new(b),
         Err(e) => return (Err(e.to_string()), None),
     };
 
@@ -285,7 +290,9 @@ fn process(
     match pixelwash::wash(&bytes, &settings) {
         Ok(washed) => {
             let report = washed.report.clone();
-            match metascrub::sanitize(&washed.data, policy) {
+            // The intermediate carries the full-resolution washed image.
+            let washed_data = Zeroizing::new(washed.data);
+            match metascrub::sanitize(&washed_data, policy) {
                 Ok(final_pass) => (
                     Ok(Sanitized { data: final_pass.data, report: stripped.report }),
                     Some(Ok(report)),
@@ -823,6 +830,7 @@ impl App {
                         }
                         if ui.button("Add files...").clicked() {
                             if let Some(files) = rfd::FileDialog::new().pick_files() {
+                                privacy::forget_recent(&files);
                                 self.queue(files);
                             }
                         }
@@ -832,6 +840,21 @@ impl App {
                 if let Some(err) = &self.error {
                     ui.add_space(4.0);
                     ui.label(RichText::new(format!("! {err}")).size(12.0).color(theme::DANGER));
+                }
+
+                // Said once something has been saved, because "cleaned" reads as
+                // "dealt with", and the untouched original is still sitting in
+                // the same folder carrying everything that was just removed.
+                if self.entries.iter().any(|e| e.saved_to.is_some()) {
+                    ui.add_space(3.0);
+                    ui.label(
+                        RichText::new(
+                            "Your original files are untouched and still contain everything \
+                             listed above. Delete them yourself if that matters.",
+                        )
+                        .size(11.5)
+                        .color(theme::WARN),
+                    );
                 }
             });
     }
@@ -860,6 +883,7 @@ impl App {
                     ui.add_space(16.0);
                     if ui.button("Choose files...").clicked() {
                         if let Some(files) = rfd::FileDialog::new().pick_files() {
+                            privacy::forget_recent(&files);
                             self.queue(files);
                         }
                     }
@@ -1064,6 +1088,7 @@ impl App {
         };
 
         let Some(dst) = dialog.save_file() else { return };
+        privacy::forget_recent(std::slice::from_ref(&dst));
         let data = sanitized.data.clone();
         match write_atomic(&dst, &data) {
             Ok(()) => {
@@ -1137,6 +1162,9 @@ fn badge(ui: &mut egui::Ui, text: &str, colour: Color32, mark: Mark) {
 }
 
 fn main() -> eframe::Result<()> {
+    // Before anything is loaded, so a crash during startup cannot dump either.
+    privacy::suppress_crash_dumps();
+
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([760.0, 620.0])

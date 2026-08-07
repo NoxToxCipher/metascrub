@@ -27,7 +27,13 @@ egui = "0.36"
 # Native "open file" dialogs. Drag and drop is the primary path; this is for
 # people who reach for a button.
 rfd = "0.17"
+# The decoded photograph and whatever was pulled out of it sit in these
+# buffers. Wiping them on drop keeps them out of freed heap pages.
+zeroize = { workspace = true }
 
 [[bin]]
 name = "metascrub-gui"
 path = "src/main.rs"
+
+[dev-dependencies]
+tempfile = "3"
