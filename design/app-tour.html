@@ -1,0 +1,594 @@
+<title>Metadata Scrubber: The Built App</title>
+
+<style>
+  :root {
+    --ground:#0f1418; --panel:#171d22; --panel2:#1d252b; --line:#2a343b;
+    --ink:#dde4e8; --dim:#93a3ac; --faint:#66757e;
+    --accent:#58a6b0; --ok:#74a97b; --warn:#d9973f; --danger:#c4584b;
+    --sans: ui-sans-serif,-apple-system,"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+    --mono: ui-monospace,"Cascadia Code","SF Mono",Consolas,monospace;
+  }
+  @media (prefers-color-scheme: light) {
+    :root { --ground:#e9edf0; --panel:#fff; --panel2:#f2f5f7; --line:#ccd6dc;
+      --ink:#172028; --dim:#536068; --faint:#7d8b93;
+      --accent:#2d7d88; --ok:#47804f; --warn:#a76c17; --danger:#a8402f; }
+  }
+  :root[data-theme="light"] { --ground:#e9edf0; --panel:#fff; --panel2:#f2f5f7;
+    --line:#ccd6dc; --ink:#172028; --dim:#536068; --faint:#7d8b93;
+    --accent:#2d7d88; --ok:#47804f; --warn:#a76c17; --danger:#a8402f; }
+  :root[data-theme="dark"] { --ground:#0f1418; --panel:#171d22; --panel2:#1d252b;
+    --line:#2a343b; --ink:#dde4e8; --dim:#93a3ac; --faint:#66757e;
+    --accent:#58a6b0; --ok:#74a97b; --warn:#d9973f; --danger:#c4584b; }
+
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
+    font-size:16px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1180px;margin:0 auto;padding:56px 24px 96px}
+
+  .eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--faint);margin:0 0 14px}
+  h1{font-size:clamp(30px,4.4vw,46px);line-height:1.1;letter-spacing:-.02em;
+    margin:0 0 16px;font-weight:600;text-wrap:balance}
+  .lede{max-width:64ch;color:var(--dim);font-size:17px;margin:0 0 26px}
+  .masthead{border-bottom:1px solid var(--line);padding-bottom:32px;margin-bottom:40px}
+  .built{display:flex;gap:12px;align-items:flex-start;max-width:70ch;
+    background:var(--panel);border:1px solid var(--line);border-left:3px solid var(--ok);
+    border-radius:6px;padding:14px 16px;font-size:14.5px;color:var(--dim)}
+  .built strong{color:var(--ink)}
+
+  .facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:1px;background:var(--line);border:1px solid var(--line);
+    border-radius:6px;overflow:hidden;margin:26px 0 52px}
+  .fact{background:var(--panel);padding:14px 16px;text-align:center}
+  .fact .n{font-family:var(--mono);font-size:20px;font-weight:600;color:var(--accent);
+    font-variant-numeric:tabular-nums}
+  .fact .l{font-size:10.5px;color:var(--faint);text-transform:uppercase;
+    letter-spacing:.08em;font-family:var(--mono);margin-top:4px}
+
+  .flow{margin-bottom:60px}
+  .flow-head{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line);
+    padding-bottom:10px;margin-bottom:24px;flex-wrap:wrap}
+  .flow-head h2{font-size:21px;font-weight:600;margin:0;letter-spacing:-.01em}
+  .flow-head .tag{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--accent)}
+
+  .frames{display:grid;grid-template-columns:repeat(auto-fit,minmax(340px,1fr));
+    gap:28px;align-items:start}
+  figure{margin:0}
+  figcaption{margin-top:12px;font-size:13.5px;color:var(--dim);line-height:1.5}
+  figcaption b{color:var(--ink);font-weight:600;display:block;font-size:13px;margin-bottom:3px}
+
+  /* the application window */
+  .app{background:var(--ground);border:1px solid var(--line);border-radius:8px;
+    overflow:hidden;display:flex;flex-direction:column;min-height:380px;
+    font-size:13px}
+  .titlebar{display:flex;align-items:center;gap:8px;padding:7px 10px;
+    background:var(--panel2);border-bottom:1px solid var(--line);
+    font-size:12px;color:var(--dim)}
+  .titlebar .dot{width:9px;height:9px;border-radius:2px;background:var(--accent);flex-shrink:0}
+  .titlebar .grow{margin-left:auto;font-family:var(--mono);font-size:10px;color:var(--faint)}
+
+  .topbar{padding:9px 11px;background:var(--panel2);border-bottom:1px solid var(--line)}
+  .toprow{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .brand{font-weight:600;font-size:13.5px}
+  .tagline{font-size:11.5px;color:var(--faint)}
+  .push{margin-left:auto;display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .cb{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;color:var(--dim);
+    white-space:nowrap}
+  .cb i{width:12px;height:12px;border:1px solid var(--line);border-radius:2px;
+    display:inline-block;background:var(--panel);flex-shrink:0}
+  .cb.on i{background:var(--accent);border-color:var(--accent);position:relative}
+  .cb.on i::after{content:"";position:absolute;left:3px;top:1px;width:4px;height:7px;
+    border:solid var(--ground);border-width:0 1.5px 1.5px 0;transform:rotate(42deg)}
+  .btn{font-size:11.5px;padding:4px 9px;border:1px solid var(--line);border-radius:4px;
+    background:var(--panel);color:var(--ink);white-space:nowrap}
+  .combo{font-size:11.5px;padding:3px 8px;border:1px solid var(--line);border-radius:4px;
+    background:var(--panel);color:var(--ink)}
+  .washrow{margin-top:7px;display:flex;gap:9px;align-items:center;flex-wrap:wrap}
+  .besteffort{font-family:var(--mono);font-size:9.5px;color:var(--warn);
+    letter-spacing:.06em;text-transform:uppercase}
+
+  .body{padding:12px 11px;flex:1;display:flex;flex-direction:column;gap:9px}
+
+  .drop{flex:1;margin:11px;border:2px dashed var(--line);border-radius:8px;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:9px;text-align:center;padding:34px 20px}
+  .drop.hot{border-color:var(--accent)}
+  .drop h3{margin:0;font-size:16px;font-weight:600}
+  .drop p{margin:0;font-size:11.5px;color:var(--faint);line-height:1.5}
+
+  .card{background:var(--panel);border:1px solid var(--line);border-radius:7px;padding:10px 11px}
+  .cardhead{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .fname{font-weight:600;font-size:12.5px}
+  .sub{font-family:var(--mono);font-size:10px;color:var(--faint);margin-top:3px}
+
+  .badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);
+    font-size:9.5px;letter-spacing:.06em;padding:2px 6px;border-radius:3px;
+    border:1px solid;white-space:nowrap}
+  .badge s{width:8px;height:8px;display:inline-block;flex-shrink:0}
+  .badge.ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 50%,transparent)}
+  .badge.ok s{background:var(--ok);border-radius:50%}
+  .badge.warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 50%,transparent)}
+  .badge.warn s{background:var(--warn);clip-path:polygon(50% 0,100% 100%,0 100%)}
+  .badge.bad{color:var(--danger);border-color:color-mix(in srgb,var(--danger) 55%,transparent)}
+  .badge.bad s{position:relative}
+  .badge.bad s::before,.badge.bad s::after{content:"";position:absolute;left:0;top:3px;
+    width:8px;height:1.6px;background:var(--danger)}
+  .badge.bad s::before{transform:rotate(45deg)}
+  .badge.bad s::after{transform:rotate(-45deg)}
+
+  .gps{font-size:11.5px;font-weight:600;color:var(--danger);margin-top:6px}
+  .items{margin-top:6px;display:flex;flex-direction:column;gap:3px}
+  .item{display:flex;gap:7px;align-items:baseline;font-size:11.5px}
+  .item .x{color:var(--ok);font-family:var(--mono)}
+  .item .loc{font-family:var(--mono);font-size:9.5px;color:var(--faint)}
+  .item .sz{margin-left:auto;font-family:var(--mono);font-size:9.5px;color:var(--faint);
+    font-variant-numeric:tabular-nums}
+  .warnline{font-size:11px;color:var(--warn);margin-top:6px;line-height:1.45}
+  .washline{font-family:var(--mono);font-size:9.5px;color:var(--warn);margin-top:6px}
+  .savedline{font-family:var(--mono);font-size:9.5px;color:var(--ok);margin-top:5px}
+
+  .bottombar{padding:9px 11px;background:var(--panel2);border-top:1px solid var(--line);
+    display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  .tally{font-family:var(--mono);font-size:11px}
+  .tally .g{color:var(--ok)} .tally .a{color:var(--warn)} .tally .r{color:var(--danger)}
+  .tally .sep{color:var(--faint)}
+  .primary{background:var(--accent);border-color:var(--accent);color:var(--ground);font-weight:600}
+
+  /* modal */
+  .modal{background:var(--panel);border:1px solid var(--accent);border-radius:8px;
+    padding:14px 15px;margin:14px}
+  .modal h3{margin:0 0 9px;font-size:14px;font-weight:600}
+  .modal p{margin:0 0 8px;font-size:11.5px;color:var(--dim);line-height:1.55}
+  .modal .row{display:flex;gap:7px;margin-top:11px;flex-wrap:wrap}
+
+  .refpane{padding:12px 11px;overflow:hidden;flex:1}
+  .refsec{font-size:13px;font-weight:600;margin-bottom:3px}
+  .refsub{font-size:10.5px;color:var(--faint);margin-bottom:9px;line-height:1.45}
+  .refcard{background:var(--panel);border:1px solid var(--line);border-radius:6px;
+    padding:8px 10px;margin-bottom:6px}
+  .refcard h4{margin:0 0 3px;font-family:var(--mono);font-size:10.5px;color:var(--accent)}
+  .refcard p{margin:0;font-size:10.5px;color:var(--dim);line-height:1.5}
+  .refhead{font-size:11.5px;font-weight:600;color:var(--accent);margin:10px 0 3px}
+  .refhead.d{color:var(--danger)}
+  .reftext{font-size:10.5px;color:var(--dim);line-height:1.5}
+  .fade{-webkit-mask-image:linear-gradient(to bottom,#000 65%,transparent);
+    mask-image:linear-gradient(to bottom,#000 65%,transparent)}
+
+  .footer{border-top:1px solid var(--line);padding-top:28px;margin-top:16px;
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:26px}
+  .footer h3{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--faint);margin:0 0 12px;font-weight:500}
+  .footer ul{margin:0;padding-left:17px;color:var(--dim);font-size:13.5px;line-height:1.7}
+  .footer li::marker{color:var(--accent)}
+  code{font-family:var(--mono);font-size:12.5px;background:var(--panel2);
+    padding:1px 5px;border-radius:3px;color:var(--ink)}
+</style>
+
+<div class="wrap">
+
+  <header class="masthead">
+    <p class="eyebrow">The built application</p>
+    <h1>Metadata Scrubber</h1>
+    <p class="lede">
+      Every screen and state of the working desktop app, in one place. This is
+      not a proposal. The binary exists, it runs, and these are the screens it
+      draws.
+    </p>
+    <div class="built">
+      <span>&#10003;</span>
+      <div>
+        <strong>Running now on Windows.</strong>
+        One 6.3 MB file with no installer and no dependencies to fetch. The same
+        Rust core also builds a 781 kB command line tool, and both work offline
+        with no account and no network access of any kind.
+      </div>
+    </div>
+    <div class="facts">
+      <div class="fact"><div class="n">232</div><div class="l">tests passing</div></div>
+      <div class="fact"><div class="n">20,000</div><div class="l">fuzz cases, 0 panics</div></div>
+      <div class="fact"><div class="n">7</div><div class="l">formats handled</div></div>
+      <div class="fact"><div class="n">0</div><div class="l">network calls</div></div>
+    </div>
+  </header>
+
+  <!-- OPENING -->
+  <section class="flow">
+    <div class="flow-head"><h2>Opening it</h2><span class="tag">Empty state</span></div>
+    <div class="frames">
+
+      <figure>
+        <div class="app">
+          <div class="titlebar"><span class="dot"></span>metascrub<span class="grow">6.3 MB</span></div>
+          <div class="topbar">
+            <div class="toprow">
+              <span class="brand">metascrub</span>
+              <span class="tagline">removes what a file says about you</span>
+              <span class="push">
+                <span class="cb"><i></i>Keep colour</span>
+                <span class="cb"><i></i>Keep rotation</span>
+                <span class="btn">What is removed, and why</span>
+              </span>
+            </div>
+            <div class="washrow">
+              <span class="cb"><i></i>Reduce camera fingerprint</span>
+            </div>
+          </div>
+          <div class="drop">
+            <h3>Drop files here</h3>
+            <p>Photos, PDFs and Office documents.<br>
+               Nothing is uploaded. Nothing leaves this computer.</p>
+            <span class="btn">Choose files...</span>
+          </div>
+          <div class="bottombar">
+            <span class="push">
+              <span class="btn">Add files...</span>
+              <span class="btn">Clear</span>
+              <span class="btn primary">Save 0 cleaned copies</span>
+            </span>
+          </div>
+        </div>
+        <figcaption>
+          <b>Empty state</b>
+          The offline claim sits on the first screen because it is the reason to
+          use this instead of a website that asks you to upload the photograph
+          you are trying to keep private.
+        </figcaption>
+      </figure>
+
+      <figure>
+        <div class="app">
+          <div class="titlebar"><span class="dot"></span>metascrub</div>
+          <div class="topbar">
+            <div class="toprow">
+              <span class="brand">metascrub</span>
+              <span class="tagline">removes what a file says about you</span>
+            </div>
+          </div>
+          <div class="drop hot">
+            <h3>Drop files here</h3>
+            <p>Photos, PDFs and Office documents.<br>
+               Nothing is uploaded. Nothing leaves this computer.</p>
+            <span class="btn">Choose files...</span>
+          </div>
+          <div class="bottombar">
+            <span class="tally" style="color:var(--faint)">waiting</span>
+          </div>
+        </div>
+        <figcaption>
+          <b>Dragging a file over the window</b>
+          The border picks up the accent colour. Drag and drop is the primary
+          path; the button exists for people who reach for one.
+        </figcaption>
+      </figure>
+
+    </div>
+  </section>
+
+  <!-- RESULTS -->
+  <section class="flow">
+    <div class="flow-head"><h2>Results</h2><span class="tag">Three outcomes, three shapes</span></div>
+    <div class="frames">
+
+      <figure>
+        <div class="app">
+          <div class="titlebar"><span class="dot"></span>metascrub</div>
+          <div class="body">
+            <div class="card">
+              <div class="cardhead">
+                <span class="fname">DSCF1635.JPG</span>
+                <span class="badge ok"><s></s>COMPLETE</span>
+              </div>
+              <div class="sub">JPEG  25.1 MB -&gt; 25.0 MB</div>
+              <div class="gps">This file recorded where it was taken</div>
+              <div class="items">
+                <div class="item"><span class="x">&times;</span>EXIF<span class="loc">APP1</span><span class="sz">63.9 kB</span></div>
+                <div class="item"><span class="x">&times;</span>maker note<span class="loc">APP1 EXIF maker note</span><span class="sz">&nbsp;</span></div>
+                <div class="item"><span class="x">&times;</span>thumbnail<span class="loc">APP1 EXIF IFD1</span><span class="sz">&nbsp;</span></div>
+                <div class="item"><span class="x">&times;</span>XMP<span class="loc">APP1</span><span class="sz">12.0 kB</span></div>
+                <div class="item"><span class="x">&times;</span>unrecognised structure<span class="loc">APP2</span><span class="sz">39.0 kB</span></div>
+              </div>
+              <div class="savedline">saved to DSCF1635.clean.JPG</div>
+            </div>
+          </div>
+          <div class="bottombar">
+            <span class="tally"><span class="g">1 complete</span> <span class="sep">&middot;</span> <span class="a">0 best effort</span></span>
+            <span class="push"><span class="btn primary">Save 1 cleaned copy</span></span>
+          </div>
+        </div>
+        <figcaption>
+          <b>Complete</b>
+          Real output from a 25 MB Fuji file. The last line is the allowlist
+          earning its keep: 39 kB of vendor-private data that a tool deleting
+          only what it recognises would have passed straight through.
+        </figcaption>
+      </figure>
+
+      <figure>
+        <div class="app">
+          <div class="titlebar"><span class="dot"></span>metascrub</div>
+          <div class="body">
+            <div class="card">
+              <div class="cardhead">
+                <span class="fname">contract.pdf</span>
+                <span class="badge warn"><s></s>BEST EFFORT</span>
+              </div>
+              <div class="sub">PDF  1.4 MB -&gt; 1.2 MB</div>
+              <div class="items">
+                <div class="item"><span class="x">&times;</span>author identity<span class="loc">/Info /Author</span><span class="sz">&nbsp;</span></div>
+                <div class="item"><span class="x">&times;</span>document info<span class="loc">/Producer</span><span class="sz">&nbsp;</span></div>
+                <div class="item"><span class="x">&times;</span>timestamp<span class="loc">/CreationDate</span><span class="sz">&nbsp;</span></div>
+                <div class="item"><span class="x">&times;</span>revision identifiers<span class="loc">/ID</span><span class="sz">&nbsp;</span></div>
+              </div>
+              <div class="warnline">! this PDF has 2 attached file(s); attachments keep whatever metadata they arrived with</div>
+            </div>
+          </div>
+          <div class="bottombar">
+            <span class="tally"><span class="g">0 complete</span> <span class="sep">&middot;</span> <span class="a">1 best effort</span></span>
+            <span class="push"><span class="btn primary">Save 1 cleaned copy</span></span>
+          </div>
+        </div>
+        <figcaption>
+          <b>Best effort</b>
+          A PDF cannot be rebuilt as cleanly as a JPEG, so the badge steps down
+          and the warning names the specific gap rather than hedging in general
+          terms.
+        </figcaption>
+      </figure>
+
+      <figure>
+        <div class="app">
+          <div class="titlebar"><span class="dot"></span>metascrub</div>
+          <div class="body">
+            <div class="card">
+              <div class="cardhead">
+                <span class="fname">archive.7z</span>
+                <span class="badge bad"><s></s>NOT CLEANED</span>
+              </div>
+              <div class="sub">unknown format  22.8 MB</div>
+              <div class="warnline" style="color:var(--danger)">
+                ! this format is not one metascrub can take apart, so nothing was
+                removed; treat the file as if it still carries everything it
+                arrived with
+              </div>
+            </div>
+          </div>
+          <div class="bottombar">
+            <span class="tally"><span class="g">0 complete</span> <span class="sep">&middot;</span> <span class="a">0 best effort</span> <span class="sep">&middot;</span> <span class="r">1 skipped</span></span>
+            <span class="push"><span class="btn">Save 0 cleaned copies</span></span>
+          </div>
+        </div>
+        <figcaption>
+          <b>Not cleaned</b>
+          The screen that justifies the product. No output file is written at
+          all, and the Save button stays at zero. Everything else in this
+          category shows a green tick here.
+        </figcaption>
+      </figure>
+
+    </div>
+  </section>
+
+  <!-- PRNU -->
+  <section class="flow">
+    <div class="flow-head"><h2>The camera fingerprint</h2><span class="tag">Optional, off by default</span></div>
+    <div class="frames">
+
+      <figure>
+        <div class="app">
+          <div class="titlebar"><span class="dot"></span>metascrub</div>
+          <div class="modal">
+            <h3>About your camera's fingerprint</h3>
+            <p>Your camera leaves a faint pattern in the pixels of every
+               photograph it takes. It comes from tiny manufacturing differences
+               between the light sensors, it is fixed for the life of the camera,
+               and it is not metadata. Removing EXIF does nothing to it.</p>
+            <p>It can be used to show that two photographs came from the same
+               camera. That matters if you publish under your own name and also
+               want to publish something anonymously.</p>
+            <p>What this does: it denoises the image, makes it smaller, adds a
+               little noise, and re-compresses it. Together these reduce how
+               strongly the pattern can be matched.</p>
+            <p><b style="color:var(--ink)">What it does not do: remove the
+               pattern.</b> Nobody can promise that. This lowers the confidence
+               of a match; it does not make one impossible.</p>
+            <p>It also costs image quality. Your photographs will be softer and
+               smaller. That is why it stays off unless you turn it on.</p>
+            <div class="row">
+              <span class="btn primary">I understand</span>
+              <span class="btn">Read the full explanation</span>
+              <span class="btn">Cancel</span>
+            </div>
+          </div>
+        </div>
+        <figcaption>
+          <b>Shown once, before any file is touched</b>
+          Ticking the box opens this first, and closing it without acknowledging
+          leaves the setting off. The choice is remembered afterwards, so it
+          appears once rather than every launch.
+        </figcaption>
+      </figure>
+
+      <figure>
+        <div class="app">
+          <div class="titlebar"><span class="dot"></span>metascrub</div>
+          <div class="topbar">
+            <div class="toprow">
+              <span class="brand">metascrub</span>
+              <span class="push">
+                <span class="cb"><i></i>Keep colour</span>
+                <span class="cb"><i></i>Keep rotation</span>
+              </span>
+            </div>
+            <div class="washrow">
+              <span class="cb on"><i></i>Reduce camera fingerprint</span>
+              <span class="combo">Balanced</span>
+              <span style="font-size:10.5px;color:var(--faint)">Softer on close inspection. Keeps 70% of the size.</span>
+              <span class="besteffort">best effort only</span>
+            </div>
+          </div>
+          <div class="body">
+            <div class="card">
+              <div class="cardhead">
+                <span class="fname">DSCF1635.JPG</span>
+                <span class="badge ok"><s></s>COMPLETE</span>
+              </div>
+              <div class="sub">JPEG  25.1 MB -&gt; 4.9 MB</div>
+              <div class="items">
+                <div class="item"><span class="x">&times;</span>EXIF<span class="loc">APP1</span><span class="sz">63.9 kB</span></div>
+                <div class="item"><span class="x">&times;</span>maker note<span class="loc">APP1 EXIF maker note</span><span class="sz">&nbsp;</span></div>
+              </div>
+              <div class="washline">fingerprint reduced (best effort): 6240x4160 -&gt; 4368x2912, quality 85</div>
+            </div>
+          </div>
+          <div class="bottombar">
+            <span class="tally"><span class="g">1 complete</span></span>
+            <span class="push"><span class="btn primary">Save 1 cleaned copy</span></span>
+          </div>
+        </div>
+        <figcaption>
+          <b>Enabled, with the strength control</b>
+          The label describes what it costs, not a protection level it cannot
+          promise. Results appear in their own words below the metadata
+          findings, marked best effort, so reduced is never read as removed.
+        </figcaption>
+      </figure>
+
+      <figure>
+        <div class="app">
+          <div class="titlebar"><span class="dot"></span>metascrub</div>
+          <div class="refpane fade">
+            <div class="refsec">What is removed, and why</div>
+            <div class="refsub">Files are rebuilt from a list of what to keep, so
+              anything not named here is dropped as well, including private
+              sections this tool has never seen.</div>
+            <div class="refcard">
+              <h4>Maker note</h4>
+              <p>This is where the sensor serial number usually lives, along with
+                 shutter actuation counts and internal settings. It is the single
+                 most identifying field in a typical photograph.</p>
+            </div>
+            <div class="refcard">
+              <h4>Thumbnail</h4>
+              <p>A photograph cropped to remove someone from the frame can still
+                 carry the uncropped original inside it.</p>
+            </div>
+            <div class="refhead">Why downscaling helps most</div>
+            <div class="reftext">Correlation depends on lining up each pixel of
+              the photograph with the corresponding point of the reference
+              pattern. Downscaling breaks that correspondence.</div>
+            <div class="refhead d">What this tool cannot reach</div>
+            <div class="reftext">If you upload a photograph while logged in, the
+              platform knows which account uploaded it, when, and from which
+              address, regardless of how clean the file was.</div>
+          </div>
+        </div>
+        <figcaption>
+          <b>The reference panel</b>
+          Around 3,300 words: ten metadata components, eight sections on sensor
+          fingerprints, thirteen pieces of misinformation, six on what the
+          research shows, and what none of it can reach.
+          <a href="https://claude.ai/code/artifact/899cd7f4-060b-44d7-92ac-d10af26ff02f"
+             style="color:var(--accent)">Read the whole thing.</a>
+        </figcaption>
+      </figure>
+
+    </div>
+  </section>
+
+  <!-- CLI -->
+  <section class="flow">
+    <div class="flow-head"><h2>The same engine, no window</h2><span class="tag">Command line</span></div>
+    <div class="frames">
+      <figure>
+        <div class="app">
+          <div class="titlebar"><span class="dot"></span>metascrub.exe<span class="grow">781 kB</span></div>
+          <div class="body">
+            <div style="font-family:var(--mono);font-size:11px;line-height:1.75;color:var(--dim);white-space:pre-wrap">
+<b style="color:var(--ink)">$ metascrub -n *.jpg *.pdf</b>
+
+DSCF1635.JPG: JPEG: removed 7 item(s),
+  120832 bytes, <span style="color:var(--danger)">including GPS coordinates</span>
+  <span style="color:var(--ok)">**</span> this file recorded where it was taken <span style="color:var(--ok)">**</span>
+  - EXIF at APP1, 63914 bytes
+  - maker note at APP1 EXIF maker note
+  - thumbnail at APP1 EXIF IFD1
+
+contract.pdf: PDF: removed 4 item(s)
+  <span style="color:var(--warn)">!</span> 2 attached file(s) keep their own metadata
+
+archive.7z: <span style="color:var(--danger)">NOT SANITIZED</span>, unknown format
+
+<b style="color:var(--ink)">$ echo $?</b>
+<span style="color:var(--danger)">2</span></div>
+          </div>
+        </div>
+        <figcaption>
+          <b>Command line</b>
+          Exit code 2 means a file was left uncleaned, so a batch script cannot
+          mistake "not understood" for success. The honesty is machine-readable,
+          not just a sentence on a screen.
+        </figcaption>
+      </figure>
+
+      <figure>
+        <div class="app" style="min-height:auto">
+          <div class="titlebar"><span class="dot"></span>What is actually in the box</div>
+          <div class="body">
+            <div class="items" style="gap:7px">
+              <div class="item"><span class="x">&#10003;</span>JPEG, PNG, WebP, HEIF, AVIF<span class="loc">rebuilt from a keep-list</span></div>
+              <div class="item"><span class="x">&#10003;</span>PDF<span class="loc">object graph rebuilt</span></div>
+              <div class="item"><span class="x">&#10003;</span>Word, Excel, PowerPoint, OpenDocument<span class="loc">archive parts cleaned</span></div>
+              <div class="item"><span class="x">&#10003;</span>Images inside documents<span class="loc">recursed by default</span></div>
+              <div class="item"><span class="x">&#10003;</span>Atomic writes<span class="loc">temp file, then rename</span></div>
+              <div class="item"><span class="x">&#10003;</span>Originals never modified<span class="loc">unless you ask</span></div>
+            </div>
+            <div class="warnline" style="color:var(--faint);margin-top:10px">
+              No telemetry. No analytics. No update check. No network code of any
+              kind in either binary.
+            </div>
+          </div>
+        </div>
+        <figcaption>
+          <b>Scope</b>
+          Seven container formats, and the one thing it will not do is guess.
+          Anything it cannot take apart is reported as such and returned
+          untouched.
+        </figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section class="footer">
+    <div>
+      <h3>Working today</h3>
+      <ul>
+        <li>Desktop app, Windows, single 6.3 MB file</li>
+        <li>Command line tool, 781 kB</li>
+        <li>Seven formats, documents included</li>
+        <li>Optional fingerprint reduction</li>
+        <li>3,300-word reference panel</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Next</h3>
+      <ul>
+        <li>An icon and an installer</li>
+        <li>Linux and macOS builds from the same code</li>
+        <li>Android share sheet</li>
+        <li>Signed, reproducible releases</li>
+        <li>A name of its own</li>
+      </ul>
+    </div>
+    <div>
+      <h3>Never claimed</h3>
+      <ul>
+        <li>That a cleaned file is an anonymous file</li>
+        <li>That sensor fingerprints are removed</li>
+        <li>That best effort is the same as complete</li>
+        <li>That a format it cannot parse was handled</li>
+      </ul>
+    </div>
+  </section>
+
+</div>
