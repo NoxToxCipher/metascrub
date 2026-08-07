@@ -10,7 +10,15 @@ ignore = []
 [bans]
 # Flag multiple versions of the same crate (bloat / audit surface) as a warning.
 multiple-versions = "warn"
-wildcards = "deny"          # no "*" version requirements
+# No "*" version requirement on anything from a registry: that is how an
+# unreviewed major version walks into the build.
+wildcards = "deny"
+# Our own crates are path dependencies with no version, which cargo represents
+# as "*" (tox-core -> tox-sys, tox-daemon -> tox-core, metascrub-gui ->
+# metascrub). They are in this repository and reviewed with it, so they are not
+# the risk the rule exists for. This exempts path dependencies only; a wildcard
+# on a crates.io dependency still fails the build.
+allow-wildcard-paths = true
 # Deny known-problematic crates outright if any slip in.
 deny = []
 

@@ -241,10 +241,13 @@ pub const MYTHS: &[Myth] = &[
         claim: "Sending a photo through a messaging app removes everything.",
         reality: "Most large platforms do strip EXIF when you send a picture as \
                   a photo, so the location usually goes. Two catches. Sending \
-                  the same file as a document or a file attachment, which is an \
-                  option on several apps, uploads the original untouched, \
-                  metadata and all. And none of them touch the sensor pattern \
-                  in the pixels, because that is not metadata.",
+                  the same file as a document or a file attachment uploads the \
+                  original untouched, metadata and all, and people choose that \
+                  option for better quality without realising what else rides \
+                  along. WhatsApp and Telegram both behave this way; Signal \
+                  strips metadata in document mode too, which is a real \
+                  difference between them. And none of them touch the sensor \
+                  pattern in the pixels, because that is not metadata.",
     },
     Myth {
         claim: "Taking a screenshot removes the metadata.",
@@ -385,7 +388,7 @@ pub const EVIDENCE: &[Section] = &[
                approaches include upscaling with one interpolation method and \
                downscaling with another, so that the pixel values are \
                plausible but no longer aligned with the original grid, and \
-               various forms of noise suppression and injection.\n\n\
+               several forms of noise suppression and injection.\n\n\
                None is presented in that literature as a guarantee. They are \
                described as making attribution harder, which is a different \
                claim, and it is the claim made here.",
