@@ -312,6 +312,24 @@ pub const MYTHS: &[Myth] = &[
                   links photographs to each other; it does not produce a name.",
     },
     Myth {
+        claim: "The file is clean, so it cannot be traced back to me.",
+        reality: "Cleaning the file handles what is inside the file. If you \
+                  uploaded it while logged in, the platform has its own record \
+                  of which account sent what and when, and that record is \
+                  reachable by legal process regardless of how clean the file \
+                  was. Some platforms also write their own identifier into \
+                  images on the way through. See 'What this tool cannot reach'.",
+    },
+    Myth {
+        claim: "Shrinking and re-compressing stops a platform recognising the image.",
+        reality: "No. Platforms match images with perceptual hashes, which are \
+                  built specifically to survive resizing, re-compression and \
+                  small edits. The fingerprint reduction in this app disturbs \
+                  the sensor pattern; it does not stop a platform seeing that \
+                  two files are the same photograph. Different attack, \
+                  different defence.",
+    },
+    Myth {
         claim: "This only matters if you are a journalist or an activist.",
         reality: "The most common real harm is domestic. A photograph posted \
                   publicly can carry the coordinates of the place it was taken, \
@@ -395,6 +413,101 @@ pub const EVIDENCE: &[Section] = &[
                visibly apart for that reason. If your safety depends on being \
                unlinkable, treat the fingerprint work as one layer among \
                several, not as the thing that solves it.",
+    },
+];
+
+/// Identifying information that exists outside the file, which no file-cleaning
+/// tool can touch.
+///
+/// The most dangerous misunderstanding this app could create is that a clean
+/// file is an anonymous one. Cleaning handles one channel. The account, the
+/// connection and the platform's own records are separate channels, and they
+/// are frequently the ones that matter.
+pub const BEYOND_THE_FILE: &[Section] = &[
+    Section {
+        heading: "A clean file is not an anonymous upload",
+        body: "Everything else in this panel is about information carried \
+               inside a file. This section is about information held \
+               somewhere else, describing the same file.\n\n\
+               If you upload a photograph while logged in, the platform knows \
+               which account uploaded it, when, and from which address, \
+               regardless of how clean the file was. Removing the metadata \
+               does not remove the upload record. It was never in the file to \
+               begin with.\n\n\
+               This tool cannot reach any of that, and no tool of this kind \
+               can.",
+    },
+    Section {
+        heading: "Platforms add their own identifiers",
+        body: "Some services do not merely strip metadata, they write their \
+               own in.\n\n\
+               Facebook has embedded an identifier in the IPTC block of \
+               uploaded images since around 2014, in the field intended for \
+               transmission references, with values beginning 'FBMD'. It was \
+               found by a security researcher in 2019, and the IPTC, who own \
+               the standard being used, looked for documentation of the \
+               practice and found none.\n\n\
+               The practical effect: an image downloaded from the platform can \
+               carry a marker that the platform can interpret, on a file that \
+               otherwise looks stripped. This app removes IPTC blocks entirely, \
+               so running a downloaded image through it removes that marker \
+               too. What it cannot do is remove the copy the platform kept.",
+    },
+    Section {
+        heading: "What legal process can obtain",
+        body: "The exact mechanism is worth knowing, because it is often \
+               described too loosely.\n\n\
+               Under Meta's published guidelines, a subpoena in a criminal \
+               investigation compels basic subscriber records: name, length of \
+               service, email addresses, and recent login addresses. Compelling \
+               the stored contents of an account, which includes messages, \
+               photos and videos, requires a search warrant on a showing of \
+               probable cause. Content is a higher bar than subscriber \
+               details, not the same one.\n\n\
+               Retention has a timing element as well. Meta preserves records \
+               pending legal process, but a preservation request has to arrive \
+               before the material is deleted. Data already gone is gone.\n\n\
+               So the answer to 'can someone match this file back to whoever \
+               sent it' is: with the right legal process, in the right \
+               jurisdiction, within the retention window, frequently yes. That \
+               has nothing to do with the file's metadata.",
+    },
+    Section {
+        heading: "Perceptual hashing, and a limit of this tool",
+        body: "Large platforms match images using perceptual hashes, which are \
+               designed to survive exactly the changes that break an ordinary \
+               checksum: resizing, re-compression, minor colour shifts, small \
+               crops.\n\n\
+               This has a direct consequence for the fingerprint reduction \
+               offered here. Denoising, downscaling and re-encoding are \
+               intended to disturb the sensor pattern, and perceptual hashing \
+               is built to be indifferent to precisely those operations. A \
+               washed copy will still match its original under that kind of \
+               comparison.\n\n\
+               These are different attacks with different defences. Nothing in \
+               this app is a defence against a platform recognising that two \
+               images are the same picture.",
+    },
+    Section {
+        heading: "Every other copy",
+        body: "A file you clean is one copy. The original is still in your \
+               camera roll, most likely in a cloud backup, possibly in a \
+               messaging app's own cache, and after you send it, on somebody \
+               else's device where you have no say at all.\n\n\
+               Cleaning a copy before sending is worth doing. It is not the \
+               same as the information ceasing to exist.",
+    },
+    Section {
+        heading: "What actually helps",
+        body: "If the concern is the file, clean the file. That is what this \
+               tool is for and it does it well.\n\n\
+               If the concern is that an upload should not be traceable to \
+               you, the file is the least of it. The account, the connection \
+               it was made over, the payment method behind the account and the \
+               device it came from all matter more, and none of them are \
+               addressed here.\n\n\
+               Being clear about that boundary is more useful than a tool that \
+               implies it has covered everything.",
     },
 ];
 

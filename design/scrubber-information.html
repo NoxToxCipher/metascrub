@@ -47,6 +47,11 @@ h1{font-size:clamp(28px,4vw,42px);line-height:1.1;letter-spacing:-.02em;
 .card .why{margin:0;font-size:14px;color:var(--dim)}
 .sect{margin-bottom:26px}
 .sect h3{margin:0 0 8px;font-size:16px;color:var(--accent);font-weight:600}
+.sect h3.danger{color:var(--danger)}
+.tag.danger{color:var(--danger)}
+.limit{background:color-mix(in srgb,var(--danger) 7%,transparent);
+  border-left:3px solid var(--danger);border-radius:8px;padding:20px 22px 4px}
+.limit .flow-head{border-bottom-color:color-mix(in srgb,var(--danger) 35%,transparent)}
 .sect p{margin:0 0 12px;font-size:14.5px;color:var(--dim);max-width:68ch}
 .myth .claim,.myth .truth{margin:0 0 8px;font-size:14px}
 .myth .claim{color:var(--ink);font-style:italic}
@@ -133,8 +138,21 @@ optional tool, with a weaker guarantee.</p>
 <div class="sect"><h3>What does not work: colour</h3><p>Shifting the white balance, applying a colour cast, or changing the gain of individual channels does nothing at all.</p><p>Detectors use normalised correlation, which divides out any uniform scaling or offset before comparing. A global colour change is exactly that kind of transformation, so it is removed by the maths before the comparison happens. It costs colour accuracy and buys no protection.</p><p>This is written down because it is an intuitive idea that happens to be wrong, and it appears in a lot of advice online.</p></div>
 <div class="sect"><h3>The honest limit</h3><p>This reduces correlation. It does not remove the fingerprint, and nothing in this app will ever tell you that it has.</p><p>A forensic analyst with a strong reference pattern, many sample images, and time can compensate for scaling factors and search across crops. Against that, these operations raise the cost and lower the confidence of a match. They do not make a match impossible.</p><p>There is also a cost on your side. Every setting here degrades the photograph: softer detail, fewer pixels, more compression. That trade is yours to make, which is why this is switched off until you switch it on.</p><p>If your safety depends on being unlinkable, the stronger measure is not to publish from the same camera under two identities in the first place.</p></div>
 </section>
+<section class="flow limit"><div class="flow-head">
+<h2>What this tool cannot reach</h2>
+<span class="tag danger">6 sections</span></div>
+<p class="sub">Identifying information that lives outside the file. The most
+dangerous idea this app could leave you with is that a clean file is an
+anonymous one.</p>
+<div class="sect"><h3 class="danger">A clean file is not an anonymous upload</h3><p>Everything else in this panel is about information carried inside a file. This section is about information held somewhere else, describing the same file.</p><p>If you upload a photograph while logged in, the platform knows which account uploaded it, when, and from which address, regardless of how clean the file was. Removing the metadata does not remove the upload record. It was never in the file to begin with.</p><p>This tool cannot reach any of that, and no tool of this kind can.</p></div>
+<div class="sect"><h3 class="danger">Platforms add their own identifiers</h3><p>Some services do not merely strip metadata, they write their own in.</p><p>Facebook has embedded an identifier in the IPTC block of uploaded images since around 2014, in the field intended for transmission references, with values beginning &#x27;FBMD&#x27;. It was found by a security researcher in 2019, and the IPTC, who own the standard being used, looked for documentation of the practice and found none.</p><p>The practical effect: an image downloaded from the platform can carry a marker that the platform can interpret, on a file that otherwise looks stripped. This app removes IPTC blocks entirely, so running a downloaded image through it removes that marker too. What it cannot do is remove the copy the platform kept.</p></div>
+<div class="sect"><h3 class="danger">What legal process can obtain</h3><p>The exact mechanism is worth knowing, because it is often described too loosely.</p><p>Under Meta&#x27;s published guidelines, a subpoena in a criminal investigation compels basic subscriber records: name, length of service, email addresses, and recent login addresses. Compelling the stored contents of an account, which includes messages, photos and videos, requires a search warrant on a showing of probable cause. Content is a higher bar than subscriber details, not the same one.</p><p>Retention has a timing element as well. Meta preserves records pending legal process, but a preservation request has to arrive before the material is deleted. Data already gone is gone.</p><p>So the answer to &#x27;can someone match this file back to whoever sent it&#x27; is: with the right legal process, in the right jurisdiction, within the retention window, frequently yes. That has nothing to do with the file&#x27;s metadata.</p></div>
+<div class="sect"><h3 class="danger">Perceptual hashing, and a limit of this tool</h3><p>Large platforms match images using perceptual hashes, which are designed to survive exactly the changes that break an ordinary checksum: resizing, re-compression, minor colour shifts, small crops.</p><p>This has a direct consequence for the fingerprint reduction offered here. Denoising, downscaling and re-encoding are intended to disturb the sensor pattern, and perceptual hashing is built to be indifferent to precisely those operations. A washed copy will still match its original under that kind of comparison.</p><p>These are different attacks with different defences. Nothing in this app is a defence against a platform recognising that two images are the same picture.</p></div>
+<div class="sect"><h3 class="danger">Every other copy</h3><p>A file you clean is one copy. The original is still in your camera roll, most likely in a cloud backup, possibly in a messaging app&#x27;s own cache, and after you send it, on somebody else&#x27;s device where you have no say at all.</p><p>Cleaning a copy before sending is worth doing. It is not the same as the information ceasing to exist.</p></div>
+<div class="sect"><h3 class="danger">What actually helps</h3><p>If the concern is the file, clean the file. That is what this tool is for and it does it well.</p><p>If the concern is that an upload should not be traceable to you, the file is the least of it. The account, the connection it was made over, the payment method behind the account and the device it came from all matter more, and none of them are addressed here.</p><p>Being clear about that boundary is more useful than a tool that implies it has covered everything.</p></div>
+</section>
 <section class="flow"><div class="flow-head">
-<h2>Things you may have been told</h2><span class="tag">11 claims</span></div>
+<h2>Things you may have been told</h2><span class="tag">13 claims</span></div>
 <p class="sub">Bad advice is worse than none, because someone who believes a
 file is clean will act as though it is.</p><div class="cards">
 <article class="card myth">
@@ -176,6 +194,14 @@ file is clean will act as though it is.</p><div class="cards">
 <article class="card myth">
         <p class="claim"><span class="lbl warn">claim</span>Sensor fingerprinting means you can always be identified.</p>
         <p class="truth"><span class="lbl ok">truth</span>Equally wrong in the other direction. Matching requires a reference pattern for your specific camera, built from the physical device or from photographs already known to be yours. Without one, there is nothing to compare against. It links photographs to each other; it does not produce a name.</p>
+        </article>
+<article class="card myth">
+        <p class="claim"><span class="lbl warn">claim</span>The file is clean, so it cannot be traced back to me.</p>
+        <p class="truth"><span class="lbl ok">truth</span>Cleaning the file handles what is inside the file. If you uploaded it while logged in, the platform has its own record of which account sent what and when, and that record is reachable by legal process regardless of how clean the file was. Some platforms also write their own identifier into images on the way through. See &#x27;What this tool cannot reach&#x27;.</p>
+        </article>
+<article class="card myth">
+        <p class="claim"><span class="lbl warn">claim</span>Shrinking and re-compressing stops a platform recognising the image.</p>
+        <p class="truth"><span class="lbl ok">truth</span>No. Platforms match images with perceptual hashes, which are built specifically to survive resizing, re-compression and small edits. The fingerprint reduction in this app disturbs the sensor pattern; it does not stop a platform seeing that two files are the same photograph. Different attack, different defence.</p>
         </article>
 <article class="card myth">
         <p class="claim"><span class="lbl warn">claim</span>This only matters if you are a journalist or an activist.</p>

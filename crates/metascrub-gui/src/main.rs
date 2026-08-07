@@ -623,6 +623,36 @@ impl App {
                 ui.add_space(12.0);
 
                 ui.label(
+                    RichText::new("What this tool cannot reach")
+                        .size(17.0)
+                        .strong()
+                        .color(theme::INK),
+                );
+                ui.label(
+                    RichText::new(
+                        "Identifying information that lives outside the file. The most \
+                         dangerous idea this app could leave you with is that a clean file \
+                         is an anonymous one.",
+                    )
+                    .size(12.5)
+                    .color(theme::INK_FAINT),
+                );
+                ui.add_space(10.0);
+
+                for section in reference::BEYOND_THE_FILE {
+                    ui.label(
+                        RichText::new(section.heading).size(14.0).strong().color(theme::DANGER),
+                    );
+                    ui.add_space(4.0);
+                    ui.label(RichText::new(section.body).size(12.5).color(theme::INK_DIM));
+                    ui.add_space(14.0);
+                }
+
+                ui.add_space(6.0);
+                ui.separator();
+                ui.add_space(12.0);
+
+                ui.label(
                     RichText::new("Things you may have been told")
                         .size(17.0)
                         .strong()
