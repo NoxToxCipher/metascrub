@@ -44,6 +44,7 @@ mod theme {
     pub const INK_DIM: Color32 = Color32::from_rgb(0x93, 0xa3, 0xac);
     pub const INK_FAINT: Color32 = Color32::from_rgb(0x66, 0x75, 0x7e);
     pub const ACCENT: Color32 = Color32::from_rgb(0x58, 0xa6, 0xb0);
+    pub const ACCENT_DIM: Color32 = Color32::from_rgb(0x2f, 0x5a, 0x60);
     pub const OK: Color32 = Color32::from_rgb(0x74, 0xa9, 0x7b);
     pub const WARN: Color32 = Color32::from_rgb(0xd9, 0x97, 0x3f);
     pub const DANGER: Color32 = Color32::from_rgb(0xc4, 0x58, 0x4b);
@@ -158,11 +159,32 @@ impl App {
             style.visuals.extreme_bg_color = theme::PANEL2;
             style.visuals.override_text_color = Some(theme::INK);
             style.visuals.widgets.noninteractive.bg_stroke = Stroke::new(1.0, theme::LINE);
+
+            // Every interactive widget needs its own outline. Setting only the
+            // noninteractive one left unticked checkboxes drawing egui's default
+            // near-black stroke on a near-black panel, so the box was invisible
+            // until hovered and the setting looked like plain text.
+            let outline = Stroke::new(1.0, theme::LINE);
+            let outline_lit = Stroke::new(1.0, theme::ACCENT);
             style.visuals.widgets.inactive.bg_fill = theme::PANEL2;
+            style.visuals.widgets.inactive.weak_bg_fill = theme::PANEL2;
+            style.visuals.widgets.inactive.bg_stroke = outline;
             style.visuals.widgets.hovered.bg_fill = theme::LINE;
+            style.visuals.widgets.hovered.weak_bg_fill = theme::LINE;
+            style.visuals.widgets.hovered.bg_stroke = outline_lit;
             style.visuals.widgets.active.bg_fill = theme::LINE;
-            style.spacing.item_spacing = egui::vec2(8.0, 8.0);
+            style.visuals.widgets.active.weak_bg_fill = theme::LINE;
+            style.visuals.widgets.active.bg_stroke = outline_lit;
+            // The tick itself, and any glyph drawn inside a widget.
+            style.visuals.widgets.inactive.fg_stroke = Stroke::new(1.6, theme::INK);
+            style.visuals.widgets.hovered.fg_stroke = Stroke::new(1.8, theme::INK);
+            style.visuals.widgets.active.fg_stroke = Stroke::new(1.8, theme::ACCENT);
+            style.visuals.selection.bg_fill = theme::ACCENT_DIM;
+            style.visuals.selection.stroke = Stroke::new(1.0, theme::ACCENT);
+
+            style.spacing.item_spacing = egui::vec2(9.0, 9.0);
             style.spacing.button_padding = egui::vec2(12.0, 7.0);
+            style.spacing.window_margin = egui::Margin::same(14);
         });
 
         Self::default()
@@ -555,10 +577,16 @@ impl App {
         egui::Window::new("What is removed, and why")
             .open(&mut open)
             .collapsible(false)
-            .default_width(640.0)
-            .default_height(560.0)
+            .default_width(680.0)
+            .default_height(620.0)
             .vscroll(true)
             .show(ctx, |ui| {
+                // Cap the measure. Dragged to full width on a wide monitor, the
+                // body text ran off the right edge, and lines that long are
+                // miserable to read even when they fit.
+                ui.set_max_width(660.0);
+                ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Wrap);
+
                 ui.label(RichText::new("Metadata").size(17.0).strong().color(theme::INK));
                 ui.label(
                     RichText::new(
