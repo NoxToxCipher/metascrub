@@ -241,8 +241,8 @@ pub const MYTHS: &[Myth] = &[
         claim: "Sending a photo through a messaging app removes everything.",
         reality: "Most large platforms do strip EXIF when you send a picture as \
                   a photo, so the location usually goes. Two catches. Sending \
-                  the same file as a *document* or *file attachment*, which is \
-                  an option on several apps, uploads the original untouched, \
+                  the same file as a document or a file attachment, which is an \
+                  option on several apps, uploads the original untouched, \
                   metadata and all. And none of them touch the sensor pattern \
                   in the pixels, because that is not metadata.",
     },

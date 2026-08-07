@@ -1,0 +1,201 @@
+<title>Metadata Scrubber: Information Page</title>
+<style>
+:root {
+  --ground:#0f1418; --panel:#171d22; --panel2:#1d252b; --line:#2a343b;
+  --ink:#dde4e8; --dim:#93a3ac; --faint:#66757e;
+  --accent:#58a6b0; --ok:#74a97b; --warn:#d9973f; --danger:#c4584b;
+  --sans: ui-sans-serif,-apple-system,"Segoe UI Variable Text","Segoe UI",system-ui,sans-serif;
+  --mono: ui-monospace,"Cascadia Code","SF Mono",Consolas,monospace;
+}
+@media (prefers-color-scheme: light) {
+  :root { --ground:#e9edf0; --panel:#fff; --panel2:#f2f5f7; --line:#ccd6dc;
+    --ink:#172028; --dim:#536068; --faint:#7d8b93;
+    --accent:#2d7d88; --ok:#47804f; --warn:#a76c17; --danger:#a8402f; }
+}
+:root[data-theme="light"] { --ground:#e9edf0; --panel:#fff; --panel2:#f2f5f7;
+  --line:#ccd6dc; --ink:#172028; --dim:#536068; --faint:#7d8b93;
+  --accent:#2d7d88; --ok:#47804f; --warn:#a76c17; --danger:#a8402f; }
+:root[data-theme="dark"] { --ground:#0f1418; --panel:#171d22; --panel2:#1d252b;
+  --line:#2a343b; --ink:#dde4e8; --dim:#93a3ac; --faint:#66757e;
+  --accent:#58a6b0; --ok:#74a97b; --warn:#d9973f; --danger:#c4584b; }
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--sans);
+  font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased}
+.wrap{max-width:820px;margin:0 auto;padding:56px 24px 96px}
+.eyebrow{font-family:var(--mono);font-size:11px;letter-spacing:.16em;
+  text-transform:uppercase;color:var(--faint);margin:0 0 14px}
+h1{font-size:clamp(28px,4vw,42px);line-height:1.1;letter-spacing:-.02em;
+  margin:0 0 16px;font-weight:600;text-wrap:balance}
+.lede{color:var(--dim);font-size:17px;margin:0 0 26px;max-width:62ch}
+.masthead{border-bottom:1px solid var(--line);padding-bottom:30px;margin-bottom:40px}
+.note{display:flex;gap:12px;background:var(--panel);border:1px solid var(--line);
+  border-left:3px solid var(--accent);border-radius:6px;padding:14px 16px;
+  font-size:14.5px;color:var(--dim)}
+.note strong{color:var(--ink)}
+.flow{margin-bottom:56px}
+.flow-head{display:flex;align-items:baseline;gap:14px;border-bottom:1px solid var(--line);
+  padding-bottom:10px;margin-bottom:14px;flex-wrap:wrap}
+.flow-head h2{font-size:22px;font-weight:600;margin:0;letter-spacing:-.01em}
+.tag{font-family:var(--mono);font-size:11px;letter-spacing:.14em;
+  text-transform:uppercase;color:var(--accent)}
+.sub{color:var(--faint);font-size:13.5px;margin:0 0 20px;max-width:66ch}
+.cards{display:flex;flex-direction:column;gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px 18px}
+.card h3{margin:0 0 8px;font-size:14.5px;color:var(--accent);font-weight:600;
+  font-family:var(--mono);letter-spacing:.02em}
+.card .what{margin:0 0 8px;font-size:14px;color:var(--ink)}
+.card .why{margin:0;font-size:14px;color:var(--dim)}
+.sect{margin-bottom:26px}
+.sect h3{margin:0 0 8px;font-size:16px;color:var(--accent);font-weight:600}
+.sect p{margin:0 0 12px;font-size:14.5px;color:var(--dim);max-width:68ch}
+.myth .claim,.myth .truth{margin:0 0 8px;font-size:14px}
+.myth .claim{color:var(--ink);font-style:italic}
+.myth .truth{color:var(--dim);margin-bottom:0;font-style:normal}
+.lbl{font-family:var(--mono);font-size:9.5px;letter-spacing:.1em;
+  text-transform:uppercase;margin-right:9px;padding:2px 6px;border-radius:3px;
+  border:1px solid;font-style:normal;white-space:nowrap;display:inline-block}
+.lbl.warn{color:var(--warn);border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+.lbl.ok{color:var(--ok);border-color:color-mix(in srgb,var(--ok) 45%,transparent)}
+.firstuse{background:var(--panel2);border:1px solid var(--accent);
+  border-radius:8px;padding:20px 22px;margin-bottom:56px}
+.firstuse h2{margin:0 0 4px;font-size:18px}
+.firstuse .when{font-family:var(--mono);font-size:10.5px;letter-spacing:.1em;
+  text-transform:uppercase;color:var(--accent);margin:0 0 14px}
+.firstuse p{margin:0 0 12px;font-size:14.5px;color:var(--dim);max-width:66ch}
+.src{border-top:1px solid var(--line);padding-top:20px;font-size:13px;color:var(--faint)}
+</style>
+
+<div class="wrap">
+<header class="masthead">
+<p class="eyebrow">Information page &middot; exact app copy</p>
+<h1>What is removed, and why</h1>
+<p class="lede">The reference panel from inside the scrubber, rendered for
+reading. This is extracted from the source rather than retyped, so it is
+word for word what the application shows.</p>
+<div class="note"><span>&#9432;</span><div><strong>Every claim here is meant to
+be defensible.</strong> Where something cannot be promised, the text says so
+rather than going quiet.</div></div>
+</header>
+
+<div class="firstuse">
+<p class="when">Shown once, before pixel washing touches a file</p>
+<h2>About your camera's fingerprint</h2>
+<p>Your camera leaves a faint pattern in the pixels of every photograph it takes. It comes from tiny manufacturing differences between the light sensors, it is fixed for the life of the camera, and it is not metadata. Removing EXIF does nothing to it.</p><p>It can be used to show that two photographs came from the same camera. That matters if you publish under your own name and also want to publish something anonymously.</p><p>What this does: it denoises the image, makes it smaller, adds a little noise, and re-compresses it. Together these reduce how strongly the pattern can be matched.</p><p>What it does not do: remove the pattern. Nobody can promise that. This lowers the confidence of a match; it does not make one impossible.</p><p>It also costs image quality. Your photographs will be softer and smaller. That is why it stays off unless you turn it on.</p>
+</div>
+
+<section class="flow"><div class="flow-head">
+<h2>Metadata</h2><span class="tag">10 components</span></div>
+<p class="sub">Files are rebuilt from a list of what to keep, so anything not
+named here is dropped as well, including private sections this tool has never
+seen.</p><div class="cards">
+<article class="card"><h3>EXIF</h3>
+        <p class="what">A block of tags written by the camera: model, lens, serial number, shutter count, exposure settings, the date and time to the second, and often GPS coordinates.</p>
+        <p class="why">GPS is the obvious one, and it is accurate to a few metres, so a single holiday photo can give away a home address. The rest is quieter but adds up: the same camera body and lens across a set of photographs ties them to one person even when nothing else does.</p></article>
+<article class="card"><h3>Maker note</h3>
+        <p class="what">A vendor&#x27;s private area inside EXIF, in an undocumented format that differs between manufacturers and firmware versions.</p>
+        <p class="why">This is where the sensor serial number usually lives, along with shutter actuation counts and internal settings. It is the single most identifying field in a typical photograph, and because the format is private, tools that only understand standard tags often leave it in place.</p></article>
+<article class="card"><h3>Thumbnail</h3>
+        <p class="what">A small copy of the picture, stored inside the file so that viewers can show a preview without decoding the whole image.</p>
+        <p class="why">Thumbnails are generated once and frequently not regenerated after an edit. A photograph cropped to remove someone from the frame can still carry the uncropped original inside it. The same applies to blurred faces and painted-over details.</p></article>
+<article class="card"><h3>XMP</h3>
+        <p class="what">Adobe&#x27;s metadata format, stored as XML. Written by editing software and by some cameras.</p>
+        <p class="why">Carries the editing history, the software and version used, ratings, keywords, and often the author&#x27;s name or the licence holder. It is also where catalogue identifiers live, which can link a published image back to a specific library on a specific machine.</p></article>
+<article class="card"><h3>IPTC</h3>
+        <p class="what">A press and publishing metadata block, often written by photo management software.</p>
+        <p class="why">Designed to carry a byline, a copyright notice, contact details and caption text. All useful for a wire service, all identifying for anyone who did not intend to publish under their name.</p></article>
+<article class="card"><h3>Colour profile</h3>
+        <p class="what">An ICC profile describing how the file&#x27;s colour numbers should be interpreted.</p>
+        <p class="why">Mostly harmless, and kept if you ask for it. Removed by default for two reasons: a profile carries a free-text description and a device model, and a custom profile from a calibrated monitor can be distinctive enough to link files. If your images are wide-gamut and colour accuracy matters, turn it back on.</p></article>
+<article class="card"><h3>Trailing data</h3>
+        <p class="what">Anything appended after the point where the image format says the file ends.</p>
+        <p class="why">Most tools stop reading at the end marker, which makes the space after it a good hiding place. Some phone cameras genuinely store a second, full-resolution photograph there. Whatever is in it, it is not part of the picture and it travels with the file.</p></article>
+<article class="card"><h3>Document info</h3>
+        <p class="what">In PDFs and Office documents: title, subject, author, the software that produced it, and creation and modification times.</p>
+        <p class="why">The author field is often a real name or a corporate username, filled in automatically from the account the software was installed under, without ever being shown to the person typing.</p></article>
+<article class="card"><h3>Revision identifiers</h3>
+        <p class="what">Random identifiers that word processors write into a document and update as it is edited.</p>
+        <p class="why">Two documents sharing a revision identifier were edited in the same session on the same machine. This links files that have nothing else in common, and almost nobody knows the field exists.</p></article>
+<article class="card"><h3>Unrecognised structures</h3>
+        <p class="what">Any block in the container that is not on the keep-list, including vendor-private sections this tool has never seen.</p>
+        <p class="why">The reason the tool rebuilds files rather than editing them. A tool that deletes the metadata it recognises will silently pass through anything new, private, or deliberately hidden. Rebuilding from a list of what to keep means the default for anything unknown is to drop it.</p></article>
+</div></section>
+<section class="flow"><div class="flow-head">
+<h2>The camera's fingerprint in the pixels</h2>
+<span class="tag">8 sections</span></div>
+<p class="sub">A separate problem from metadata, addressed by a separate,
+optional tool, with a weaker guarantee.</p>
+<div class="sect"><h3>What a sensor fingerprint is</h3><p>A camera sensor is a grid of millions of light-sensitive wells, etched into silicon. Manufacturing cannot make them perfectly identical, so each one responds to light a fraction differently from its neighbours. Some read slightly bright, some slightly dark, by a fraction of a percent.</p><p>That variation is fixed. It is decided when the sensor is manufactured and it does not change over the life of the camera. Every photograph the camera takes carries it, faintly multiplied into the brightness of every pixel. It is called Photo Response Non-Uniformity, or PRNU.</p><p>The practical consequence: it is a serial number written into the picture itself rather than into the file&#x27;s information fields. Removing EXIF does not touch it. Nor does renaming the file, screenshotting it, or sending it through an app that strips metadata.</p></div>
+<div class="sect"><h3>How it is used against someone</h3><p>An analyst estimates the noise-free version of a photograph, subtracts it to leave a residual of fine detail, and correlates that residual against a reference pattern for a camera. A strong correlation says the photograph came from that sensor.</p><p>The important part is that they need the reference pattern first. It is built either from the physical camera or from a set of photographs already known to come from it. So this is a linking attack rather than an identifying one. Nobody looks at an anonymous photograph and derives a name from the pixels.</p><p>The realistic scenario is this: someone publishes work under their own name, then publishes something anonymously, and both were taken with the same camera. The analyst does not need to identify the anonymous photograph. They only need to show it came from the same sensor as the public ones.</p></div>
+<div class="sect"><h3>Why denoising helps</h3><p>The pattern lives in the fine, high-frequency detail, which is exactly what a denoiser targets.</p><p>The tools that detect PRNU work by denoising an image and keeping the residual they subtracted. So denoising and keeping the image instead is precisely the reverse operation, applied to the part of the picture where the fingerprint is strongest.</p><p>It is done first, at full resolution, because that is where the pattern is most estimable and therefore most worth attacking.</p></div>
+<div class="sect"><h3>Why downscaling helps most</h3><p>Correlation depends on lining up each pixel of the photograph with the corresponding point of the reference pattern. Downscaling breaks that correspondence.</p><p>When an image is resized, each output pixel is mixed from several input pixels. The fixed pattern is averaged together with its neighbours and smeared across a new grid that no longer matches the sensor&#x27;s. Of the four operations here, this one reduces correlation the most.</p><p>It is done after denoising so that resampling is the last thing to touch the pixel grid.</p></div>
+<div class="sect"><h3>Why a little noise is added</h3><p>After denoising and downscaling, some trace of the pattern remains. Adding a small amount of fresh random noise lowers the signal-to-noise ratio of any estimate an analyst can make from the image.</p><p>It does not erase what is there. It makes what is there harder to measure, which for a statistical test amounts to much the same thing at the margin.</p></div>
+<div class="sect"><h3>Why re-compressing is the weakest step</h3><p>The common advice is to compress and decompress a photograph to destroy the fingerprint. That is the least effective of the operations here.</p><p>PRNU survives moderate JPEG compression comfortably. Lossy compression discards some high-frequency detail, which helps a little, but it was never going to be sufficient on its own. It is included as a final step rather than relied upon.</p></div>
+<div class="sect"><h3>What does not work: colour</h3><p>Shifting the white balance, applying a colour cast, or changing the gain of individual channels does nothing at all.</p><p>Detectors use normalised correlation, which divides out any uniform scaling or offset before comparing. A global colour change is exactly that kind of transformation, so it is removed by the maths before the comparison happens. It costs colour accuracy and buys no protection.</p><p>This is written down because it is an intuitive idea that happens to be wrong, and it appears in a lot of advice online.</p></div>
+<div class="sect"><h3>The honest limit</h3><p>This reduces correlation. It does not remove the fingerprint, and nothing in this app will ever tell you that it has.</p><p>A forensic analyst with a strong reference pattern, many sample images, and time can compensate for scaling factors and search across crops. Against that, these operations raise the cost and lower the confidence of a match. They do not make a match impossible.</p><p>There is also a cost on your side. Every setting here degrades the photograph: softer detail, fewer pixels, more compression. That trade is yours to make, which is why this is switched off until you switch it on.</p><p>If your safety depends on being unlinkable, the stronger measure is not to publish from the same camera under two identities in the first place.</p></div>
+</section>
+<section class="flow"><div class="flow-head">
+<h2>Things you may have been told</h2><span class="tag">11 claims</span></div>
+<p class="sub">Bad advice is worse than none, because someone who believes a
+file is clean will act as though it is.</p><div class="cards">
+<article class="card myth">
+        <p class="claim"><span class="lbl warn">claim</span>Sending a photo through a messaging app removes everything.</p>
+        <p class="truth"><span class="lbl ok">truth</span>Most large platforms do strip EXIF when you send a picture as a photo, so the location usually goes. Two catches. Sending the same file as a document or a file attachment, which is an option on several apps, uploads the original untouched, metadata and all. And none of them touch the sensor pattern in the pixels, because that is not metadata.</p>
+        </article>
+<article class="card myth">
+        <p class="claim"><span class="lbl warn">claim</span>Taking a screenshot removes the metadata.</p>
+        <p class="truth"><span class="lbl ok">truth</span>Largely true, and it also disrupts the sensor pattern, since you are capturing what the screen displayed rather than what the sensor recorded. But the screenshot carries its own new metadata, the quality is much worse than a proper clean copy, and the common mistake is to screenshot for safety and then send the original by accident.</p>
+        </article>
+<article class="card myth">
+        <p class="claim"><span class="lbl warn">claim</span>Renaming the file, or putting it in a zip, removes metadata.</p>
+        <p class="truth"><span class="lbl ok">truth</span>Neither does anything at all. A filename is not part of the file&#x27;s contents, and an archive preserves the file exactly so that it comes out the other side unchanged. That is the whole purpose of an archive.</p>
+        </article>
+<article class="card myth">
+        <p class="claim"><span class="lbl warn">claim</span>Converting to PNG strips the metadata.</p>
+        <p class="truth"><span class="lbl ok">truth</span>PNG has its own metadata chunks, including a full EXIF chunk and free-text fields, and many converters copy the tags across rather than dropping them. Changing format is not the same as removing information.</p>
+        </article>
+<article class="card myth">
+        <p class="claim"><span class="lbl warn">claim</span>I turned location services off, so my photos are fine.</p>
+        <p class="truth"><span class="lbl ok">truth</span>That removes GPS coordinates, which is the biggest single item, and it is worth doing. Everything else remains: camera model, lens, serial number in the maker note, exact timestamp, the embedded thumbnail, and editing history.</p>
+        </article>
+<article class="card myth">
+        <p class="claim"><span class="lbl warn">claim</span>Just compress the photo and the camera fingerprint is gone.</p>
+        <p class="truth"><span class="lbl ok">truth</span>This is the most common piece of advice and the weakest of the useful operations. The pattern survives moderate JPEG compression comfortably. Compression helps at the margin; resizing and denoising do the real work.</p>
+        </article>
+<article class="card myth">
+        <p class="claim"><span class="lbl warn">claim</span>Changing the colours or white balance defeats the fingerprint.</p>
+        <p class="truth"><span class="lbl ok">truth</span>It does nothing. The comparison is a normalised correlation, which divides out any uniform per-channel scaling or offset before the two are compared. A global colour change is removed by the arithmetic before it can have any effect.</p>
+        </article>
+<article class="card myth">
+        <p class="claim"><span class="lbl warn">claim</span>Cropping the photo defeats the fingerprint.</p>
+        <p class="truth"><span class="lbl ok">truth</span>It helps, because it shifts the alignment the comparison depends on, but an analyst can search across possible crop positions. It also leaves the pattern intact in whatever pixels remain.</p>
+        </article>
+<article class="card myth">
+        <p class="claim"><span class="lbl warn">claim</span>Sensor fingerprinting is theoretical, or something from films.</p>
+        <p class="truth"><span class="lbl ok">truth</span>It is a documented technique with a research literature going back to 2006 and use in real casework. Treating it as fiction is as much a mistake as treating it as infallible.</p>
+        </article>
+<article class="card myth">
+        <p class="claim"><span class="lbl warn">claim</span>Sensor fingerprinting means you can always be identified.</p>
+        <p class="truth"><span class="lbl ok">truth</span>Equally wrong in the other direction. Matching requires a reference pattern for your specific camera, built from the physical device or from photographs already known to be yours. Without one, there is nothing to compare against. It links photographs to each other; it does not produce a name.</p>
+        </article>
+<article class="card myth">
+        <p class="claim"><span class="lbl warn">claim</span>This only matters if you are a journalist or an activist.</p>
+        <p class="truth"><span class="lbl ok">truth</span>The most common real harm is domestic. A photograph posted publicly can carry the coordinates of the place it was taken, and a thumbnail can carry the version of the picture that was cropped for a reason.</p>
+        </article>
+</div></section>
+<section class="flow"><div class="flow-head">
+<h2>What the research actually shows</h2><span class="tag">6 sections</span></div>
+<p class="sub">Including the parts that limit what this tool is allowed to
+claim.</p>
+<div class="sect"><h3>Where the technique comes from</h3><p>Sensor fingerprinting was established by Lukáš, Fridrich and Goljan in &#x27;Digital Camera Identification from Sensor Pattern Noise&#x27;, published in IEEE Transactions on Information Forensics and Security in 2006. It is the foundational paper and remains the basis of the field.</p><p>Their method: build a reference pattern for a camera by taking many photographs from it, denoising each one, keeping the residual, and averaging those residuals so that the fixed component reinforces while the random component cancels. A questioned photograph is then denoised the same way and its residual correlated against that reference.</p></div>
+<div class="sect"><h3>Why a reference pattern is the whole story</h3><p>Because the reference is built by averaging across many images from one camera, an analyst must already have either the device or a body of photographs attributed to it.</p><p>This is the single most important fact about the threat, and it is the one most often left out. The technique answers &#x27;did these come from the same sensor?&#x27; It does not answer &#x27;whose camera is this?&#x27; unless somebody has already supplied the answer.</p></div>
+<div class="sect"><h3>What the evidence says about resizing</h3><p>This is where the honesty matters most, because resizing is the main thing this tool does.</p><p>The literature is consistent: identification from downscaled images remains possible, but performance degrades significantly. Resizing acts as a low-pass filter, and different scale factors preserve different parts of the signal. An analyst who knows or guesses the scale factor can compensate for it.</p><p>So downscaling is the most effective operation available here, and it is still not a defeat. &#x27;Significantly degrades&#x27; is the honest description, and it is the one this app uses.</p></div>
+<div class="sect"><h3>What the evidence says about counter-forensics</h3><p>Counter-forensic methods against sensor fingerprints are an active research area rather than a solved problem. Published approaches include upscaling with one interpolation method and downscaling with another, so that the pixel values are plausible but no longer aligned with the original grid, and various forms of noise suppression and injection.</p><p>None is presented in that literature as a guarantee. They are described as making attribution harder, which is a different claim, and it is the claim made here.</p></div>
+<div class="sect"><h3>What is genuinely contested</h3><p>Reliability under real conditions is debated. Recent work asks how well the technique holds up on modern smartphones, where heavy computational processing, aggressive noise reduction and digital stabilisation all interfere with the pattern before the file is even written.</p><p>There is also ongoing discussion about whether the field has a settled standard for casework. Anyone who tells you the answer is simple, in either direction, is ahead of the evidence.</p></div>
+<div class="sect"><h3>What this means for you</h3><p>Metadata removal is the part that is provable. The information is in defined places, it is removed, and the result can be checked with another tool.</p><p>Sensor fingerprint reduction is statistical. It lowers the confidence of a match by an amount nobody can state precisely for your specific photograph, camera and adversary.</p><p>Those are different kinds of claim and this app keeps them visibly apart for that reason. If your safety depends on being unlinkable, treat the fingerprint work as one layer among several, not as the thing that solves it.</p></div>
+</section>
+
+<div class="src"><p>Sources: Luk&aacute;&scaron;, Fridrich &amp; Goljan,
+"Digital Camera Identification from Sensor Pattern Noise", IEEE Transactions on
+Information Forensics and Security, 2006. Subsequent work on robustness under
+downscaling, on counter-forensic resampling, and on smartphone reliability.</p></div>
+</div>

@@ -31,6 +31,16 @@ allow = [
     # Our own crates. cargo-deny matches SPDX ids exactly, so the "-or-later"
     # form must be listed explicitly; plain "GPL-3.0" does not cover it.
     "GPL-3.0-or-later",
+
+    # Arrived with the desktop interface (eframe/egui and the file dialog).
+    # Both are permissive and GPL-compatible; listed individually rather than
+    # loosening the policy, so a genuinely new licence still stops the build.
+    # Boost Software License: clipboard-win, error-code.
+    "BSL-1.0",
+    # The bundled default fonts. SIL Open Font License and the Ubuntu font
+    # licence both permit embedding and redistribution.
+    "OFL-1.1",
+    "Ubuntu-font-1.0",
 ]
 confidence-threshold = 0.9
 
