@@ -346,12 +346,12 @@ mod tests {
             payload = minimal_docx(Some((&format!("word/media/{i}.docx"), payload)));
         }
 
-        // The assertion is simply that this returns.
+        // The assertion is simply that this returns rather than overflowing the
+        // stack. Two things stop it now, and either alone is sufficient: the
+        // recursion depth limit, and detecting embedded content by type so a
+        // nested archive (which is not an image) is not descended into at all.
         let out = sanitize(&payload, &Policy::default()).expect("must not error");
-        assert!(
-            out.report.warnings.iter().any(|w| w.contains("nests archives more deeply")),
-            "the depth limit should have been reported"
-        );
+        assert!(!out.data.is_empty());
     }
 
     #[test]

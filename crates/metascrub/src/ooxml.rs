@@ -124,10 +124,13 @@ pub(crate) fn sanitize(
             continue;
         }
 
-        // The thumbnail is a rendering of the first page. It is a preview of
-        // the content rather than a property, so it stays, but it arrives with
-        // its own EXIF and gets the same treatment as any other image.
-        if path == THUMBNAIL || is_media(&path) {
+        // Embedded images are found by content, not by path. A photo with GPS
+        // in it is a leak wherever it sits in the archive; assuming images only
+        // live under `media/` is exactly the denylist thinking this tool exists
+        // to avoid. `media/` is the usual home, but Word will also drop images
+        // under `embeddings/`, in a custom part, or anywhere a vendor chooses.
+        // The thumbnail is a rendering of page one and is handled the same way.
+        if path == THUMBNAIL || entry_is_image(entry) {
             if policy.recurse_embedded {
                 scrub_embedded(entry, policy, report, &path, depth);
             } else {
@@ -166,10 +169,22 @@ pub(crate) fn sanitize(
     Ok(archive.write())
 }
 
-fn is_media(path: &str) -> bool {
-    ["word/media/", "xl/media/", "ppt/media/", "media/", "Pictures/"]
-        .iter()
-        .any(|prefix| path.starts_with(prefix))
+/// Whether an archive entry's *content* is an image format we can clean.
+///
+/// Sniffing the bytes rather than trusting the path, so an image survives no
+/// better for being stored somewhere unexpected. Decompresses the entry to look
+/// at its header; an entry that will not decompress is not our image to clean
+/// and is handled elsewhere.
+fn entry_is_image(entry: &mut crate::zip::Entry) -> bool {
+    let Ok(content) = entry.read() else { return false };
+    matches!(
+        crate::detect(&content),
+        crate::Format::Jpeg
+            | crate::Format::Png
+            | crate::Format::WebP
+            | crate::Format::Heif
+            | crate::Format::Avif
+    )
 }
 
 /// Run an embedded image back through the top-level sanitizer.
@@ -366,6 +381,22 @@ mod tests {
             report.removed.iter().any(|r| r.location.starts_with("word/media/image1.jpeg →")),
             "the finding must say which part it came from"
         );
+    }
+
+    #[test]
+    fn an_embedded_photo_is_cleaned_wherever_it_sits_not_only_under_media() {
+        // A photo carries GPS regardless of the archive path it is stored at.
+        // Word drops images under embeddings/ and elsewhere, so the sanitizer
+        // must find them by content, not by a media/ path allowlist.
+        let photo = jpeg_with_gps();
+        let (out, report) = run(&docx(&[("word/embeddings/pasted.jpg", &photo)]));
+
+        let cleaned = part_bytes(&out, "word/embeddings/pasted.jpg");
+        assert!(
+            !cleaned.windows(16).any(|w| w == b"CameraSerial9988"),
+            "an image off the media path kept its EXIF"
+        );
+        assert!(report.found_location, "GPS off the media path is still GPS in the document");
     }
 
     #[test]
