@@ -114,6 +114,21 @@ pub struct Sanitized {
 /// *do* claim to handle is an error, because a partial parse means a partial
 /// strip.
 pub fn sanitize(input: &[u8], policy: &Policy) -> Result<Sanitized> {
+    sanitize_at_depth(input, policy, 0)
+}
+
+/// How deeply the sanitizer will recurse into embedded files.
+///
+/// An Office document is a ZIP, and a ZIP can hold another Office document under
+/// `word/media/`, which the recursion happily descends into. A file crafted to
+/// nest thousands of levels deep would otherwise overflow the stack, and with
+/// `panic = "abort"` a stack overflow ends the process: a denial of service
+/// from a single file. Legitimate documents nest a level or two at most.
+pub(crate) const MAX_RECURSION_DEPTH: u32 = 8;
+
+/// The real entry point. `depth` is the number of container boundaries already
+/// crossed; it starts at zero for the file the user handed us.
+pub(crate) fn sanitize_at_depth(input: &[u8], policy: &Policy, depth: u32) -> Result<Sanitized> {
     if let Some(limit) = policy.max_input_bytes {
         if input.len() as u64 > limit {
             return Err(Error::TooLarge { len: input.len() as u64, limit });
@@ -121,6 +136,20 @@ pub fn sanitize(input: &[u8], policy: &Policy) -> Result<Sanitized> {
     }
     let format = detect(input);
     let mut report = Report::new(format, input.len());
+
+    // A container that would take us past the limit is refused rather than
+    // descended into. Refusing is safe: the outer file is still rebuilt, and the
+    // one nested part that was too deep is reported as left alone.
+    let nestable = matches!(format, Format::Ooxml | Format::OpenDocument);
+    if nestable && depth >= MAX_RECURSION_DEPTH {
+        report.assurance = Assurance::BestEffort;
+        report.warn(
+            "this file nests archives more deeply than we will follow, so the deepest parts \
+             were left as they arrived; a document nested this way is almost never innocent",
+        );
+        report.output_len = input.len();
+        return Ok(Sanitized { data: input.to_vec(), report });
+    }
 
     let data = match format {
         #[cfg(feature = "image")]
@@ -134,7 +163,7 @@ pub fn sanitize(input: &[u8], policy: &Policy) -> Result<Sanitized> {
         #[cfg(feature = "pdf")]
         Format::Pdf => pdf::sanitize(input, policy, &mut report)?,
         #[cfg(feature = "ooxml")]
-        Format::Ooxml | Format::OpenDocument => ooxml::sanitize(input, policy, &mut report)?,
+        Format::Ooxml | Format::OpenDocument => ooxml::sanitize(input, policy, &mut report, depth)?,
         _ => {
             report.assurance = Assurance::None;
             report.warn(
@@ -282,6 +311,47 @@ mod tests {
     fn empty_input_does_not_panic() {
         let out = sanitize(&[], &Policy::default()).unwrap();
         assert_eq!(out.report.assurance, Assurance::None);
+    }
+
+    /// An Office document is a ZIP and can hold another Office document, so the
+    /// recursion must not be able to run away. Without the depth limit this
+    /// overflows the stack, which under `panic = "abort"` kills the process:
+    /// a denial of service from one crafted file.
+    #[cfg(feature = "ooxml")]
+    #[test]
+    fn deeply_nested_documents_do_not_overflow_the_stack() {
+        use ::zip::write::SimpleFileOptions;
+        use std::io::Write;
+
+        fn minimal_docx(inner: Option<(&str, Vec<u8>)>) -> Vec<u8> {
+            let mut buf = std::io::Cursor::new(Vec::new());
+            {
+                let mut z = ::zip::ZipWriter::new(&mut buf);
+                let opts = SimpleFileOptions::default();
+                z.start_file("[Content_Types].xml", opts).unwrap();
+                z.write_all(br#"<?xml version="1.0"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"/>"#).unwrap();
+                z.start_file("word/document.xml", opts).unwrap();
+                z.write_all(br#"<?xml version="1.0"?><document/>"#).unwrap();
+                if let Some((name, data)) = inner {
+                    z.start_file(name, opts).unwrap();
+                    z.write_all(&data).unwrap();
+                }
+                z.finish().unwrap();
+            }
+            buf.into_inner()
+        }
+
+        let mut payload = minimal_docx(None);
+        for i in 0..500 {
+            payload = minimal_docx(Some((&format!("word/media/{i}.docx"), payload)));
+        }
+
+        // The assertion is simply that this returns.
+        let out = sanitize(&payload, &Policy::default()).expect("must not error");
+        assert!(
+            out.report.warnings.iter().any(|w| w.contains("nests archives more deeply")),
+            "the depth limit should have been reported"
+        );
     }
 
     #[test]

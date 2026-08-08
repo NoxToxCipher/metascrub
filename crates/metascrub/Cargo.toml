@@ -40,3 +40,6 @@ lopdf = { version = "0.44", default-features = false, optional = true }
 # Test-only. Used to generate genuinely encoded fixtures and to prove that a
 # sanitized file still decodes to bit-identical pixels. Never shipped.
 image = { version = "0.25", default-features = false, features = ["jpeg", "png", "webp"] }
+# Test-only. Builds correctly-encoded ZIP fixtures for the archive parser,
+# rather than hand-assembling headers a byte at a time. Never shipped.
+zip = { version = "2", default-features = false, features = ["deflate"] }

@@ -94,6 +94,7 @@ pub(crate) fn sanitize(
     input: &[u8],
     policy: &Policy,
     report: &mut Report,
+    depth: u32,
 ) -> crate::Result<Vec<u8>> {
     // Parts are edited rather than rebuilt, and unknown parts are kept because
     // in these formats they are usually content.
@@ -128,7 +129,7 @@ pub(crate) fn sanitize(
         // its own EXIF and gets the same treatment as any other image.
         if path == THUMBNAIL || is_media(&path) {
             if policy.recurse_embedded {
-                scrub_embedded(entry, policy, report, &path);
+                scrub_embedded(entry, policy, report, &path, depth);
             } else {
                 report.warn(format!(
                     "{path} was left alone because embedded images were not being processed; \
@@ -172,12 +173,18 @@ fn is_media(path: &str) -> bool {
 }
 
 /// Run an embedded image back through the top-level sanitizer.
-fn scrub_embedded(entry: &mut crate::zip::Entry, policy: &Policy, report: &mut Report, path: &str) {
+fn scrub_embedded(
+    entry: &mut crate::zip::Entry,
+    policy: &Policy,
+    report: &mut Report,
+    path: &str,
+    depth: u32,
+) {
     let Ok(content) = entry.read() else {
         report.warn(format!("{path} could not be decompressed, so it was left as it is"));
         return;
     };
-    match crate::sanitize(&content, policy) {
+    match crate::sanitize_at_depth(&content, policy, depth + 1) {
         Ok(clean) => {
             if !clean.report.removed.is_empty() {
                 entry.write(&clean.data);
@@ -260,7 +267,7 @@ mod tests {
 
     fn run(input: &[u8]) -> (Vec<u8>, Report) {
         let mut report = Report::new(Format::Ooxml, input.len());
-        let out = sanitize(input, &Policy::default(), &mut report).expect("valid docx");
+        let out = sanitize(input, &Policy::default(), &mut report, 0).expect("valid docx");
         (out, report)
     }
 
@@ -368,7 +375,7 @@ mod tests {
         let policy = Policy { recurse_embedded: false, ..Policy::default() };
 
         let mut report = Report::new(Format::Ooxml, input.len());
-        let out = sanitize(&input, &policy, &mut report).unwrap();
+        let out = sanitize(&input, &policy, &mut report, 0).unwrap();
 
         // The part is deflated inside the archive, so check the content itself
         // rather than the container bytes.
@@ -404,7 +411,7 @@ mod tests {
         };
 
         let mut report = Report::new(Format::OpenDocument, odt.len());
-        let out = sanitize(&odt, &Policy::default(), &mut report).unwrap();
+        let out = sanitize(&odt, &Policy::default(), &mut report, 0).unwrap();
 
         assert!(!out.windows(14).any(|w| w == b"Jane Q. Author"));
         assert!(!out.windows(11).any(|w| w == b"LibreOffice"));
@@ -449,7 +456,7 @@ mod tests {
         let full = docx(&[(CORE, REAL_CORE), ("word/document.xml", b"<w:p w:author=\"A\"/>")]);
         for n in 0..full.len() {
             let mut report = Report::new(Format::Ooxml, n);
-            let _ = sanitize(&full[..n], &Policy::default(), &mut report);
+            let _ = sanitize(&full[..n], &Policy::default(), &mut report, 0);
         }
     }
 
