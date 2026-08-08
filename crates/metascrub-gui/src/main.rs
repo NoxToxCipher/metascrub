@@ -116,7 +116,7 @@ impl Default for App {
         let (tx, rx) = channel();
         Self {
             entries: Vec::new(),
-            policy: Policy::default(),
+            policy: Policy { max_input_bytes: Some(MAX_FILE_BYTES), ..Policy::default() },
             tx,
             rx,
             pending: 0,
@@ -262,11 +262,34 @@ impl App {
 /// quality for nothing. The washed result is finally passed back through the
 /// sanitizer, since a fresh encode is only metadata-free if nothing put
 /// anything back.
+/// Largest file the interface will read into memory. Checked against the file's
+/// size on disk *before* reading, so an enormous file is refused rather than
+/// loaded. No photograph or document approaches this; the parsers allocate
+/// roughly the input size again, so the real memory cost is a small multiple.
+const MAX_FILE_BYTES: u64 = 2 * 1024 * 1024 * 1024;
+
 fn process(
     path: &std::path::Path,
     policy: &Policy,
     wash: Option<Strength>,
 ) -> (Result<Sanitized, String>, Option<Result<WashReport, String>>) {
+    // Refuse an oversize file by its size on disk, before it is read. The
+    // policy also carries this limit, but that check only runs after the bytes
+    // are in memory, which is too late to prevent the allocation.
+    match std::fs::metadata(path) {
+        Ok(m) if m.len() > MAX_FILE_BYTES => {
+            return (
+                Err(format!(
+                    "file is {:.1} GB, larger than the {} GB limit",
+                    m.len() as f64 / 1e9,
+                    MAX_FILE_BYTES / 1_000_000_000
+                )),
+                None,
+            );
+        }
+        _ => {}
+    }
+
     // Wiped when this returns. The buffer holds the original file, metadata and
     // all, so a freed heap page could otherwise keep someone's coordinates
     // readable to whatever allocates next, or to a memory dump.
@@ -315,28 +338,18 @@ fn clean_name(path: &std::path::Path) -> PathBuf {
     path.with_file_name(name)
 }
 
-/// Write to a temporary file and rename. An interrupted direct write leaves a
-/// truncated file wearing a name that says it was cleaned, and the user has no
-/// reason to distrust it.
+/// Write cleaned bytes through the library's single hardened writer.
+///
+/// The interface used to carry its own copy of this, and the copy was weaker: a
+/// predictable temporary name opened with `create`, which a local attacker can
+/// pre-place as a symlink to make the write land somewhere else. The library's
+/// version uses an unpredictable name and `create_new`, so there is one correct
+/// implementation rather than two that can drift apart.
 fn write_atomic(dst: &std::path::Path, data: &[u8]) -> std::io::Result<()> {
-    use std::io::Write;
-
-    let dir = dst.parent().unwrap_or_else(|| std::path::Path::new("."));
-    let name = dst.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
-    let tmp = dir.join(format!(".{name}.{}.metascrub", std::process::id()));
-
-    let mut file = std::fs::File::create(&tmp)?;
-    let written = file.write_all(data).and_then(|()| file.sync_all());
-    drop(file);
-    if let Err(e) = written {
-        let _ = std::fs::remove_file(&tmp);
-        return Err(e);
-    }
-    if let Err(e) = std::fs::rename(&tmp, dst) {
-        let _ = std::fs::remove_file(&tmp);
-        return Err(e);
-    }
-    Ok(())
+    metascrub::write_atomic(dst, data).map_err(|e| match e {
+        metascrub::Error::Io(io) => io,
+        other => std::io::Error::other(other.to_string()),
+    })
 }
 
 fn human(bytes: usize) -> String {

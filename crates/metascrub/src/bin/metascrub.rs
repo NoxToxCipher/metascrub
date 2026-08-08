@@ -82,7 +82,17 @@ fn main() -> ExitCode {
     ExitCode::from(worst)
 }
 
+/// Largest file the tool will read into memory, checked before reading so an
+/// enormous file is refused rather than loaded. No real photograph or document
+/// approaches 2 GB.
+const MAX_FILE_BYTES: u64 = 2 * 1024 * 1024 * 1024;
+
 fn process(path: &Path, opts: &Options) -> metascrub::Result<Report> {
+    if let Ok(meta) = std::fs::metadata(path) {
+        if meta.len() > MAX_FILE_BYTES {
+            return Err(metascrub::Error::TooLarge { len: meta.len(), limit: MAX_FILE_BYTES });
+        }
+    }
     let input = std::fs::read(path)?;
     let result = metascrub::sanitize(&input, &opts.policy)?;
 
@@ -92,43 +102,11 @@ fn process(path: &Path, opts: &Options) -> metascrub::Result<Report> {
     Ok(result.report)
 }
 
-/// Write through a temporary file in the same directory, then rename.
-///
-/// A direct write is not atomic: interrupt it and the leftover is a truncated
-/// file carrying a name that says it was cleaned, which the user has no reason
-/// to distrust. With `--in-place` a direct write also destroys the original
-/// before the replacement is complete. Renaming within a directory is atomic on
-/// both Unix and Windows, so the destination is either the old file or the
-/// whole new one.
-fn write_atomic(dst: &Path, data: &[u8]) -> std::io::Result<()> {
-    use std::io::Write;
-
-    let dir = dst.parent().unwrap_or_else(|| Path::new("."));
-    let name = dst.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
-    let tmp = dir.join(format!(".{name}.{}.metascrub", std::process::id()));
-
-    let mut opts = std::fs::OpenOptions::new();
-    opts.write(true).create(true).truncate(true);
-    #[cfg(unix)]
-    {
-        // The cleaned file is the user's photograph; it should not be
-        // world-readable even for the moment before the rename.
-        use std::os::unix::fs::OpenOptionsExt;
-        opts.mode(0o600);
-    }
-
-    let mut file = opts.open(&tmp)?;
-    let written = file.write_all(data).and_then(|()| file.sync_all());
-    drop(file);
-    if let Err(e) = written {
-        let _ = std::fs::remove_file(&tmp);
-        return Err(e);
-    }
-    if let Err(e) = std::fs::rename(&tmp, dst) {
-        let _ = std::fs::remove_file(&tmp);
-        return Err(e);
-    }
-    Ok(())
+/// Write cleaned bytes through the library's single hardened writer, so the
+/// atomic-rename, unpredictable-name, `create_new` behaviour is not
+/// reimplemented here where it could drift weaker.
+fn write_atomic(dst: &Path, data: &[u8]) -> metascrub::Result<()> {
+    metascrub::write_atomic(dst, data)
 }
 
 fn print_human(path: &Path, report: &Report, opts: &Options) {
@@ -228,7 +206,7 @@ impl Options {
     fn parse(args: &[String]) -> Result<Option<Self>, String> {
         let mut opts = Options {
             inputs: Vec::new(),
-            policy: Policy::default(),
+            policy: Policy { max_input_bytes: Some(MAX_FILE_BYTES), ..Policy::default() },
             dry_run: false,
             quiet: false,
             json: false,

@@ -1,0 +1,25 @@
+[package]
+name = "pixelwash-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+# Excluded from the workspace: libfuzzer-sys needs nightly and a sanitizer
+# runtime. pixelwash decodes untrusted images, so this is the crate that most
+# wants continuous fuzzing.
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+
+[dependencies.pixelwash]
+path = ".."
+
+[[bin]]
+name = "wash_any"
+path = "fuzz_targets/wash_any.rs"
+test = false
+doc = false
+bench = false

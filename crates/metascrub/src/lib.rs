@@ -204,18 +204,39 @@ pub fn sanitize_file(
     dst: impl AsRef<std::path::Path>,
     policy: &Policy,
 ) -> Result<Report> {
-    use std::io::Write;
-
     let (src, dst) = (src.as_ref(), dst.as_ref());
     let input = std::fs::read(src)?;
     let out = sanitize(&input, policy)?;
+    write_atomic(dst, &out.data)?;
+    Ok(out.report)
+}
 
+/// Write `data` to `dst` atomically and safely.
+///
+/// The one hardened writer, so an interface never has to reimplement it and get
+/// it subtly weaker. Any caller that has already produced cleaned bytes (a GUI
+/// with the result in memory, a batch job) should write through this rather than
+/// `fs::write`.
+///
+/// - **Atomic.** Written to a temporary file in the same directory and renamed.
+///   A rename within a directory is atomic on Unix and Windows, so `dst` is
+///   either the old contents or the whole new file, never a half-written one
+///   wearing a name that says it was cleaned.
+/// - **Not a symlink target.** The temporary name is unpredictable and opened
+///   with `create_new`, which fails rather than following an existing path. A
+///   fixed, guessable temp name in a directory someone else can write to is the
+///   classic way to turn "write a file" into "write through a symlink of my
+///   choosing".
+/// - **Not world-readable.** On Unix the temporary is created `0o600`; the
+///   contents are the user's photograph and should not be readable by others
+///   even for the moment before the rename.
+pub fn write_atomic(dst: impl AsRef<std::path::Path>, data: &[u8]) -> Result<()> {
+    use std::io::Write;
+
+    let dst = dst.as_ref();
     let dir = dst.parent().unwrap_or_else(|| std::path::Path::new("."));
     let stem = dst.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
 
-    // A few attempts, in case the name is already taken. `create_new` fails
-    // rather than following an existing path, so losing the race is an error
-    // and never a write to somebody else's file.
     let mut last_err = None;
     for _ in 0..8 {
         let mut nonce = [0u8; 12];
@@ -232,7 +253,7 @@ pub fn sanitize_file(
 
         match opts.open(&tmp) {
             Ok(mut f) => {
-                let write_res = f.write_all(&out.data).and_then(|()| f.sync_all());
+                let write_res = f.write_all(data).and_then(|()| f.sync_all());
                 drop(f);
                 if let Err(e) = write_res {
                     let _ = std::fs::remove_file(&tmp);
@@ -242,7 +263,7 @@ pub fn sanitize_file(
                     let _ = std::fs::remove_file(&tmp);
                     return Err(e.into());
                 }
-                return Ok(out.report);
+                return Ok(());
             }
             Err(e) if e.kind() == std::io::ErrorKind::AlreadyExists => {
                 last_err = Some(e);

@@ -203,9 +203,35 @@ pub struct Washed {
 /// This **reduces** linkability. It does not remove the sensor fingerprint, and
 /// any interface built on this must say so.
 pub fn wash(input: &[u8], settings: &Settings) -> Result<Washed, Error> {
-    let decoded = image::load_from_memory(input).map_err(|e| Error::Decode(e.to_string()))?;
+    // Bound the decoder *before* it runs. The previous approach decoded first
+    // and checked dimensions afterwards, which is the decompression-bomb order
+    // of operations: a 30000x30000 PNG is a couple of hundred bytes on disk and
+    // several gigabytes decoded, and the size check never gets a turn because
+    // the allocation happens inside the decode. The `image` crate has its own
+    // default memory cap, but relying on a dependency's default for a security
+    // property is fragile across version bumps, so the limit is set explicitly
+    // here from our own configuration.
+    let mut reader = image::ImageReader::new(std::io::Cursor::new(input));
+    reader = reader.with_guessed_format().map_err(|e| Error::Decode(e.to_string()))?;
+
+    if let Some(mp) = settings.max_megapixels {
+        let mut limits = image::Limits::default();
+        // Pixel ceiling as a width/height product, plus a hard allocation cap so
+        // an intermediate buffer cannot balloon past what the pixels imply.
+        let max_px = mp as u64 * 1_000_000;
+        limits.max_image_width = Some(max_px.min(u32::MAX as u64) as u32);
+        limits.max_image_height = Some(max_px.min(u32::MAX as u64) as u32);
+        // 4 bytes per pixel (RGBA), plus generous slack for the decoder's own
+        // scratch. Still far below a bomb.
+        limits.max_alloc = Some(max_px.saturating_mul(6));
+        reader.limits(limits);
+    }
+
+    let decoded = reader.decode().map_err(|e| Error::Decode(e.to_string()))?;
     let (w, h) = decoded.dimensions();
 
+    // Belt and braces: the reader limits should have caught an oversize image,
+    // but check the decoded dimensions too so the reported error is precise.
     if let Some(limit) = settings.max_megapixels {
         let megapixels = (w as u64 * h as u64) / 1_000_000;
         if megapixels > limit as u64 {
@@ -413,12 +439,19 @@ mod tests {
     }
 
     #[test]
-    fn oversized_images_are_refused_before_processing() {
+    fn oversized_images_are_refused_at_the_decoder() {
+        // The limit is now enforced on the decoder before the image is built, so
+        // a zero-megapixel ceiling refuses everything rather than passing small
+        // images through an integer-division quirk. This is the stricter, more
+        // predictable behaviour, and it means the bomb is stopped inside the
+        // decode rather than after it.
         let photo = fake_photo(64, 64, &sensor);
         let settings = Settings { max_megapixels: Some(0), ..Default::default() };
-        // 64x64 is under a megapixel, so integer division gives 0, which is not
-        // greater than 0: it passes. Prove the ceiling works at a real size.
-        assert!(wash(&photo, &settings).is_ok());
+        assert!(wash(&photo, &settings).is_err(), "a zero limit must refuse any image");
+
+        // A generous ceiling still processes an ordinary photo.
+        let ok = Settings { max_megapixels: Some(120), ..Default::default() };
+        assert!(wash(&photo, &ok).is_ok());
     }
 
     #[test]

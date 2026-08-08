@@ -8,7 +8,7 @@ members = [
 
 # The fuzz crate needs a nightly toolchain and a sanitizer runtime, so it is
 # deliberately not part of the normal build. See crates/metascrub/fuzz/.
-exclude = ["crates/metascrub/fuzz"]
+exclude = ["crates/metascrub/fuzz", "crates/pixelwash/fuzz"]
 
 [workspace.package]
 version = "0.1.0"
