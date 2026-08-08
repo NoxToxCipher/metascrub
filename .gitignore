@@ -1,0 +1,15 @@
+# Rust
+/target
+**/*.rs.bk
+# Cargo.lock IS committed. These are applications, so exact audited dependency
+# versions are pinned for reproducible, supply-chain-safe builds.
+
+# Fuzzing artefacts
+/crates/metascrub/fuzz/target
+/crates/metascrub/fuzz/corpus
+/crates/metascrub/fuzz/artifacts
+
+# Never commit somebody's files, cleaned or otherwise
+*.clean.*
+/samples
+/scratch
