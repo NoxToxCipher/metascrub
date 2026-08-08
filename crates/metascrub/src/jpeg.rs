@@ -381,6 +381,35 @@ mod tests {
         );
     }
 
+    /// aCropalypse (CVE-2023-21036): an editor cropped an image but wrote the
+    /// smaller result over the original without truncating, so the cropped-out
+    /// pixels stayed on disk after the end marker and were recoverable. A file
+    /// arriving here may already be in that state. The rebuild copies only up to
+    /// EOI, so any recoverable tail is dropped and the output is exactly the
+    /// bytes we constructed, with no leftover from the input.
+    #[test]
+    fn an_acropalypse_style_trailer_is_dropped_and_reported() {
+        let mut j = vec![0xFF, SOI];
+        j.extend_from_slice(&seg(0xDB, &[0u8; 65]));
+        j.extend_from_slice(&seg(0xC0, &[8, 0, 8, 0, 8, 1, 1, 0x11, 0]));
+        j.extend_from_slice(&seg(0xC4, &[0u8; 20]));
+        j.extend_from_slice(&seg(SOS, &[1, 1, 0, 0, 63, 0]));
+        j.extend_from_slice(&[0x12, 0x34]);
+        j.extend_from_slice(&[0xFF, EOI]);
+        // The "recoverable original" a naive crop leaves behind.
+        j.extend_from_slice(b"RECOVERABLE-UNCROPPED-IMAGE-DATA");
+
+        let (out, report) = run(&j, &Policy::default());
+
+        assert!(
+            !out.windows(31).any(|w| w == b"RECOVERABLE-UNCROPPED-IMAGE-DATA"),
+            "the recoverable tail survived"
+        );
+        // The output ends at its own EOI, carrying nothing from the input tail.
+        assert_eq!(&out[out.len() - 2..], &[0xFF, EOI]);
+        assert!(report.removed.iter().any(|r| r.kind == Kind::Trailer));
+    }
+
     /// Runs of fill bytes are legal anywhere a marker may appear.
     #[test]
     fn long_fill_runs_before_eoi_are_handled() {
