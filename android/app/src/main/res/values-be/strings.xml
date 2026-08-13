@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">metascrub</string>
+    <string name="tagline">прыбірае тое, што файл распавядае пра вас</string>
+
+    <string name="share_prompt">Дадайце фотаздымкі, PDF ці дакументы, каб ачысціць іх.\n\nУсё адбываецца на гэтым тэлефоне. Нічога не запампоўваецца, і вашы файлы закранаюцца толькі калі вы націскаеце «Ачысціць».</string>
+    <string name="opt_random_names">Даваць ачышчаным файлам выпадковыя імёны</string>
+    <string name="opt_keep_colour">Пакінуць колеравы профіль</string>
+    <string name="opt_keep_orientation">Пакінуць арыентацыю выявы</string>
+    <string name="opt_fingerprint">Знізіць адбітак камеры (фота)</string>
+    <string name="fingerprint_note">Змякчае пікселі, каб аслабіць адбітак сенсара, які камера пакідае на кожным фотаздымку. Гэта зніжае тое, наколькі лёгка фотаздымкі можна звязаць з адной камерай. Гэта не выдаляе адбітак і робіць фотаздымак мякчэйшым і крыху меншым. Фотаздымкі захоўваюцца як JPEG.</string>
+    <string name="strength_gentle">Мякка</string>
+    <string name="strength_balanced">Збалансавана</string>
+    <string name="strength_thorough">Старанна</string>
+
+    <!-- Actions -->
+    <string name="choose_files">Выбраць файлы</string>
+    <string name="add_more">Дадаць яшчэ</string>
+    <string name="start_over">Пачаць спачатку</string>
+    <string name="scrubbing">Ачыстка…</string>
+    <plurals name="scrub_files">
+        <item quantity="one">Ачысціць 1 файл</item>
+        <item quantity="few">Ачысціць %1$d файлы</item>
+        <item quantity="many">Ачысціць %1$d файлаў</item>
+        <item quantity="other">Ачысціць %1$d файла</item>
+    </plurals>
+    <plurals name="save_files">
+        <item quantity="one">Захаваць ачышчаную копію</item>
+        <item quantity="few">Захаваць %1$d ачышчаныя копіі</item>
+        <item quantity="many">Захаваць %1$d ачышчаных копій</item>
+        <item quantity="other">Захаваць %1$d ачышчанай копіі</item>
+    </plurals>
+    <plurals name="saved_files">
+        <item quantity="one">Захавана ачышчаная копія. Ваш арыгінал не зменены.</item>
+        <item quantity="few">Захавана %1$d ачышчаныя копіі. Вашы арыгіналы не зменены.</item>
+        <item quantity="many">Захавана %1$d ачышчаных копій. Вашы арыгіналы не зменены.</item>
+        <item quantity="other">Захавана %1$d ачышчанай копіі. Вашы арыгіналы не зменены.</item>
+    </plurals>
+
+    <!-- Section titles -->
+    <string name="ready_header">Гатова да ачысткі</string>
+    <string name="results_header">Вынікі</string>
+
+    <!-- Messages -->
+    <string name="too_large">Больш за 100 МБ — прапушчана. metascrub ачышчае файл у памяці тэлефона, таму вельмі вялікія файлы пакуль не падтрымліваюцца.</string>
+    <string name="read_failed">Не ўдалося прачытаць: %1$s</string>
+    <string name="save_failed">Не ўдалося захаваць: %1$s</string>
+    <string name="nothing_to_save">Няма чаго захоўваць — ніводзін з гэтых файлаў не ўдалося ачысціць.</string>
+    <string name="remove">Выдаліць</string>
+
+    <!-- Assurance badges and their honest one-line meaning -->
+    <string name="badge_complete">ПОЎНАСЦЮ</string>
+    <string name="badge_best_effort">ПА МАГЧЫМАСЦІ</string>
+    <string name="badge_not_cleaned">НЕ АЧЫШЧАНА</string>
+    <string name="note_complete">Перасабрана з заведама бяспечных частак. Нічога невядомага не пакінута.</string>
+    <string name="note_best_effort">Ачышчана на месцы. Частка структуры можа застацца.</string>
+    <string name="note_none">Не ўдалося разабраць гэты фармат, таму лічыце, што ён усё яшчэ нясе ўсё.</string>
+
+    <string name="found_location">Запісана, дзе быў зроблены здымак.</string>
+    <string name="removed_prefix">Выдалена: %1$s</string>
+    <string name="nothing_found">Ужо чыста. Няма чаго выдаляць.</string>
+
+    <!-- Tabs and language -->
+    <string name="tab_scrub">Ачыстка</string>
+    <string name="tab_handbook">Даведнік</string>
+    <string name="language">Мова</string>
+    <string name="lang_more_soon">Дадаюцца новыя мовы. Даведнік і ўвесь інтэрфейс будуць даступныя на кожнай з іх.</string>
+    <string name="handbook_unavailable">Не ўдалося загрузіць Даведнік.</string>
+</resources>

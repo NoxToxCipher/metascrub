@@ -1,0 +1,233 @@
+{
+  "chapters": [
+    {
+      "title": "Kiel metascrub purigas",
+      "intro": "metascrub neniam donas verdan markon, kiun ĝi ne meritis. Ĉiu dosiero revenas kun unu el tri honestaj rezultoj.",
+      "entries": [
+        {
+          "heading": "KOMPLETA",
+          "body": "La dosiero estis malmuntita kaj rekonstruita el listo de la partoj indaj je konservado. Io ajn ne sur tiu listo — inkluzive de privataj, vendist-specifaj aŭ kaŝitaj blokoj, kiujn la ilo neniam vidis — estas forlasata pro la konstruo mem. Fotoj kaj dokumentoj (JPEG, PNG, WebP, HEIC, AVIF, GIF, TIFF, PDF kaj Office-dosieroj) estas purigataj tiamaniere."
+        },
+        {
+          "heading": "LAŬEBLE",
+          "body": "La dosiero estis redaktita surloke anstataŭ rekonstruita, ĉar rekonstrui ĝin riskus igi ĝin nemalfermebla. Identigaj kampoj estas anstataŭskribataj, sed iom da strukturo, kiun la ilo ne povas sekure tuŝi, povas resti. Raw-dosieroj de fotiloj estas purigataj tiamaniere."
+        },
+        {
+          "heading": "NE PURIGITA",
+          "body": "metascrub ne povis malmunti ĉi tiun formaton, do ĝi estis lasita netuŝita, kaj vi supozu ke ĝi ankoraŭ portas ĉion. Rezulto, al kiu vi povas fidi, valoras pli ol marko, kiu ne estis meritita, do la ilo diras al vi malkaŝe anstataŭ ŝajnigi."
+        },
+        {
+          "heading": "Kial ĝi rekonstruas dosierojn anstataŭ redakti ilin",
+          "body": "Ilo, kiu forigas nur la metadatumojn, kiujn ĝi rekonas, silente tralasos ion ajn novan, privatan aŭ intence kaŝitan. Rekonstrui el listo de tio, kion konservi, signifas ke la implicita ago por io ajn nekonata estas forĵeti ĝin."
+        }
+      ]
+    },
+    {
+      "title": "Kion ĝi povas purigi, kaj kiom bone",
+      "intro": "metascrub detektas la formaton el la propra enhavo de la dosiero, neniam el ĝia nomo. Jen kion ĝi faras kun ĉiu.",
+      "entries": [
+        {
+          "heading": "Plene rekonstruita (KOMPLETA)",
+          "body": "Malmuntita kaj rekonstruita el permeslisto, do nenio nekonata postvivas. Fotoj: JPEG, PNG, WebP, HEIC kaj HEIF, AVIF, GIF, TIFF. Vektora: SVG. Dokumentoj: PDF, Word, Excel, PowerPoint kaj OpenDocument. Fotoj algluitaj ene de dokumento ankaŭ estas purigataj."
+        },
+        {
+          "heading": "Purigita surloke (LAŬEBLE)",
+          "body": "Redaktita, ne rekonstruita, ĉar rekonstrui riskus dosieron, kiun vi ne povas refoti. Raw-dosieroj de fotiloj: Canon CR2 kaj CR3, Nikon NEF kaj NRW, Sony ARW kaj SR2, Fujifilm RAF, Olympus kaj OM System ORF, Panasonic RW2, Pentax PEF, Samsung SRW, Adobe DNG, Epson ERF, GoPro GPR, kaj la mezformataj dorsoj. La marko, modelo kaj fabrikanta noto (maker note) estas konservataj por ke la dosiero ankoraŭ malfermiĝu, do seria numero ene de la fabrikanta noto povas resti. Vidu Raw-dosieroj de fotiloj."
+        },
+        {
+          "heading": "Lasita netuŝita (NE PURIGITA)",
+          "body": "Se metascrub ne povas malmunti formaton, ĝi ne divenas. Ĝi lasas la dosieron ĝuste kia ĝi estas kaj markas ĝin NE PURIGITA, por ke netuŝita dosiero neniam estu konfuzita kun purigita. Tio inkluzivas videon kaj sonon, kaj la maloftan raw-aranĝon, kiun ĝi ankoraŭ ne analizas, kiel la X3F de Sigma."
+        }
+      ]
+    },
+    {
+      "title": "Kion ĝi forigas, kaj kial",
+      "entries": [
+        {
+          "heading": "EXIF",
+          "body": "Bloko de etikedoj skribitaj de la fotilo: modelo, objektivo, seria numero, obturatora kalkulo, ekspoziciaj agordoj, la dato kaj horo ĝis la sekundo, kaj ofte GPS-koordinatoj.\n\nGPS estas la evidenta, kaj ĝi estas preciza ĝis kelkaj metroj, do ununura ferifoto povas malkaŝi hejman adreson. La cetero estas pli kvieta sed akumuliĝas: la sama fotilkorpo kaj objektivo tra aro da fotoj ligas ilin al unu persono, eĉ kiam nenio alia faras tion."
+        },
+        {
+          "heading": "Fabrikanta noto",
+          "body": "Privata areo de vendisto ene de EXIF, en nedokumentita formato, kiu diferencas inter fabrikantoj kaj mikroprogramaj versioj.\n\nĈi tie kutime troviĝas la seria numero de la sensilo, kune kun obturataj funkciigaj kalkuloj kaj internaj agordoj. Ĝi estas la ununura plej identiga kampo en tipa foto, kaj ĉar la formato estas privata, iloj, kiuj komprenas nur normajn etikedojn, ofte lasas ĝin surloke."
+        },
+        {
+          "heading": "Miniaturo",
+          "body": "Malgranda kopio de la bildo, konservita ene de la dosiero por ke rigardiloj povu montri antaŭrigardon sen dekodi la tutan bildon.\n\nMiniaturoj estas generataj unufoje kaj ofte ne regenerataj post redakto. Foto stucita por forigi iun el la kadro povas ankoraŭ porti la nestucitan originalon interne. La samo validas por malklarigitaj vizaĝoj kaj surpentritaj detaloj."
+        },
+        {
+          "heading": "XMP",
+          "body": "Metadatuma formato de Adobe, konservita kiel XML. Skribita de redakta programaro kaj de iuj fotiloj.\n\nPortas la redaktan historion, la uzitan programaron kaj version, taksojn, ŝlosilvortojn, kaj ofte la nomon de la aŭtoro aŭ la licenchavanton. Ĝi estas ankaŭ kie troviĝas katalogaj identigiloj, kiuj povas ligi publikigitan bildon reen al specifa biblioteko sur specifa maŝino."
+        },
+        {
+          "heading": "IPTC",
+          "body": "Metadatuma bloko por gazetaro kaj eldonado, ofte skribita de foto-administra programaro.\n\nDestinita porti aŭtoran atribuon, kopirajtan noton, kontaktdetalojn kaj apudskriban tekston. Ĉio utila por novaĵagentejo, ĉio identiga por iu, kiu ne intencis publikigi sub sia nomo."
+        },
+        {
+          "heading": "Kolora profilo",
+          "body": "ICC-profilo, kiu priskribas kiel la kolornombroj de la dosiero devus esti interpretataj.\n\nPlejparte sendanĝera, kaj konservata se vi petas ĝin. Forigata defaŭlte pro du kialoj: profilo portas libertekstan priskribon kaj aparatan modelon, kaj propra profilo de kalibrita ekrano povas esti sufiĉe distinga por ligi dosierojn. Se viaj bildoj estas larĝgamaj kaj kolora precizeco gravas, reŝaltu ĝin."
+        },
+        {
+          "heading": "Vostaj datumoj",
+          "body": "Io ajn aldonita post la punkto, kie la bilda formato diras ke la dosiero finiĝas.\n\nPlej multaj iloj ĉesas legi ĉe la fina markilo, kio igas la spacon post ĝi bona kaŝejo. Iuj telefonaj fotiloj konservas tie duan, plenrezolucian foton. Kio ajn estas en ĝi, ĝi ne estas parto de la bildo kaj ĝi vojaĝas kun la dosiero."
+        },
+        {
+          "heading": "Dokumenta informo",
+          "body": "En PDF-oj kaj Office-dokumentoj: titolo, temo, aŭtoro, la programaro kiu produktis ĝin, kaj kreadaj kaj modifaj tempoj.\n\nLa aŭtora kampo estas ofte vera nomo aŭ kompania uzantnomo, plenigita aŭtomate el la konto sub kiu la programaro estis instalita, neniam montrata al la persono, kiu tajpas."
+        },
+        {
+          "heading": "Reviziaj identigiloj",
+          "body": "Hazardaj identigiloj, kiujn tekstprilaboriloj skribas en dokumenton kaj ĝisdatigas dum ĝi estas redaktata.\n\nDu dokumentoj kunhavantaj revizian identigilon estis redaktitaj en la sama seanco sur la sama maŝino. Tio ligas dosierojn, kiuj havas nenion alian komunan, kaj preskaŭ neniu scias ke la kampo ekzistas."
+        },
+        {
+          "heading": "Nerekonataj strukturoj",
+          "body": "Ĉiu bloko en la ujo, kiu ne estas sur la konserv-listo, inkluzive de vendist-privataj sekcioj, kiujn ĉi tiu ilo neniam vidis.\n\nLa kialo, pro kiu la ilo rekonstruas dosierojn anstataŭ redakti ilin. Ilo, kiu forigas la metadatumojn, kiujn ĝi rekonas, silente tralasos ion ajn novan, privatan aŭ intence kaŝitan. Rekonstrui el listo de tio, kion konservi, signifas ke la implicita ago por io ajn nekonata estas forĵeti ĝin."
+        }
+      ]
+    },
+    {
+      "title": "Viaj dosieroj, kaj kion ili portas",
+      "entries": [
+        {
+          "heading": "JPEG-foto (.jpg)",
+          "body": "EXIF-bloko skribita de la fotilo aŭ telefono: GPS-koordinatoj, la fotila marko, modelo kaj seria numero, la objektivo, la ĝusta dato kaj horo ĝis la sekundo, kaj malgranda miniaturo. Ofte ankaŭ XMP-bloko el redakta programaro.\n\nLa GPS estas preciza ĝis kelkaj metroj, do unu ferifoto povas malkaŝi hejmon. La seria numero estas la forta: ĝi estas sama tra ĉiu foto, kiun tiu fotilo iam faris, do ĝi ligas anoniman bildon al la aro, kiun vi afiŝis sub via propra nomo. La miniaturo estas generata unufoje kaj ofte ne ĝisdatigata, do foto stucita por forigi iun povas ankoraŭ porti la nestucitan originalon interne."
+        },
+        {
+          "heading": "Telefona foto (HEIC, HEIF, AVIF)",
+          "body": "La samaj EXIF kaj XMP kiel ĉe JPEG, kaj modernaj telefonoj estas ĝisfundaj: preciza GPS, la aparata modelo, kaptaj agordoj, kaj foje profundmapo aŭ sinsekvo da kadroj.\n\nĈio, kion la JPEG-kazo priskribas, kaj ĉar ĝi venis rekte de telefono kun lokado ŝaltita, la GPS kutime ĉeestas kaj estas preciza. La aparata modelo plus operaci-sistemaj detaloj malvastigas kies telefono ĝi estis."
+        },
+        {
+          "heading": "PNG-bildo (.png)",
+          "body": "Tekstaj blokoj, kiuj tenas liberformajn komentojn, la programaron kiu skribis la dosieron, kreadan tempon, kaj foje plenan EXIF-blokon kopiitan el originala foto.\n\nHomoj supozas ke PNG estas 'pura', ĉar ĝi estas ofte uzata por ekrankopioj, sed konvertiloj ofte transportas la EXIF de la originala foto, kun GPS kaj ĉio, en la PNG. La programara kampo fingrospuras la ilon kaj version, kiujn vi uzis."
+        },
+        {
+          "heading": "WebP kaj GIF",
+          "body": "WebP portas EXIF kaj XMP kiel JPEG. GIF portas komentajn kaj aplikaĵajn blokojn, kiuj estis uzataj por aŭtoraj nomoj, programaraj ĉenoj kaj XMP.\n\nLa sama loka kaj aparata rakonto por WebP. Por GIF temas kutime pri la aŭtoro aŭ programara ĉeno anstataŭ GPS, sed tio ankoraŭ nomas ilon, konton aŭ personon."
+        },
+        {
+          "heading": "TIFF (.tif)",
+          "body": "TIFF estas la ujo, sur kiu EXIF mem estas konstruita, do ĝi tenas la plenan aron: GPS, fotila marko, modelo kaj serio, tempindikoj, kaj enigita miniaturo.\n\nLa sama kiel JPEG, kaj TIFF estas ofta por skanaĵoj kaj profesia laboro, kie skanila aŭ fotila serio kaj preciza tempindiko povas ligi dokumenton reen al unu maŝino."
+        },
+        {
+          "heading": "Fotila raw (CR2, CR3, NEF, ARW, RAF, DNG, ...)",
+          "body": "Ĉio, kion JPEG portas, kaj pli. Pli granda fabrikanta noto tenas la internan serian numeron kaj la obturatoran kalkulon. Plengranda JPEG-antaŭrigardo estas enigita interne, kun sia propra EXIF kaj GPS.\n\nRaw estas pli malbona liko ol la JPEG de la sama foto, ne pli bona. La obturatora kalkulo efike numeras viajn fotojn laŭ la ordo, en kiu vi faris ilin. La fabrikanta noto tenas datumojn, kiujn konvertilo bezonas por riveli la dosieron, do ĉi tiu ilo konservas ĝin kaj la serio en ĝi kutime restas, tial raw neniam povas esti plene purigita surloke. Por forigi la serion, rivelu la raw al JPEG kaj purigu tiun."
+        },
+        {
+          "heading": "SVG-vektorbildo (.svg)",
+          "body": "SVG estas XML, do ĝi portas redaktilan librotenadon: la desegnan programon kaj ĝian version, tavolan kaj fenestran aranĝon, foje dokumentan vojon, metadatuman blokon kun aŭtoro kaj licenco, kaj referencojn al eksteraj dosieroj.\n\nLa redaktilaj kampoj kaj ĉia enigita dokumenta vojo povas porti uzantnomon aŭ dosierujan strukturon, kiu nomas vin. Ekstera referenco igas la bildon havigi rimedon de servilo kiam iu malfermas ĝin, kio raportas al tiu servilo ke ĝi estis rigardita. Skriptoj en SVG povas ruliĝi kiam ĝi estas malfermita en retumilo."
+        },
+        {
+          "heading": "XMP-akompananto (.xmp)",
+          "body": "Dosiero, kiu estas nenio krom metadatumoj, skribita apud foto de redakta programaro: la aŭtoro, kopirajto, GPS, la datoj kiam la foto estis farita kaj redaktita, la plena redakta historio, katalogaj identigiloj, kaj la fotila seria numero.\n\nHomoj forgesas ke la akompananto ekzistas kaj kunhavigas ĝin apud la foto. Ĝi portas la identecon, de kiu la foto estis purigita. La redakta historio ligas la dosieron al specifa seanco sur specifa maŝino, kaj la katalogaj identigiloj ligas ĝin al unu fotobiblioteko."
+        },
+        {
+          "heading": "PDF-dokumento (.pdf)",
+          "body": "Dokument-informa bloko kun la aŭtoro, la programaro kiu produktis ĝin, kaj kreadaj kaj modifaj tempoj. Ofte ankaŭ XMP-bloko, kaj historio de laŭpaŝaj redaktoj.\n\nLa aŭtora kampo estas kutime plenigita aŭtomate el la konto sub kiu la programaro estis instalita, do ĝi estas ofte vera nomo aŭ kompania uzantnomo, kiun la verkinto neniam tajpis aŭ vidis. La redakta historio povas teni pli fruajn versiojn de la dosiero, kio estas kiel 'cenzuritaj' PDF-oj likis la tekston sub la nigraj skatoloj."
+        },
+        {
+          "heading": "Word, Excel, PowerPoint, OpenDocument",
+          "body": "Nomoj de aŭtoro kaj de laste-modifinto, la kompanio, tuta redakta tempo, revizi-konservaj identigiloj, spuritaj ŝanĝoj kun la nomoj de ĉiuj, kiuj redaktis, ŝablonaj vojoj, kaj ĉiuj algluitaj bildoj, kiuj konservas sian propran EXIF.\n\nLa kampoj de aŭtoro kaj laste-redaktinto nomas verajn homojn aŭ kontajn uzantnomojn. Revizi-konservaj identigiloj estas hazardaj numeroj, kiuj kongruas inter dokumentoj redaktitaj en la sama seanco sur la sama maŝino, kio ligas dosierojn, kiuj havas nenion alian komunan. Spuritaj ŝanĝoj povas malkaŝi kiu skribis kion, kaj alglua foto kunportas sian propran GPS."
+        }
+      ]
+    },
+    {
+      "title": "Raw-dosieroj de fotiloj",
+      "intro": "Raw-oj estas la sola formato purigata surloke anstataŭ rekonstruata, kaj la vorto 'raw' estas vaste miskomprenata. Jen kio raw estas, kaj precize kie la ilo estas limigita ĉe unu.",
+      "entries": [
+        {
+          "heading": "Kio raw-dosiero fakte estas",
+          "body": "Raw-dosiero estas la preskaŭ neprilaborita ellego de la bildsensilo de la fotilo, antaŭ ol la fotilo transformis ĝin en bildon. Ĝi ne estas rigardebla bildo en la ordinara senco. Ĝi havas neniajn fiksajn kolorojn, neniun kontrastan kurbon kaj neniun aplikitan akrigon; ĝi estas pli proksima al fotografia negativo ol al finita presaĵo, kaj ĝi devas esti 'rivelita' de programaro antaŭ ol ĝi aspektas kiel io ajn.\n\nĈar ĝi tenas la plenajn sensilajn datumojn kun preskaŭ nenio forĵetita, raw estas granda, kaj ĝi povas esti malfermita nur de programaro, kiu komprenas la formaton de tiu specifa fotilo. Tio estas la tuta celo de fotado en raw: nenio ankoraŭ estis decidita aŭ forĵetita, do la fotisto povas fari tiujn elektojn poste."
+        },
+        {
+          "heading": "Neredaktita JPEG ne estas raw",
+          "body": "Ĉi tio estas la plej ofta kaj plej multekosta miskompreno, do indas esti sincera. JPEG rekte el telefono aŭ fotilo, kiun vi neniam malfermis en redaktilo, ne estas raw-dosiero. Ĝi jam estis rivelita ene de la fotilo: la sensilaj datumoj estis transformitaj en kolorojn, kontrasta kurbo kaj akrigo estis aplikitaj, kaj la rezulto estis densigita kaj forĵetita ĝis frakcio de sia origina grandeco. 'Neredaktita de vi' ne estas la samo kiel 'raw'.\n\nLa fidinda maniero distingi ilin estas la dosiertipo, ne kiel la bildo aspektas. Raw-oj havas fabrikant-specifajn finaĵojn: Canon CR2 kaj CR3, Nikon NEF kaj NRW, Sony ARW, Panasonic RW2, Olympus ORF, Fujifilm RAF, Pentax PEF, la universala Adobe DNG, kaj dekduo pli. Se la dosiero finiĝas per .jpg aŭ .jpeg, ĝi estas JPEG, kio ajn alia veras pri ĝi. Se vi dubas, ĉi tiu ilo diras al vi, kiun formaton ĝi detektis el la propra enhavo de la dosiero, ignorante la nomon."
+        },
+        {
+          "heading": "Kial raw-oj portas pli por forigi, ne malpli",
+          "body": "Raw estas pli malbona privateca risko ol la JPEG de la sama foto, ne pli bona. Ĝi portas la plenan EXIF-blokon, kaj ĝia fabrikanta noto, kie troviĝas la seria numero de la sensilo kaj la obturatora kalkulo, estas kutime pli granda kaj pli detala ol en prilaborita dosiero.\n\nRaw ankaŭ preskaŭ ĉiam enhavas kompletan JPEG-antaŭrigardon de la rivelita foto, enigita interne por ke programaro povu montri la bildon sen dekodi la sensilajn datumojn. Tiu antaŭrigardo havas sian propran EXIF, sian propran GPS, kaj povas eĉ montri version de la sceno de antaŭ redakto. Ĝi estas dosiero ene de la dosiero, kaj ĝi ankaŭ devas esti purigita. Ĉi tiu ilo trovas kaj malplenigas la metadatumojn ene de tiuj enigitaj antaŭrigardoj same kiel en la propraj etikedoj de la raw."
+        },
+        {
+          "heading": "Du niveloj de purigado, kaj kial raw-oj estas la pli malalta",
+          "body": "Ordinaraj bildoj kaj dokumentoj estas rekonstruataj de nulo: la ilo konservas liston de la partoj indaj je konservado, kopias nur tiujn en novan dosieron, kaj pro la konstruo mem nenio alia postvivas. JPEG, PNG, WebP, HEIC, AVIF, GIF, TIFF, PDF kaj Office-dosieroj estas purigataj tiamaniere, al 'Kompleta' rezulto.\n\nRaw ne povas esti traktata tiel. Ĝia sensila bildo troviĝas en vendist-specifaj subsekcioj, kies aranĝo estas nedokumentita kaj malsama por ĉiu fabrikanto, kaj testado sur realaj dosieroj de multaj markoj montris ke rekonstrui unu redonas dosieron, kiu ne plu malfermiĝas. Raw ne estas io, kion vi povas refoti, do la ilo ne prenos tiun riskon. Raw-oj estas anstataŭe purigataj surloke: la dosiero estas redaktita, ne rekonstruita, nenio estas movita, kaj la longo ne ŝanĝiĝas. Ĉi tio estas ĉiam 'Laŭebla' rezulto."
+        },
+        {
+          "heading": "Precize kio ŝanĝiĝas en raw, kaj kio ne",
+          "body": "FORIGITA, anstataŭskribita per nuloj: la GPS-loko; la dato kaj horo, kiam la foto estis farita kaj laste ŝanĝita; la nomoj de posedanto kaj artisto; ĉia XMP- aŭ IPTC-bloko; la normaj kampoj de seria numero kaj bild-identigilo; kaj la metadatumoj ene de la enigita antaŭrigarda bildo. La raporto listigas precize kiuj el ĉi tiuj estis trovitaj en via dosiero.\n\nKONSERVITA intence: la fotila marko kaj modelo, kaj la fabrikanta noto de la produktinto.\n\nNETUŜITA: la sensilaj bildaj datumoj mem, kaj la kapablo de la dosiero esti rivelita. La bildo estas bit-post-bite la sama; nur la informoj ĉirkaŭ ĝi ŝanĝiĝis."
+        },
+        {
+          "heading": "Kial la fabrikanta noto estas konservata, kaj kion tio likas",
+          "body": "La fabrikanta noto estas la privata bloko de la produktinto. Ĝi ja tenas la internan serian numeron de la fotilo kaj ĝian obturatoran kalkulon, kiuj estas identigaj. Estus bone forigi ĝin.\n\nSed produktintoj ankaŭ konservas en tiu sama bloko la agordojn, kiujn raw-konvertilo bezonas por riveli la dosieron: nigrajn kaj blankajn nivelojn, la aranĝon de la kolorfiltrilo de la sensilo, blankan ekvilibron, objektivajn korektojn. Sur realaj dosieroj de Canon, Nikon, Olympus, Pentax kaj aliaj, forigi la fabrikantan noton aŭ ĉesigis la malfermon de la raw aŭ ŝanĝis kiel ĝi dekodiĝis. Difekti la dosieron estas la sola rezulto, kiun ĉi tiu ilo rifuzas, do la fabrikanta noto restas.\n\nLa honesta konsekvenco: en raw, la interna seria numero en la fabrikanta noto kutime postvivas. Kiom da identigaj datumoj restas do dependas de via fotilo, ĉar iuj markoj ankaŭ skribas la serion en norman kampon, kiu estas forigita, dum aliaj konservas ĝin nur en la fabrikanta noto, kiu ne estas. Se tiu serio gravas al vi, uzu la sekuran vojon sube."
+        },
+        {
+          "heading": "La plej sekura vojo, kaj kiuj fotiloj estas kovritaj",
+          "body": "Se tio, kion vi bezonas, estas kunhavigi bildon anstataŭ la raw-negativon, unue rivelu la raw en JPEG aŭ PNG kaj purigu tiun. JPEG estas rekonstruita al 'Kompleta' rezulto kaj portas nenion el la fabrikanta noto, enigita antaŭrigardo aŭ vendistaj subsekcioj, kiujn raw portas. Tio estas la maniero forigi la serion, kiun la raw konservas.\n\nLa ilo rekonas raw-ojn de Canon (CR2, CR3), Nikon (NEF, NRW), Sony (ARW, SR2), Fujifilm (RAF), Olympus kaj OM System (ORF), Panasonic (RW2), Pentax (PEF), Leica, Samsung (SRW), Adobe (DNG), Epson (ERF), GoPro (GPR), kaj la mezformataj dorsoj de Hasselblad, Phase One kaj Leaf, interalie. Ĉiu estas identigita el sia enhavo, neniam el sia dosiernomo. La X3F de Sigma uzas aranĝon, kiun la ilo ankoraŭ ne analizas, do ĝi estas lasita netuŝita kaj raportita kiel ne purigita, anstataŭ malbone purigita."
+        }
+      ]
+    },
+    {
+      "title": "Redukti la fotilan fingrospuron",
+      "intro": "Aparta, nedeviga paŝo, malŝaltita defaŭlte ĉar ĝi moligas la foton. Ĉiu fotila sensilo lasas malfortan fiksan ŝablonon en la bilderoj de ĉiu foto, kiun ĝi faras. Forigi metadatumojn faras nenion al ĝi.",
+      "entries": [
+        {
+          "heading": "Kio estas sensila fingrospuro",
+          "body": "Fotila sensilo estas krado de milionoj da lumsentemaj putoj gravuritaj en silicion. Fabrikado ne povas fari ilin perfekte identaj, do ĉiu reagas al lumo iomete alie ol siaj najbaroj. Tiu vario estas fiksa dum la tuta vivo de la fotilo kaj estas premsigelita, malforte, sur ĉiu foto, kiun ĝi faras. Ĝi nomiĝas Fota Responda Nenuniformeco, aŭ PRNU — seria numero skribita en la bildon mem anstataŭ en la informajn kampojn de la dosiero. Forigi EXIF ne tuŝas ĝin, kaj same nek renomi la dosieron, nek ekrankopii ĝin, nek sendi ĝin tra aplikaĵo, kiu forigas metadatumojn."
+        },
+        {
+          "heading": "Kiel ĝi estas uzata kontraŭ iu",
+          "body": "Ĝi estas liga atako, ne identiga. Analizisto korelacias la fajnajn detalojn de foto kontraŭ referenca ŝablono por fotilo, konstruita aŭ el la fizika fotilo aŭ el fotoj jam konataj kiel devenaj de ĝi. Neniu derivas nomon el la bilderoj de anonima foto. La realisma scenaro: iu publikigas verkon sub sia propra nomo, poste publikigas ion anonime, ambaŭ faritaj per la sama fotilo, kaj la analizisto montras ke la du venis de unu sensilo."
+        },
+        {
+          "heading": "Kion ĉi tiu opcio faras",
+          "body": "'Redukti fingrospuron de fotilo' malbruigas la foton je plena rezolucio (la ŝablono troviĝas en la fajnaj detaloj, do ĉi tio estas la malo de kiel detektiloj trovas ĝin), malgrandigas ĝin (miksante ĉiun eligan bilderon el pluraj enigaj bilderoj, kio rompas la bilder-post-bilderan kongruon, de kiu korelacio dependas — la ununura plej efika paŝo), aldonas iom da freŝa bruo, kaj rekodas kiel JPEG. Milda konservas 90% de la grandeco, Ekvilibra 70%, Ĝisfunda 50%. Ju pli forta la agordo, des pli mola kaj malgranda la foto."
+        },
+        {
+          "heading": "Kio ne funkcias",
+          "body": "Ŝanĝi la kolorojn aŭ blankan ekvilibron faras absolute nenion. Detektiloj uzas normigitan korelacion, kiu eldividas ĉian uniforman po-kanalan skalon aŭ deŝovon antaŭ komparado. Malloka kolorŝanĝo estas ĝuste tio, do ĝi estas forigita de la matematiko antaŭ ol la komparo okazas. Ĝi kostas koloran precizecon kaj aĉetas nenian protekton. Ĉi tio estas skribita ĉar ĝi estas intuicia ideo, kiu hazarde estas malĝusta."
+        },
+        {
+          "heading": "La honesta limo",
+          "body": "Ĉi tio reduktas korelacion. Ĝi ne forigas la fingrospuron, kaj nenio ĉi tie diros al vi ke ĝi faris tion. Krimmedicina analizisto kun forta referenca ŝablono, multaj specimenoj kaj tempo ankoraŭ povas sukcesi. Ĉiu agordo ankaŭ malbonigas la foton — pli mola detalo, malpli da bilderoj, pli da densigo. Se via sekureco dependas de neligeblo, la pli forta rimedo estas ne publikigi de la sama fotilo sub du identecoj en la unua loko."
+        }
+      ]
+    },
+    {
+      "title": "Oftaj miskomprenoj",
+      "intro": "Malbona konsilo ĉi tie estas pli malbona ol neniu: iu, kiu kredas ke dosiero estas pura, kondutas kvazaŭ ĝi estas.",
+      "entries": [
+        {
+          "heading": "Sendi foton tra mesaĝ-aplikaĵo forigas ĉion.",
+          "body": "Plej multaj grandaj platformoj ja forigas EXIF kiam vi sendas bildon kiel foton, do la loko kutime malaperas. Du kaptiloj. Sendi la saman dosieron kiel dokumenton aŭ dosier-aldonaĵon alŝutas la originalon netuŝitan, kun metadatumoj kaj ĉio, kaj homoj elektas tiun opcion por pli bona kvalito ne konsciante kio alia kunveturas. WhatsApp kaj Telegram ambaŭ kondutas tiel; Signal forigas metadatumojn ankaŭ en dokumenta reĝimo, kio estas reala diferenco inter ili."
+        },
+        {
+          "heading": "Fari ekrankopion forigas la metadatumojn.",
+          "body": "Grandparte vera. Sed la ekrankopio portas siajn proprajn novajn metadatumojn, la kvalito estas multe pli malbona ol taŭga pura kopio, kaj la ofta eraro estas ekrankopii por sekureco kaj poste sendi la originalon hazarde."
+        },
+        {
+          "heading": "Renomi la dosieron, aŭ meti ĝin en zip-arkivon, forigas metadatumojn.",
+          "body": "Nek unu faras ion ajn. Dosiernomo ne estas parto de la enhavo de la dosiero, kaj arkivo konservas la dosieron ĝuste tiel ke ĝi eliras la alian flankon neŝanĝita. Tio estas la tuta celo de arkivo."
+        },
+        {
+          "heading": "Mia foto estas raw-dosiero, ĉar mi ne redaktis ĝin.",
+          "body": "Foto, kiun vi ne tuŝis, ankoraŭ ne estas raw-dosiero. JPEG rekte el telefono aŭ fotilo jam estis rivelita ene de la fotilo: koloroj, kontrasto kaj akrigo aplikitaj, poste densigita. Raw estas la sensilaj datumoj antaŭ io ajn el tio, en fabrikant-specifa formato (CR2, CR3, NEF, ARW, DNG, RW2, ORF, RAF kaj aliaj), kiu bezonas specialan programaron por malfermi. La dosiertipo decidas ĝin, ne ĉu vi redaktis la bildon."
+        },
+        {
+          "heading": "Konverti al PNG forigas la metadatumojn.",
+          "body": "PNG havas siajn proprajn metadatumajn blokojn, inkluzive de plena EXIF-bloko kaj liberformaj kampoj, kaj multaj konvertiloj kopias la etikedojn anstataŭ forigi ilin. Ŝanĝi formaton ne estas la samo kiel forigi informojn."
+        },
+        {
+          "heading": "Mi malŝaltis lokservojn, do miaj fotoj estas en ordo.",
+          "body": "Tio forigas GPS-koordinatojn, kio estas la plej granda unuopa ero, kaj indas fari ĝin. Ĉio alia restas: fotila modelo, objektivo, seria numero en la fabrikanta noto, ĝusta tempindiko, la enigita miniaturo, kaj redakta historio."
+        }
+      ]
+    },
+    {
+      "title": "Letero de postvivanto",
+      "entries": [
+        {
+          "heading": "",
+          "body": "Saluton.\n\nMi estas fotisto, kaj mi lernis kiom multe ununura foto povas malkaŝi pri la persono, kiu faris ĝin: kie tiu staris, la fotilon en ties manoj, nomon, kiun tiu neniam elektis alligi. Tra la tuta mondo, tiuj kaŝitaj datumoj estis uzataj por forpreni de homoj ilian privatecon, kaj foje ilian sekurecon.\n\nMi konstruis metascrub por redoni tion. Ĝi estas por iu ajn, kiu deziras ĝin, kaj antaŭ ĉio por homoj vivantaj sub cenzuro aŭ gvatado, por homoj liberiĝantaj de iu danĝera, kaj por iu ajn, kiu simple volas esti pli malfacile sekvebla.\n\nĈio okazas sur via telefono. Nenio iam estas alŝutata.\n\nDaŭrigu.\n— Cipher"
+        }
+      ]
+    }
+  ]
+}

@@ -4,6 +4,7 @@ members = [
     "crates/metascrub",
     "crates/pixelwash",
     "crates/metascrub-gui",
+    "crates/metascrub-android",
 ]
 
 # The fuzz crate needs a nightly toolchain and a sanitizer runtime, so it is

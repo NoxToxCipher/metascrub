@@ -90,6 +90,40 @@ impl std::fmt::Display for Kind {
     }
 }
 
+/// The result of checking a clean against itself: the tool's own homework,
+/// marked. Present only when a verify pass was run.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct Verification {
+    /// A fresh scan of the cleaned output found nothing left that this tool
+    /// removes. For a `Complete` clean this should always hold; if it does not,
+    /// the output still carries metadata and must not be trusted.
+    pub output_reinspected_clean: bool,
+    /// Cleaning the same input twice produced byte-identical output, so nothing
+    /// varying per run (a stray timestamp, random padding) leaked into the file.
+    pub deterministic: bool,
+}
+
+impl Verification {
+    /// True only if both checks held.
+    pub fn passed(&self) -> bool {
+        self.output_reinspected_clean && self.deterministic
+    }
+}
+
+/// One piece of identifying data the tool knowingly left in the file, with a
+/// plain statement of what it would reveal to someone examining the file.
+///
+/// This exists because a best-effort clean that quietly leaves things behind is
+/// worse than one that says exactly what it could not do. A user deciding whether
+/// to send a file needs the residual risk spelled out, not implied.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Retained {
+    /// What is still in the file, and why it was kept.
+    pub what: String,
+    /// What that data would tell someone who inspected the file.
+    pub reveals: String,
+}
+
 /// One thing that was taken out.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Removed {
@@ -112,6 +146,10 @@ pub struct Report {
     pub assurance: Assurance,
     /// Every item that was removed, in the order encountered.
     pub removed: Vec<Removed>,
+    /// Identifying data knowingly left in the file, each with what it reveals.
+    /// Non-empty means the clean was partial by necessity; the interface should
+    /// surface this prominently rather than let it read as a full clean.
+    pub retained: Vec<Retained>,
     /// Things the user should know that are not removals: what we could not
     /// guarantee, and what remains in the file on purpose.
     pub warnings: Vec<String>,
@@ -124,6 +162,9 @@ pub struct Report {
     pub input_len: usize,
     /// Output size in bytes.
     pub output_len: usize,
+    /// Filled in when the caller asked the tool to check its own output. See
+    /// [`Verification`].
+    pub verification: Option<Verification>,
 }
 
 impl Report {
@@ -132,15 +173,27 @@ impl Report {
             format,
             assurance: Assurance::Complete,
             removed: Vec::new(),
+            retained: Vec::new(),
             warnings: Vec::new(),
             found_location: false,
             input_len,
             output_len: 0,
+            verification: None,
         }
     }
 
     pub(crate) fn removed(&mut self, kind: Kind, location: impl Into<String>, bytes: usize) {
         self.removed.push(Removed { kind, location: location.into(), bytes });
+    }
+
+    /// Record identifying data left in the file. Deduplicated on `what`, since
+    /// the same residual (a kept maker note, say) is reached from several code
+    /// paths but should be told to the user once.
+    pub(crate) fn retain(&mut self, what: impl Into<String>, reveals: impl Into<String>) {
+        let what = what.into();
+        if !self.retained.iter().any(|r| r.what == what) {
+            self.retained.push(Retained { what, reveals: reveals.into() });
+        }
     }
 
     pub(crate) fn warn(&mut self, msg: impl Into<String>) {
@@ -161,6 +214,9 @@ impl Report {
         }
         for warning in other.warnings {
             self.warn(format!("{prefix}: {warning}"));
+        }
+        for r in other.retained {
+            self.retain(r.what, r.reveals);
         }
         self.found_location |= other.found_location;
     }

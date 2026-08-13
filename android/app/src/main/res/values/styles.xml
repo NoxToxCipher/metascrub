@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      A single always-dark theme. metascrub is a dark app on every device, the
+      way the rest of the suite is, rather than following the system into a light
+      mode the palette was not drawn for. Material (not DeviceDefault) so the base
+      is dark regardless of the phone's skin; NoActionBar because the layout draws
+      its own header.
+    -->
+    <style name="AppTheme" parent="@android:style/Theme.Material.NoActionBar">
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:statusBarColor">@color/bg</item>
+        <item name="android:navigationBarColor">@color/bg</item>
+        <item name="android:colorAccent">@color/teal</item>
+        <item name="android:textColorPrimary">@color/text</item>
+        <item name="android:textColorSecondary">@color/text_muted</item>
+    </style>
+</resources>

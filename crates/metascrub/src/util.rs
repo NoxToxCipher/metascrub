@@ -94,23 +94,43 @@ impl<'a> Reader<'a> {
     }
 }
 
-/// CRC-32 (IEEE 802.3, reflected, `0xEDB88320`), as used by PNG and ZIP.
-///
-/// Table-free: PNG files have few chunks and ZIP entries are hashed once each,
-/// so the bitwise form is not worth a 1 KiB static table.
+/// CRC-32 (IEEE 802.3, reflected, `0xEDB88320`) lookup table, built at compile
+/// time. A `const` block means no runtime init and no dependency — the reasons
+/// the bitwise form was originally chosen — while giving the table's ~4-8x
+/// speed. For a large PNG (`IDAT` is verified byte-for-byte, up to the 2 GB
+/// ceiling) or a rewritten ZIP entry, the CRC dominates the sanitize cost. ~1 KiB.
+const CRC32_TABLE: [u32; 256] = {
+    let mut table = [0u32; 256];
+    let mut n = 0usize;
+    while n < 256 {
+        let mut c = n as u32;
+        let mut k = 0;
+        while k < 8 {
+            c = if c & 1 != 0 { 0xEDB8_8320 ^ (c >> 1) } else { c >> 1 };
+            k += 1;
+        }
+        table[n] = c;
+        n += 1;
+    }
+    table
+};
+
+/// Fold `data` into a running (pre-final-XOR) CRC. Identical result to the
+/// bitwise form; validated by `crc32_matches_known_vectors`.
+#[inline]
+fn crc32_update(mut crc: u32, data: &[u8]) -> u32 {
+    for &byte in data {
+        crc = CRC32_TABLE[((crc ^ byte as u32) & 0xFF) as usize] ^ (crc >> 8);
+    }
+    crc
+}
+
+/// CRC-32 as used by PNG and ZIP.
 // PNG hashes chunks through `crc32_parts`; the whole-buffer form is for ZIP
 // entries, so an image-only build does not reach it.
 #[cfg_attr(not(feature = "ooxml"), allow(dead_code))]
 pub(crate) fn crc32(data: &[u8]) -> u32 {
-    let mut crc = 0xFFFF_FFFFu32;
-    for &byte in data {
-        crc ^= byte as u32;
-        for _ in 0..8 {
-            let mask = (crc & 1).wrapping_neg();
-            crc = (crc >> 1) ^ (0xEDB8_8320 & mask);
-        }
-    }
-    !crc
+    !crc32_update(0xFFFF_FFFF, data)
 }
 
 /// CRC-32 over several slices, so a PNG chunk's type and body can be hashed
@@ -118,13 +138,7 @@ pub(crate) fn crc32(data: &[u8]) -> u32 {
 pub(crate) fn crc32_parts(parts: &[&[u8]]) -> u32 {
     let mut crc = 0xFFFF_FFFFu32;
     for part in parts {
-        for &byte in *part {
-            crc ^= byte as u32;
-            for _ in 0..8 {
-                let mask = (crc & 1).wrapping_neg();
-                crc = (crc >> 1) ^ (0xEDB8_8320 & mask);
-            }
-        }
+        crc = crc32_update(crc, part);
     }
     !crc
 }

@@ -139,8 +139,19 @@ impl Archive {
         r.seek(cd_offset as usize)
             .ok_or_else(|| Error::malformed(FORMAT, "central directory offset is out of range"))?;
 
-        let mut entries = Vec::with_capacity(total as usize);
+        // `total` is an attacker-controlled u16 (up to 65534). Cap the
+        // pre-allocation so a lying count cannot force a large up-front Vec.
+        let mut entries = Vec::with_capacity((total as usize).min(4096));
         let mut dropped_extra = 0usize;
+
+        // Each entry's compressed data is copied out of `input`. In a legitimate
+        // archive the parts do not overlap, so their sizes sum to no more than
+        // the file itself; a sum that exceeds the input means multiple entries
+        // point at the SAME bytes — an overlapping-entry bomb that would blow a
+        // few-MB file up into gigabytes of copies. Bound the aggregate to the
+        // input size, which every real archive is under.
+        let max_total_stored = input.len() as u64;
+        let mut total_stored: u64 = 0;
 
         for _ in 0..total {
             if r.take(4) != Some(CENTRAL_SIG) {
@@ -171,6 +182,14 @@ impl Archive {
 
             if flags & FLAG_ENCRYPTED != 0 {
                 return Err(Error::Encrypted("this archive"));
+            }
+
+            total_stored = total_stored.saturating_add(comp_size as u64);
+            if total_stored > max_total_stored {
+                return Err(Error::malformed(
+                    FORMAT,
+                    "archive entries point at more data than the file holds (overlapping-entry bomb)",
+                ));
             }
 
             let stored = locate_data(input, local_offset as usize, comp_size as usize)?;

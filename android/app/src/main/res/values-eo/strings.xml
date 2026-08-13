@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">metascrub</string>
+    <string name="tagline">forigas tion, kion dosiero diras pri vi</string>
+
+    <string name="share_prompt">Aldonu fotojn, PDF-ojn aŭ dokumentojn por purigi ilin.\n\nĈio okazas sur ĉi tiu telefono. Nenio estas alŝutata, kaj viaj dosieroj estas tuŝataj nur kiam vi premas Purigi.</string>
+    <string name="opt_random_names">Doni hazardajn nomojn al purigitaj dosieroj</string>
+    <string name="opt_keep_colour">Konservi koloran profilon</string>
+    <string name="opt_keep_orientation">Konservi orientiĝon de bildo</string>
+    <string name="opt_fingerprint">Redukti fingrospuron de fotilo (fotoj)</string>
+    <string name="fingerprint_note">Moligas la bilderojn por malfortigi la sensilan fingrospuron, kiun fotilo lasas en ĉiu foto. Tio reduktas kiom facile fotoj povas esti ligitaj al unu fotilo. Ĝi ne forigas la fingrospuron, kaj ĝi igas la foton pli mola kaj iom pli malgranda. Fotoj estas konservataj kiel JPEG.</string>
+    <string name="strength_gentle">Milda</string>
+    <string name="strength_balanced">Ekvilibra</string>
+    <string name="strength_thorough">Ĝisfunda</string>
+
+    <!-- Actions -->
+    <string name="choose_files">Elekti dosierojn</string>
+    <string name="add_more">Aldoni pliajn</string>
+    <string name="start_over">Komenci denove</string>
+    <string name="scrubbing">Purigado…</string>
+    <plurals name="scrub_files">
+        <item quantity="one">Purigi 1 dosieron</item>
+        <item quantity="other">Purigi %1$d dosierojn</item>
+    </plurals>
+    <plurals name="save_files">
+        <item quantity="one">Konservi purigitan kopion</item>
+        <item quantity="other">Konservi %1$d purigitajn kopiojn</item>
+    </plurals>
+    <plurals name="saved_files">
+        <item quantity="one">Konservis purigitan kopion. Via originalo ne estis ŝanĝita.</item>
+        <item quantity="other">Konservis %1$d purigitajn kopiojn. Viaj originaloj ne estis ŝanĝitaj.</item>
+    </plurals>
+
+    <!-- Section titles -->
+    <string name="ready_header">Preta por purigi</string>
+    <string name="results_header">Rezultoj</string>
+
+    <!-- Messages -->
+    <string name="too_large">Pli granda ol 100 MB — preterlasita. metascrub purigas dosieron en la memoro de la telefono, do tre grandaj dosieroj ankoraŭ ne estas subtenataj.</string>
+    <string name="read_failed">Ne eblis legi: %1$s</string>
+    <string name="save_failed">Ne eblis konservi: %1$s</string>
+    <string name="nothing_to_save">Nenio konservenda — neniu el ĉi tiuj dosieroj purigeblis.</string>
+    <string name="remove">Forigi</string>
+
+    <!-- Assurance badges and their honest one-line meaning -->
+    <string name="badge_complete">KOMPLETA</string>
+    <string name="badge_best_effort">LAŬEBLE</string>
+    <string name="badge_not_cleaned">NE PURIGITA</string>
+    <string name="note_complete">Rekonstruita el konataj sekuraj partoj. Nenio nekonata estis konservita.</string>
+    <string name="note_best_effort">Purigita surloke. Iom da strukturo povas resti.</string>
+    <string name="note_none">Ne eblis malmunti ĉi tiun formaton, do supozu ke ĝi ankoraŭ portas ĉion.</string>
+
+    <string name="found_location">Registris kie ĝi estis farita.</string>
+    <string name="removed_prefix">Forigita: %1$s</string>
+    <string name="nothing_found">Jam pura. Nenio forigenda.</string>
+
+    <!-- Tabs and language -->
+    <string name="tab_scrub">Purigi</string>
+    <string name="tab_handbook">Manlibro</string>
+    <string name="language">Lingvo</string>
+    <string name="lang_more_soon">Pliaj lingvoj estas aldonataj. La Manlibro kaj la tuta interfaco legeblos en ĉiu el ili.</string>
+    <string name="handbook_unavailable">La Manlibro ne ŝargeblis.</string>
+</resources>

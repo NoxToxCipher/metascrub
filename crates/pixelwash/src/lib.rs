@@ -214,6 +214,26 @@ pub fn wash(input: &[u8], settings: &Settings) -> Result<Washed, Error> {
     let mut reader = image::ImageReader::new(std::io::Cursor::new(input));
     reader = reader.with_guessed_format().map_err(|e| Error::Decode(e.to_string()))?;
 
+    // Constrain the decode to the formats we intend to wash, independent of what
+    // the `image` crate was *compiled* to support: in the GUI binary, Cargo
+    // feature unification (via eframe/arboard) enables more decoders than this
+    // crate declares, so a file guessing to BMP/ICO/TGA/etc. would otherwise be
+    // handed to a decoder outside this crate's audited surface. Refuse it.
+    if !matches!(
+        reader.format(),
+        Some(
+            image::ImageFormat::Jpeg
+                | image::ImageFormat::Png
+                | image::ImageFormat::WebP
+                | image::ImageFormat::Tiff
+                | image::ImageFormat::Gif
+        )
+    ) {
+        return Err(Error::Decode(
+            "pixel washing only handles JPEG, PNG, WebP, TIFF and GIF".to_string(),
+        ));
+    }
+
     if let Some(mp) = settings.max_megapixels {
         let mut limits = image::Limits::default();
         // Pixel ceiling as a width/height product, plus a hard allocation cap so

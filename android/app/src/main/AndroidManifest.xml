@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  metascrub for Android. Groundwork — see android/README.md.
+
+  The whole manifest is a security statement, and two lines carry it:
+
+  * There is NO <uses-permission>. None. No INTERNET, no storage, no location,
+    no camera. metascrub reads the file the share sheet hands it (a content URI
+    the system grants for that one file) and writes the cleaned copy through the
+    Storage Access Framework, which the user drives — neither needs a permission.
+    The ABSENCE of INTERNET is verifiable proof the app cannot phone home, which
+    is the one promise a metadata scrubber most needs to be able to make.
+
+  * taskAffinity="" is not tidiness. An activity's default affinity is the
+    package name, and a hostile app can declare the same affinity with
+    allowTaskReparenting to slip its own screen into this app's task (the
+    StrandHogg family). An empty affinity removes that surface.
+-->
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="org.crake.metascrub">
+
+    <application
+        android:allowBackup="false"
+        android:largeHeap="true"
+        android:icon="@mipmap/ic_launcher"
+        android:roundIcon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:theme="@style/AppTheme">
+
+        <!--
+          No launchMode override. A share target should treat each shared file
+          as a fresh job: the default mode delivers every SEND to onCreate with
+          its own intent. singleTask would instead deliver the second share to
+          onNewIntent on the existing instance, and the file would be ignored.
+
+          configChanges keeps the one loaded file (and its offered random name)
+          across a rotation instead of re-reading and re-parsing it. The layout
+          is a single scrolling column that needs no per-orientation resource.
+        -->
+        <activity
+            android:name=".MainActivity"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:taskAffinity=""
+            android:configChanges="orientation|screenSize|keyboardHidden">
+
+            <!-- In the launcher. -->
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+            <!-- "Share -> metascrub" from a gallery, files app, or document. -->
+            <intent-filter>
+                <action android:name="android.intent.action.SEND" />
+                <action android:name="android.intent.action.SEND_MULTIPLE" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:mimeType="image/*" />
+                <data android:mimeType="application/pdf" />
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.wordprocessingml.document" />
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" />
+                <data android:mimeType="application/vnd.openxmlformats-officedocument.presentationml.presentation" />
+                <data android:mimeType="application/vnd.oasis.opendocument.text" />
+            </intent-filter>
+
+            <!--
+              "Open with -> metascrub" for a local file. No BROWSABLE category:
+              this app reads bytes through a content resolver, so it must not be
+              offered for http(s) links it cannot fetch.
+            -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <data android:scheme="content" />
+                <data android:scheme="file" />
+                <data android:mimeType="image/*" />
+                <data android:mimeType="application/pdf" />
+            </intent-filter>
+        </activity>
+    </application>
+</manifest>

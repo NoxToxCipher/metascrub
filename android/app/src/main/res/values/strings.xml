@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">metascrub</string>
+    <string name="tagline">removes what a file says about you</string>
+
+    <string name="share_prompt">Add photos, PDFs or documents to clean them.\n\nEverything happens on this phone. Nothing is uploaded, and your files are only touched when you press Scrub.</string>
+    <string name="opt_random_names">Give cleaned files random names</string>
+    <string name="opt_keep_colour">Keep colour profile</string>
+    <string name="opt_keep_orientation">Keep image orientation</string>
+    <string name="opt_fingerprint">Reduce camera fingerprint (photos)</string>
+    <string name="fingerprint_note">Softens the pixels to weaken the sensor fingerprint a camera leaves in every photo. This reduces how easily photos can be linked to one camera. It does not remove the fingerprint, and it makes the photo softer and a little smaller. Photos are saved as JPEG.</string>
+    <string name="strength_gentle">Gentle</string>
+    <string name="strength_balanced">Balanced</string>
+    <string name="strength_thorough">Thorough</string>
+
+    <!-- Actions -->
+    <string name="choose_files">Choose files</string>
+    <string name="add_more">Add more</string>
+    <string name="start_over">Start over</string>
+    <string name="scrubbing">Scrubbing…</string>
+    <plurals name="scrub_files">
+        <item quantity="one">Scrub 1 file</item>
+        <item quantity="other">Scrub %1$d files</item>
+    </plurals>
+    <plurals name="save_files">
+        <item quantity="one">Save cleaned copy</item>
+        <item quantity="other">Save %1$d cleaned copies</item>
+    </plurals>
+    <plurals name="saved_files">
+        <item quantity="one">Saved a cleaned copy. Your original was not changed.</item>
+        <item quantity="other">Saved %1$d cleaned copies. Your originals were not changed.</item>
+    </plurals>
+
+    <!-- Section titles -->
+    <string name="ready_header">Ready to scrub</string>
+    <string name="results_header">Results</string>
+
+    <!-- Messages -->
+    <string name="too_large">Larger than 100 MB — skipped. metascrub cleans a file in memory on the phone, so very large files are not supported yet.</string>
+    <string name="read_failed">Could not read: %1$s</string>
+    <string name="save_failed">Could not save: %1$s</string>
+    <string name="nothing_to_save">Nothing to save — none of these files could be cleaned.</string>
+    <string name="remove">Remove</string>
+
+    <!-- Assurance badges and their honest one-line meaning -->
+    <string name="badge_complete">COMPLETE</string>
+    <string name="badge_best_effort">BEST EFFORT</string>
+    <string name="badge_not_cleaned">NOT CLEANED</string>
+    <string name="note_complete">Rebuilt from known-safe parts. Nothing unknown was kept.</string>
+    <string name="note_best_effort">Cleaned in place. Some structure may remain.</string>
+    <string name="note_none">Could not take this format apart, so assume it still carries everything.</string>
+
+    <string name="found_location">Recorded where it was taken.</string>
+    <string name="removed_prefix">Removed: %1$s</string>
+    <string name="nothing_found">Already clean. Nothing to remove.</string>
+
+    <!-- Tabs and language -->
+    <string name="tab_scrub">Scrub</string>
+    <string name="tab_handbook">Handbook</string>
+    <string name="language">Language</string>
+    <string name="lang_more_soon">More languages are being added. The Handbook and the whole interface will read in each one.</string>
+    <string name="handbook_unavailable">The Handbook could not be loaded.</string>
+
+    <!-- English first (the one loaded); the rest are on the way. Endonyms. -->
+    <string-array name="languages">
+        <item>English</item>
+        <item>Русский</item>
+        <item>မြန်မာ</item>
+        <item>Latina</item>
+        <item>Esperanto</item>
+        <item>Українська</item>
+        <item>Беларуская</item>
+    </string-array>
+</resources>

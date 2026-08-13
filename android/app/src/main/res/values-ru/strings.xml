@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">metascrub</string>
+    <string name="tagline">убирает то, что файл рассказывает о вас</string>
+
+    <string name="share_prompt">Добавьте фотографии, PDF или документы, чтобы очистить их.\n\nВсё происходит на этом телефоне. Ничего не загружается, и ваши файлы затрагиваются только когда вы нажимаете «Очистить».</string>
+    <string name="opt_random_names">Давать очищенным файлам случайные имена</string>
+    <string name="opt_keep_colour">Оставить цветовой профиль</string>
+    <string name="opt_keep_orientation">Оставить ориентацию изображения</string>
+    <string name="opt_fingerprint">Снизить отпечаток камеры (фото)</string>
+    <string name="fingerprint_note">Смягчает пиксели, чтобы ослабить отпечаток сенсора, который камера оставляет в каждой фотографии. Это снижает то, насколько легко фотографии можно связать с одной камерой. Это не удаляет отпечаток и делает фотографию мягче и немного меньше. Фотографии сохраняются как JPEG.</string>
+    <string name="strength_gentle">Мягко</string>
+    <string name="strength_balanced">Сбалансированно</string>
+    <string name="strength_thorough">Тщательно</string>
+
+    <!-- Actions -->
+    <string name="choose_files">Выбрать файлы</string>
+    <string name="add_more">Добавить ещё</string>
+    <string name="start_over">Начать заново</string>
+    <string name="scrubbing">Очистка…</string>
+    <plurals name="scrub_files">
+        <item quantity="one">Очистить 1 файл</item>
+        <item quantity="few">Очистить %1$d файла</item>
+        <item quantity="many">Очистить %1$d файлов</item>
+        <item quantity="other">Очистить %1$d файла</item>
+    </plurals>
+    <plurals name="save_files">
+        <item quantity="one">Сохранить очищенную копию</item>
+        <item quantity="few">Сохранить %1$d очищенные копии</item>
+        <item quantity="many">Сохранить %1$d очищенных копий</item>
+        <item quantity="other">Сохранить %1$d очищенной копии</item>
+    </plurals>
+    <plurals name="saved_files">
+        <item quantity="one">Сохранена очищенная копия. Ваш оригинал не изменён.</item>
+        <item quantity="few">Сохранено %1$d очищенные копии. Ваши оригиналы не изменены.</item>
+        <item quantity="many">Сохранено %1$d очищенных копий. Ваши оригиналы не изменены.</item>
+        <item quantity="other">Сохранено %1$d очищенной копии. Ваши оригиналы не изменены.</item>
+    </plurals>
+
+    <!-- Section titles -->
+    <string name="ready_header">Готово к очистке</string>
+    <string name="results_header">Результаты</string>
+
+    <!-- Messages -->
+    <string name="too_large">Больше 100 МБ — пропущено. metascrub очищает файл в памяти телефона, поэтому очень большие файлы пока не поддерживаются.</string>
+    <string name="read_failed">Не удалось прочитать: %1$s</string>
+    <string name="save_failed">Не удалось сохранить: %1$s</string>
+    <string name="nothing_to_save">Нечего сохранять — ни один из этих файлов не удалось очистить.</string>
+    <string name="remove">Удалить</string>
+
+    <!-- Assurance badges and their honest one-line meaning -->
+    <string name="badge_complete">ПОЛНОСТЬЮ</string>
+    <string name="badge_best_effort">ПО ВОЗМОЖНОСТИ</string>
+    <string name="badge_not_cleaned">НЕ ОЧИЩЕНО</string>
+    <string name="note_complete">Пересобрано из заведомо безопасных частей. Ничего неизвестного не сохранено.</string>
+    <string name="note_best_effort">Очищено на месте. Часть структуры может остаться.</string>
+    <string name="note_none">Не удалось разобрать этот формат, поэтому считайте, что он всё ещё несёт всё.</string>
+
+    <string name="found_location">Записано, где был сделан снимок.</string>
+    <string name="removed_prefix">Удалено: %1$s</string>
+    <string name="nothing_found">Уже чисто. Нечего удалять.</string>
+
+    <!-- Tabs and language -->
+    <string name="tab_scrub">Очистка</string>
+    <string name="tab_handbook">Справочник</string>
+    <string name="language">Язык</string>
+    <string name="lang_more_soon">Добавляются новые языки. Справочник и весь интерфейс будут доступны на каждом из них.</string>
+    <string name="handbook_unavailable">Не удалось загрузить Справочник.</string>
+</resources>

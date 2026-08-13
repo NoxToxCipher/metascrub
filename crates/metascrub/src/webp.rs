@@ -100,25 +100,45 @@ pub(crate) fn sanitize(
         return Err(Error::malformed(FORMAT, "no image data chunk"));
     }
 
-    let mut body = Vec::with_capacity(input.len());
-    body.extend_from_slice(b"WEBP");
+    // A VP8X feature header is a fixed 10 bytes; anything past that is not part
+    // of the format.
+    const VP8X_LEN: usize = 10;
+
+    // Write straight into the output. Only VP8X (~10 bytes) needs a mutable
+    // copy; every other chunk — including the VP8/VP8L bitstream, which is the
+    // bulk of the file — is copied once, by reference, instead of being cloned
+    // into an intermediate buffer and then copied again into the output.
+    let mut out = Vec::with_capacity(input.len() + 8);
+    out.extend_from_slice(b"RIFF");
+    out.extend_from_slice(&[0u8; 4]); // RIFF length, back-patched once known
+    out.extend_from_slice(b"WEBP");
     for (ty, data) in chunks {
-        let mut data = data.to_vec();
         if &ty == b"VP8X" {
-            clear_vp8x_flags(&mut data, policy);
-        }
-        body.extend_from_slice(&ty);
-        body.extend_from_slice(&(data.len() as u32).to_le_bytes());
-        body.extend_from_slice(&data);
-        if data.len() % 2 == 1 {
-            body.push(0);
+            // Trailing bytes past the canonical 10 would ride through inside a
+            // chunk we report as clean (decoders read only the fixed header), so
+            // drop them. A conformant VP8X is untouched.
+            let keep = data.len().min(VP8X_LEN);
+            let mut fixed = data[..keep].to_vec();
+            clear_vp8x_flags(&mut fixed, policy);
+            out.extend_from_slice(&ty);
+            out.extend_from_slice(&(fixed.len() as u32).to_le_bytes());
+            out.extend_from_slice(&fixed);
+            if fixed.len() % 2 == 1 {
+                out.push(0);
+            }
+        } else {
+            out.extend_from_slice(&ty);
+            out.extend_from_slice(&(data.len() as u32).to_le_bytes());
+            out.extend_from_slice(data);
+            if data.len() % 2 == 1 {
+                out.push(0);
+            }
         }
     }
 
-    let mut out = Vec::with_capacity(body.len() + 8);
-    out.extend_from_slice(b"RIFF");
-    out.extend_from_slice(&(body.len() as u32).to_le_bytes());
-    out.extend_from_slice(&body);
+    // The RIFF length counts everything after the 8-byte "RIFF"+length header.
+    let riff_len = (out.len() - 8) as u32;
+    out[4..8].copy_from_slice(&riff_len.to_le_bytes());
     Ok(out)
 }
 

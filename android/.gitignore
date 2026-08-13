@@ -1,0 +1,7 @@
+# Build output — reproducible from source, never committed.
+build/
+
+# The local debug signing key, generated on first build. A release is signed
+# with a key kept off this machine (see README.md); neither belongs in git.
+*.keystore
+*.jks

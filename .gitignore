@@ -1,5 +1,6 @@
 # Rust
 /target
+/target-android
 **/*.rs.bk
 # Cargo.lock IS committed. These are applications, so exact audited dependency
 # versions are pinned for reproducible, supply-chain-safe builds.

@@ -36,9 +36,34 @@ setting that is off by default, reported in different words.
 | Format | Approach | Assurance |
 |---|---|---|
 | JPEG, PNG, WebP, HEIF, AVIF | Container rebuilt from a keep-list | Complete |
+| GIF | Block stream rebuilt from a keep-list; animation kept | Complete |
+| TIFF | Each directory rebuilt from a keep-list; pixels copied verbatim; multi-page kept | Complete |
+| SVG | Metadata, editor fields, scripts and external references removed | Best effort |
+| XMP sidecar (.xmp) | Rebuilt as an empty packet; nothing it held survives | Complete |
 | PDF | Object graph rebuilt | Best effort |
 | Word, Excel, PowerPoint, OpenDocument | Archive parts cleaned, images inside recursed | Best effort |
+| Camera raw (DNG, CR2, CR3, NEF, NRW, ARW, SR2, RW2, ORF, RAF, PEF, SRW, ERF, GPR, IIQ, MOS, 3FR, …) | Cleaned in place, never rebuilt. **Removed:** GPS, timestamps, owner/artist, XMP/IPTC, standard serial and image-ID fields, and the embedded preview's own EXIF. **Kept:** make/model and the vendor maker note. **Untouched:** the sensor data and decodability | Best effort |
+| Sigma X3F raw | Recognised but returned untouched, reported as not cleaned | None |
+| Video (MP4, MOV, MKV, WebM, AVI) | Recognised and named, but **not cleaned yet**; reported honestly with what videos leak (GPS, device, time) so it is never mistaken for clean | None |
+| Audio (MP3, M4A, FLAC, OGG, WAV) | Recognised and named, not cleaned yet, reported honestly | None |
 | Anything else | Returned untouched, reported as not cleaned | None |
+
+A photo saved as a **Motion Photo / Live Photo** carries a whole short video
+after its end marker. Cleaning the photo drops that video (it is trailing data),
+and metascrub now reports it specifically rather than as anonymous bytes, so you
+know the clip and its own location and time were there and are gone.
+
+A camera raw is the sensor's near-unprocessed readout, not a picture — a
+straight-from-the-camera JPEG is **not** a raw. Raws cannot be rebuilt from an
+allowlist without corrupting the undocumented vendor sub-sections that hold the
+actual sensor image (verified against real files from many brands), so they are
+cleaned by careful in-place editing that never moves a byte. The **maker note is
+deliberately kept**: manufacturers store the parameters a raw converter needs to
+develop the file in the same block as the serial number, and removing it broke
+real files. So a raw's internal serial number usually survives. To remove that
+too — and to get a Complete clean — develop the raw into a JPEG or PNG first and
+clean that. The desktop app's reference panel explains exactly what changes and
+what does not, and how it differs by camera brand.
 
 ## Using it
 

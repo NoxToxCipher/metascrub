@@ -152,6 +152,26 @@ fn sweep_objects(doc: &mut Document, report: &mut Report) {
     for id in ids {
         let Some(object) = doc.objects.get_mut(&id) else { continue };
 
+        // XMP metadata streams. Caught not only by /Type /Metadata but also by
+        // /Subtype /XML and by sniffing the raw body for an XMP packet: readers
+        // do not require /Type, and an untyped XMP stream would otherwise survive
+        // as an orphan (lopdf serializes unreferenced objects verbatim), leaking
+        // the author, xmpMM history and any GPS inside it. The PDF spec advises
+        // metadata streams be unfiltered, so the raw bytes are usually the packet
+        // — no decompression needed.
+        if let Object::Stream(s) = object {
+            let name = |k: &[u8]| s.dict.get(k).ok().and_then(|t| t.as_name().ok());
+            let head = &s.content[..s.content.len().min(512)];
+            let is_xmp = name(b"Type") == Some(b"Metadata")
+                || name(b"Subtype") == Some(b"XML")
+                || head.windows(9).any(|w| w == b"<?xpacket")
+                || head.windows(7).any(|w| w == b"xmpmeta");
+            if is_xmp {
+                xmp_streams.push(id);
+                continue;
+            }
+        }
+
         let dict: &mut Dictionary = match object {
             Object::Dictionary(d) => d,
             Object::Stream(s) => &mut s.dict,
@@ -159,12 +179,6 @@ fn sweep_objects(doc: &mut Document, report: &mut Report) {
         };
 
         match dict.get(b"Type").ok().and_then(|t| t.as_name().ok()) {
-            // An XMP packet as a standalone object. Its own dictionary has
-            // nothing worth keeping, so the object goes rather than the key.
-            Some(b"Metadata") => {
-                xmp_streams.push(id);
-                continue;
-            }
             Some(b"Annot") => {
                 let before = ANNOT_KEYS.iter().filter(|k| dict.has(k)).count();
                 for key in ANNOT_KEYS {

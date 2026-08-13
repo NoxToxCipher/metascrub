@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">metascrub</string>
+    <string name="tagline">ဖိုင်တစ်ခုက သင့်အကြောင်း ပြောသည်များကို ဖယ်ရှားသည်</string>
+
+    <string name="share_prompt">သန့်စင်ရန် ဓာတ်ပုံများ၊ PDF များ သို့မဟုတ် စာရွက်စာတမ်းများ ထည့်ပါ။\n\nအရာအားလုံး ဤဖုန်းပေါ်တွင် ဖြစ်ပျက်သည်။ ဘာမျှ အပ်လုဒ်မတင်ပါ၊ သင့်ဖိုင်များကို «သန့်စင်» ကို နှိပ်မှသာ ထိတွေ့သည်။</string>
+    <string name="opt_random_names">ကျပန်း အမည်</string>
+    <string name="opt_keep_colour">အရောင် ထားရှိ</string>
+    <string name="opt_keep_orientation">လှည့်ခြင်း ထားရှိ</string>
+    <string name="opt_fingerprint">ကင်မရာလက်ဗွေ လျှော့ချ (ဓာတ်ပုံများ)</string>
+    <string name="fingerprint_note">ကင်မရာတစ်လုံးက ဓာတ်ပုံတိုင်းတွင် ချန်ထားသည့် ဆင်ဆာလက်ဗွေကို အားနည်းစေရန် ပစ်ဆယ်များကို နူးညံ့စေသည်။ ၎င်းက ဓာတ်ပုံများကို ကင်မရာတစ်လုံးနှင့် မည်မျှလွယ်ကူစွာ ချိတ်ဆက်နိုင်သည်ကို လျှော့ချသည်။ ၎င်းက လက်ဗွေကို မဖယ်ရှား၊ ဓာတ်ပုံကို ပိုနူးညံ့ပြီး အနည်းငယ် ပိုသေးငယ်စေသည်။ ဓာတ်ပုံများကို JPEG အဖြစ် သိမ်းသည်။</string>
+    <string name="strength_gentle">နူးညံ့</string>
+    <string name="strength_balanced">မျှတ</string>
+    <string name="strength_thorough">စေ့စပ်</string>
+
+    <!-- Actions -->
+    <string name="choose_files">ဖိုင်များ ရွေးရန်</string>
+    <string name="add_more">နောက်ထပ် ထည့်ရန်</string>
+    <string name="start_over">အစမှ ပြန်စရန်</string>
+    <string name="scrubbing">သန့်စင်နေသည်…</string>
+    <plurals name="scrub_files">
+        <item quantity="other">%1$d ဖိုင် သန့်စင်ရန်</item>
+    </plurals>
+    <plurals name="save_files">
+        <item quantity="other">သန့်စင်ပြီး မိတ္တူ %1$d ခု သိမ်းရန်</item>
+    </plurals>
+    <plurals name="saved_files">
+        <item quantity="other">သန့်စင်ပြီး မိတ္တူ %1$d ခု သိမ်းပြီးပါပြီ။ သင့်မူရင်းများ မပြောင်းလဲပါ။</item>
+    </plurals>
+
+    <!-- Section titles -->
+    <string name="ready_header">သန့်စင်ရန် အသင့်</string>
+    <string name="results_header">ရလဒ်များ</string>
+
+    <!-- Messages -->
+    <string name="too_large">100 MB ထက် ကြီးသည် — ကျော်သွားသည်။ metascrub သည် ဖိုင်ကို ဖုန်းပေါ်ရှိ memory ထဲ၌ သန့်စင်သဖြင့် အလွန်ကြီးသောဖိုင်များကို ယခုအထိ မပံ့ပိုးသေးပါ။</string>
+    <string name="read_failed">ဖတ်၍မရပါ— %1$s</string>
+    <string name="save_failed">သိမ်း၍မရပါ— %1$s</string>
+    <string name="nothing_to_save">သိမ်းစရာ မရှိ — ဤဖိုင်များ တစ်ခုမျှ သန့်စင်၍ မရခဲ့ပါ။</string>
+    <string name="remove">ဖယ်ရှားရန်</string>
+
+    <!-- Assurance badges and their honest one-line meaning -->
+    <string name="badge_complete">အပြည့်အဝ</string>
+    <string name="badge_best_effort">တတ်နိုင်သမျှ</string>
+    <string name="badge_not_cleaned">မသန့်စင်ရသေး</string>
+    <string name="note_complete">လုံခြုံမှန်းသိသောအပိုင်းများမှ ပြန်တည်ဆောက်ထားသည်။ မသိသောအရာ ဘာမျှ မထားရှိပါ။</string>
+    <string name="note_best_effort">နေရာတွင်း၌ သန့်စင်ထားသည်။ အချို့ဖွဲ့စည်းပုံ ကျန်နိုင်သည်။</string>
+    <string name="note_none">ဤဖော်မတ်ကို ခွဲ၍မရသဖြင့် ၎င်းသည် အားလုံးကို ဆက်လက်သယ်ဆောင်နေသည်ဟု ယူဆပါ။</string>
+
+    <string name="found_location">ရိုက်ကူးခဲ့သည့်နေရာကို မှတ်တမ်းတင်ထားသည်။</string>
+    <string name="removed_prefix">ဖယ်ရှားပြီး— %1$s</string>
+    <string name="nothing_found">သန့်ပြီးသား။ ဖယ်ရှားစရာ မရှိ။</string>
+
+    <!-- Tabs and language -->
+    <string name="tab_scrub">သန့်စင်</string>
+    <string name="tab_handbook">လက်စွဲ</string>
+    <string name="language">ဘာသာစကား</string>
+    <string name="lang_more_soon">ဘာသာစကားများ ထပ်မံ ဖြည့်စွက်နေသည်။ လက်စွဲနှင့် interface တစ်ခုလုံးကို တစ်ခုစီဖြင့် ဖတ်နိုင်မည်။</string>
+    <string name="handbook_unavailable">လက်စွဲကို ဖွင့်၍ မရပါ။</string>
+</resources>

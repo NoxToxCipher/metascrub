@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Dark text on the filled teal button; muted when the button is disabled
+     (nothing to save), so it never becomes dark-on-dark and vanishes. -->
+<selector xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:state_enabled="false" android:color="@color/text_muted" />
+    <item android:color="@color/on_teal" />
+</selector>

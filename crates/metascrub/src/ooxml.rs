@@ -124,15 +124,54 @@ pub(crate) fn sanitize(
             continue;
         }
 
+        // Everything below needs the decompressed bytes, so inflate once here
+        // and reuse the buffer for both the image sniff and the scrub. (The
+        // replacements above overwrite blindly and never pay for a read.) This
+        // is the dominant CPU cost on an Office document — word/document.xml and
+        // the image parts used to be inflated twice each.
+        let content = match entry.read() {
+            Ok(c) => c,
+            Err(e) => {
+                // Could not decompress. A part we would have rebuilt (.xml/.rels)
+                // is a hard error, as before; anything else is left as it arrived.
+                if path.ends_with(".xml") || path.ends_with(".rels") {
+                    return Err(e);
+                }
+                if path == THUMBNAIL {
+                    report.warn(format!(
+                        "{path} could not be decompressed, so it was left as it is"
+                    ));
+                }
+                continue;
+            }
+        };
+
+        // A property part matched by its *schema*, not its path. `docProps/
+        // core.xml` is only a convention: Office locates the core/app/custom
+        // properties through the package relationship type, so a crafted document
+        // can put them at any name, where the fixed-path match above misses them
+        // and the fallback attribute-scrub leaves their element text (the author)
+        // intact. Detecting the namespace catches the renamed part and replaces
+        // it wholesale, the same as the conventional path.
+        if let Some((empty, kind, what)) = properties_by_content(&content) {
+            report.removed(
+                kind,
+                format!("{path} ({what}, a renamed property part matched by its schema)"),
+                content.len().saturating_sub(empty.len()),
+            );
+            entry.write(empty.as_bytes());
+            continue;
+        }
+
         // Embedded images are found by content, not by path. A photo with GPS
         // in it is a leak wherever it sits in the archive; assuming images only
         // live under `media/` is exactly the denylist thinking this tool exists
         // to avoid. `media/` is the usual home, but Word will also drop images
         // under `embeddings/`, in a custom part, or anywhere a vendor chooses.
         // The thumbnail is a rendering of page one and is handled the same way.
-        if path == THUMBNAIL || entry_is_image(entry) {
+        if path == THUMBNAIL || is_image_content(&content) {
             if policy.recurse_embedded {
-                scrub_embedded(entry, policy, report, &path, depth);
+                scrub_embedded(entry, &content, policy, report, &path, depth);
             } else {
                 report.warn(format!(
                     "{path} was left alone because embedded images were not being processed; \
@@ -151,7 +190,7 @@ pub(crate) fn sanitize(
         if !path.ends_with(".xml") && !path.ends_with(".rels") {
             continue;
         }
-        scrub_xml_part(entry, report, &path)?;
+        scrub_xml_part(entry, content, report, &path)?;
     }
 
     warn_opaque.sort_unstable();
@@ -169,37 +208,99 @@ pub(crate) fn sanitize(
     Ok(archive.write())
 }
 
-/// Whether an archive entry's *content* is an image format we can clean.
-///
-/// Sniffing the bytes rather than trusting the path, so an image survives no
-/// better for being stored somewhere unexpected. Decompresses the entry to look
-/// at its header; an entry that will not decompress is not our image to clean
-/// and is handled elsewhere.
-fn entry_is_image(entry: &mut crate::zip::Entry) -> bool {
-    let Ok(content) = entry.read() else { return false };
+/// Whether already-decompressed archive-part bytes are an image format we can
+/// clean. Sniffing the content rather than the path, so an image survives no
+/// better for being stored somewhere unexpected.
+fn is_image_content(content: &[u8]) -> bool {
     matches!(
-        crate::detect(&content),
+        crate::detect(content),
         crate::Format::Jpeg
             | crate::Format::Png
             | crate::Format::WebP
             | crate::Format::Heif
             | crate::Format::Avif
+            // TIFF/GIF/SVG carry metadata too (TIFF EXIF+GPS, GIF comment/XMP,
+            // SVG editor fields) and metascrub cleans them standalone, so an
+            // embedded one must be descended into, not copied through. They
+            // route to sanitize_at_depth; SVG returns BestEffort, which absorb
+            // propagates honestly.
+            | crate::Format::Tiff
+            | crate::Format::Gif
+            | crate::Format::Svg
     )
 }
 
-/// Run an embedded image back through the top-level sanitizer.
+/// Detect a core / app / custom / OpenDocument-meta property part by the schema
+/// it declares, so a part renamed away from the conventional `docProps/…` path
+/// is caught and replaced the same way. Only the head is scanned — the root
+/// element and its namespaces sit at the very start — which bounds the cost and
+/// avoids matching a URI mentioned deep inside a large content part. The exact
+/// namespace URIs are distinct from the relationship-type URIs in `.rels`, so a
+/// relationships part is not mistaken for a property part.
+fn properties_by_content(content: &[u8]) -> Option<(&'static str, Kind, &'static str)> {
+    // Skip the XML prolog (BOM, whitespace, <?..?> PIs, comments, DOCTYPE) to the
+    // real root element first: a fixed head window could otherwise be evaded by
+    // padding the prolog with a big comment so the namespace starts past it. The
+    // namespace declarations live in the root element's start tag, so scan a
+    // bounded window from there (16 KiB is far more than any real start tag).
+    let root = root_element_start(content)?;
+    let head = &content[root..(root + 16384).min(content.len())];
+    let has = |needle: &[u8]| head.windows(needle.len()).any(|w| w == needle);
+    // OpenDocument meta is anchored to the actual start tag: `office:document-meta`
+    // is a short generic token, and a bare-substring match could destroy an
+    // unrelated part that merely quotes it. `office:document-content/-styles/
+    // -settings` (the other OD roots) do not start with `-meta`, so this is exact.
+    if head.starts_with(b"<office:document-meta") {
+        Some((EMPTY_OD_META, Kind::DocumentInfo, "creator, editing cycles, dates"))
+    } else if has(b"http://schemas.openxmlformats.org/package/2006/metadata/core-properties") {
+        Some((EMPTY_CORE, Kind::DocumentInfo, "creator, last editor, revision, dates"))
+    } else if has(b"http://schemas.openxmlformats.org/officeDocument/2006/extended-properties") {
+        Some((EMPTY_APP, Kind::DocumentInfo, "application, company, manager, edit time"))
+    } else if has(b"http://schemas.openxmlformats.org/officeDocument/2006/custom-properties") {
+        Some((EMPTY_CUSTOM, Kind::CustomProperty, "custom properties"))
+    } else {
+        None
+    }
+}
+
+/// Index of the first byte of the root element (`<name…`), skipping a BOM, ASCII
+/// whitespace, XML declarations / processing instructions (`<?..?>`), comments
+/// (`<!-- .. -->`) and a DOCTYPE (`<!.. >`). `None` if the content is not XML or
+/// the prolog never closes.
+fn root_element_start(content: &[u8]) -> Option<usize> {
+    let find_from = |start: usize, needle: &[u8]| -> Option<usize> {
+        content.get(start..)?.windows(needle.len()).position(|w| w == needle).map(|p| start + p)
+    };
+    let mut i = if content.starts_with(&[0xEF, 0xBB, 0xBF]) { 3 } else { 0 };
+    loop {
+        while content.get(i).is_some_and(|b| b.is_ascii_whitespace()) {
+            i += 1;
+        }
+        if content.get(i)? != &b'<' {
+            return None; // not XML / leading junk
+        }
+        match content.get(i + 1) {
+            Some(b'?') => i = find_from(i + 2, b"?>")? + 2, // processing instruction
+            Some(b'!') if content.get(i + 2..i + 4) == Some(b"--".as_slice()) => {
+                i = find_from(i + 4, b"-->")? + 3; // comment
+            }
+            Some(b'!') => i = find_from(i + 2, b">")? + 1, // DOCTYPE / declaration
+            _ => return Some(i),                            // the root element
+        }
+    }
+}
+
+/// Run an embedded image back through the top-level sanitizer. `content` is the
+/// already-decompressed part (inflated once by the caller).
 fn scrub_embedded(
     entry: &mut crate::zip::Entry,
+    content: &[u8],
     policy: &Policy,
     report: &mut Report,
     path: &str,
     depth: u32,
 ) {
-    let Ok(content) = entry.read() else {
-        report.warn(format!("{path} could not be decompressed, so it was left as it is"));
-        return;
-    };
-    match crate::sanitize_at_depth(&content, policy, depth + 1) {
+    match crate::sanitize_at_depth(content, policy, depth + 1) {
         Ok(clean) => {
             if !clean.report.removed.is_empty() {
                 entry.write(&clean.data);
@@ -216,11 +317,10 @@ fn scrub_embedded(
 /// settings parts.
 fn scrub_xml_part(
     entry: &mut crate::zip::Entry,
+    content: Vec<u8>,
     report: &mut Report,
     path: &str,
 ) -> crate::Result<()> {
-    let content = entry.read()?;
-
     let (content, dropped_elements) = if path.ends_with("settings.xml") {
         xmlscrub::remove_elements(&content, &["rsids"])
     } else {

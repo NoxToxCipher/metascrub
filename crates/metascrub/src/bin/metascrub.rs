@@ -25,12 +25,21 @@ so nothing is overwritten until you ask for it.
 OPTIONS:
     -n, --dry-run        Report what would be removed, write nothing
     -o, --out <PATH>     Write to PATH (one input file only)
-        --in-place       Overwrite each input file
+        --in-place       Overwrite each input file. Note: this replaces the file
+                         via a rename; it does NOT shred the previous contents,
+                         whose old disk blocks may still be recoverable.
         --suffix <S>     Suffix for the output name (default: clean)
+        --random-name    Name each cleaned copy with 24 random characters,
+                         keeping the extension. The file name is metadata too:
+                         this drops the date, place or camera prefix it carried.
         --keep-icc       Keep embedded colour profiles
         --keep-rotation  Keep the EXIF orientation tag, rebuilt from scratch,
                          so photos do not display sideways
         --no-recurse     Do not sanitize images embedded in documents
+        --verify         Re-scan the cleaned output to confirm nothing removable
+                         survived, and confirm the clean is reproducible
+        --no-sidecars    Do not look for metadata sidecar files (.xmp, .thm, .aae)
+                         next to each input
         --json           Machine-readable output
     -q, --quiet          Only report problems
     -h, --help           Show this message
@@ -58,16 +67,43 @@ fn main() -> ExitCode {
     let mut reports = Vec::new();
 
     for path in &opts.inputs {
-        match process(path, &opts) {
+        // Computed once, here, and reused for both the write and the printed
+        // "-> destination" line. A random name generated twice would not match.
+        let dst = opts.destination(path);
+        match process(path, &dst, &opts) {
             Ok(report) => {
                 if report.assurance == Assurance::None {
                     worst = worst.max(2);
                 }
-                reports.push((path.clone(), report));
+                reports.push((path.clone(), report, dst));
             }
             Err(e) => {
                 eprintln!("metascrub: {}: {e}", path.display());
-                worst = 1;
+                worst = worst.max(1);
+            }
+        }
+
+        // A photo often travels with a metadata sidecar (.xmp, .thm, .aae) that
+        // carries GPS, dates and author on its own and is not cleaned by cleaning
+        // the photo. Find and handle those too, unless told not to.
+        if opts.sidecars {
+            for sc in sidecar_paths(path) {
+                if opts.inputs.iter().any(|p| p == &sc) {
+                    continue; // the user listed it explicitly; don't do it twice
+                }
+                let dst = opts.destination(&sc);
+                match process(&sc, &dst, &opts) {
+                    Ok(report) => {
+                        if report.assurance == Assurance::None {
+                            worst = worst.max(2);
+                        }
+                        reports.push((sc, report, dst));
+                    }
+                    Err(e) => {
+                        eprintln!("metascrub: {}: {e}", sc.display());
+                        worst = worst.max(1);
+                    }
+                }
             }
         }
     }
@@ -75,11 +111,56 @@ fn main() -> ExitCode {
     if opts.json {
         print_json(&reports);
     } else {
-        for (path, report) in &reports {
-            print_human(path, report, &opts);
+        for (path, report, dst) in &reports {
+            print_human(path, report, dst, &opts);
         }
     }
     ExitCode::from(worst)
+}
+
+/// Metadata sidecar extensions written beside photos by cameras and editors.
+/// `.xmp` and `.thm` this tool can clean; `.aae` and the editor formats it will
+/// flag as unsupported, which is the honest outcome and still tells the user
+/// the file is there.
+const SIDECAR_EXTS: &[&str] = &["xmp", "thm", "aae", "pp3", "dop", "on1", "repair"];
+
+/// Existing sidecar files that sit beside `path`, matched two ways: replacing
+/// the extension (`photo.xmp`) and appending it (`photo.jpg.xmp`), since both
+/// conventions are in use. Case-insensitive on the extension.
+fn sidecar_paths(path: &Path) -> Vec<PathBuf> {
+    let dir = path.parent().unwrap_or_else(|| Path::new("."));
+    let stem = path.file_stem().and_then(|s| s.to_str());
+    let full = path.file_name().and_then(|s| s.to_str());
+    let mut out: Vec<PathBuf> = Vec::new();
+    // Deduplicate on the canonical path, so a case-insensitive filesystem does
+    // not hand back `photo.xmp` and `photo.XMP` as two different files.
+    let mut seen = std::collections::BTreeSet::new();
+    let canon = |p: &Path| std::fs::canonicalize(p).ok();
+    let self_canon = canon(path);
+    for ext in SIDECAR_EXTS {
+        for cand in [
+            stem.map(|s| dir.join(format!("{s}.{ext}"))),
+            stem.map(|s| dir.join(format!("{s}.{}", ext.to_uppercase()))),
+            full.map(|s| dir.join(format!("{s}.{ext}"))),
+            full.map(|s| dir.join(format!("{s}.{}", ext.to_uppercase()))),
+        ]
+        .into_iter()
+        .flatten()
+        {
+            if !cand.is_file() {
+                continue;
+            }
+            let key = canon(&cand);
+            if key.is_some() && key == self_canon {
+                continue; // the input itself
+            }
+            let dedup = key.clone().unwrap_or_else(|| cand.clone());
+            if seen.insert(dedup) {
+                out.push(cand);
+            }
+        }
+    }
+    out
 }
 
 /// Largest file the tool will read into memory, checked before reading so an
@@ -87,17 +168,21 @@ fn main() -> ExitCode {
 /// approaches 2 GB.
 const MAX_FILE_BYTES: u64 = 2 * 1024 * 1024 * 1024;
 
-fn process(path: &Path, opts: &Options) -> metascrub::Result<Report> {
+fn process(path: &Path, dst: &Path, opts: &Options) -> metascrub::Result<Report> {
     if let Ok(meta) = std::fs::metadata(path) {
         if meta.len() > MAX_FILE_BYTES {
             return Err(metascrub::Error::TooLarge { len: meta.len(), limit: MAX_FILE_BYTES });
         }
     }
     let input = std::fs::read(path)?;
-    let result = metascrub::sanitize(&input, &opts.policy)?;
+    let result = if opts.verify {
+        metascrub::sanitize_verified(&input, &opts.policy)?
+    } else {
+        metascrub::sanitize(&input, &opts.policy)?
+    };
 
     if !opts.dry_run && result.report.assurance != Assurance::None {
-        write_atomic(&opts.destination(path), &result.data)?;
+        write_atomic(dst, &result.data)?;
     }
     Ok(result.report)
 }
@@ -109,7 +194,7 @@ fn write_atomic(dst: &Path, data: &[u8]) -> metascrub::Result<()> {
     metascrub::write_atomic(dst, data)
 }
 
-fn print_human(path: &Path, report: &Report, opts: &Options) {
+fn print_human(path: &Path, report: &Report, dst: &Path, opts: &Options) {
     let name = path.display();
 
     if report.assurance == Assurance::None {
@@ -132,18 +217,34 @@ fn print_human(path: &Path, report: &Report, opts: &Options) {
         let size = if item.bytes > 0 { format!(", {} bytes", item.bytes) } else { String::new() };
         println!("  - {} at {}{size}", item.kind, item.location);
     }
+    if !report.retained.is_empty() {
+        println!("  STILL IN THE FILE (could not be removed without corrupting it):");
+        for r in &report.retained {
+            println!("    · {}", r.what);
+            println!("        reveals: {}", r.reveals);
+        }
+    }
     for warning in &report.warnings {
         println!("  ! {warning}");
     }
+    if let Some(v) = report.verification {
+        if v.passed() {
+            println!("  \u{2713} verified: re-scan of the output found nothing removable; clean is reproducible");
+        } else if !v.output_reinspected_clean {
+            println!("  \u{2717} VERIFICATION FAILED: the output still contains removable metadata \u{2014} do not trust it");
+        } else {
+            println!("  \u{2717} VERIFICATION FAILED: cleaning the same file twice gave different output (non-deterministic)");
+        }
+    }
     if !opts.dry_run {
-        println!("  -> {}", opts.destination(path).display());
+        println!("  -> {}", dst.display());
     }
 }
 
 /// Hand-rolled JSON, so the tool carries no serialization dependency.
-fn print_json(reports: &[(PathBuf, Report)]) {
+fn print_json(reports: &[(PathBuf, Report, PathBuf)]) {
     println!("[");
-    for (i, (path, report)) in reports.iter().enumerate() {
+    for (i, (path, report, _dst)) in reports.iter().enumerate() {
         let comma = if i + 1 < reports.len() { "," } else { "" };
         println!("  {{");
         println!(r#"    "file": "{}","#, escape(&path.display().to_string()));
@@ -163,6 +264,24 @@ fn print_json(reports: &[(PathBuf, Report)]) {
             );
         }
         println!("    ],");
+        println!(r#"    "retained": ["#);
+        for (j, r) in report.retained.iter().enumerate() {
+            let comma = if j + 1 < report.retained.len() { "," } else { "" };
+            println!(
+                r#"      {{"what": "{}", "reveals": "{}"}}{comma}"#,
+                escape(&r.what),
+                escape(&r.reveals),
+            );
+        }
+        println!("    ],");
+        if let Some(v) = report.verification {
+            println!(
+                r#"    "verification": {{"passed": {}, "output_reinspected_clean": {}, "deterministic": {}}},"#,
+                v.passed(),
+                v.output_reinspected_clean,
+                v.deterministic,
+            );
+        }
         println!(r#"    "warnings": ["#);
         for (j, warning) in report.warnings.iter().enumerate() {
             let comma = if j + 1 < report.warnings.len() { "," } else { "" };
@@ -196,9 +315,12 @@ struct Options {
     dry_run: bool,
     quiet: bool,
     json: bool,
+    verify: bool,
+    sidecars: bool,
     in_place: bool,
     suffix: String,
     out: Option<PathBuf>,
+    random_name: bool,
 }
 
 impl Options {
@@ -210,9 +332,12 @@ impl Options {
             dry_run: false,
             quiet: false,
             json: false,
+            verify: false,
+            sidecars: true,
             in_place: false,
             suffix: "clean".to_string(),
             out: None,
+            random_name: false,
         };
 
         let mut i = 0;
@@ -244,10 +369,13 @@ impl Options {
                 "-n" | "--dry-run" => opts.dry_run = true,
                 "-q" | "--quiet" => opts.quiet = true,
                 "--json" => opts.json = true,
+                "--verify" => opts.verify = true,
+                "--no-sidecars" => opts.sidecars = false,
                 "--in-place" => opts.in_place = true,
                 "--keep-icc" => opts.policy.color_profile = ColorProfile::Keep,
                 "--keep-rotation" => opts.policy.orientation = Orientation::PreserveMinimal,
                 "--no-recurse" => opts.policy.recurse_embedded = false,
+                "--random-name" => opts.random_name = true,
                 "--suffix" => opts.suffix = value("--suffix")?,
                 "-o" | "--out" => opts.out = Some(PathBuf::from(value("--out")?)),
                 other => return Err(format!("unknown option '{other}'")),
@@ -263,16 +391,30 @@ impl Options {
         if opts.out.is_some() && opts.in_place {
             return Err("--out and --in-place are mutually exclusive".to_string());
         }
+        // A random name only means anything for the automatic destination. With
+        // --out you already named the file; with --in-place there is no new name.
+        if opts.random_name && opts.out.is_some() {
+            return Err("--random-name and --out are mutually exclusive".to_string());
+        }
+        if opts.random_name && opts.in_place {
+            return Err("--random-name and --in-place are mutually exclusive".to_string());
+        }
         Ok(Some(opts))
     }
 
     /// Where the cleaned copy goes.
+    ///
+    /// For `--random-name` this rolls a fresh name, so it must be called exactly
+    /// once per file and the result reused; the caller in `main` does that.
     fn destination(&self, src: &Path) -> PathBuf {
         if let Some(out) = &self.out {
             return out.clone();
         }
         if self.in_place {
             return src.to_path_buf();
+        }
+        if self.random_name {
+            return random_destination(src);
         }
         // photo.jpg becomes photo.clean.jpg, keeping the extension so the file
         // still opens by double-click.
@@ -285,6 +427,28 @@ impl Options {
             }
         }
     }
+}
+
+/// A fresh 24-character random name beside `src`, keeping the extension (lower-
+/// cased) so the file still opens. The name is regenerated if it already exists,
+/// because the write is a plain rename that would otherwise replace a file; a
+/// collision on 24 base32 characters is only a theoretical worry, but a cleaned
+/// file is not worth losing to one.
+fn random_destination(src: &Path) -> PathBuf {
+    let dir = src.parent().unwrap_or_else(|| Path::new("."));
+    let ext = src.extension().map(|e| e.to_string_lossy().to_lowercase());
+    for _ in 0..16 {
+        let stem = metascrub::random_stem(24);
+        let name = match &ext {
+            Some(e) if !e.is_empty() => format!("{stem}.{e}"),
+            _ => stem,
+        };
+        let cand = dir.join(name);
+        if !cand.exists() {
+            return cand;
+        }
+    }
+    dir.join(metascrub::random_stem(24))
 }
 
 #[cfg(test)]
@@ -343,6 +507,38 @@ mod tests {
         assert!(parse(&["-o", "x.jpg", "--in-place", "a.jpg"]).is_err(), "--out with --in-place");
         assert!(parse(&["--suffix"]).is_err(), "--suffix with no value");
         assert!(parse(&["--nonsense", "a.jpg"]).is_err(), "unknown option");
+        assert!(
+            parse(&["--random-name", "-o", "x.jpg", "a.jpg"]).is_err(),
+            "--random-name with --out"
+        );
+        assert!(
+            parse(&["--random-name", "--in-place", "a.jpg"]).is_err(),
+            "--random-name with --in-place"
+        );
+    }
+
+    #[test]
+    fn a_random_name_is_distinct_keeps_the_extension_and_varies() {
+        let opts = parse(&["--random-name", "IMG_20230715_Berlin.JPG"]).unwrap().unwrap();
+        assert!(opts.random_name);
+        let dst = opts.destination(Path::new("IMG_20230715_Berlin.JPG"));
+        // Nothing of the original name survives, and the extension is lower-cased.
+        assert_eq!(dst.extension().and_then(|e| e.to_str()), Some("jpg"));
+        let stem = dst.file_stem().and_then(|s| s.to_str()).unwrap();
+        assert_eq!(stem.len(), 24);
+        assert!(!stem.contains("Berlin") && !stem.contains("2023"));
+        assert!(stem.chars().all(|c| matches!(c, 'a'..='z' | '2'..='7')));
+        // A second roll is a different name, so it is genuinely random.
+        let dst2 = opts.destination(Path::new("IMG_20230715_Berlin.JPG"));
+        assert_ne!(dst, dst2);
+    }
+
+    #[test]
+    fn a_random_name_without_an_extension_is_just_the_token() {
+        let opts = parse(&["--random-name", "scan"]).unwrap().unwrap();
+        let dst = opts.destination(Path::new("scan"));
+        assert_eq!(dst.extension(), None);
+        assert_eq!(dst.file_name().and_then(|s| s.to_str()).unwrap().len(), 24);
     }
 
     #[test]

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">metascrub</string>
+    <string name="tagline">removet quod documentum de te dicit</string>
+
+    <string name="share_prompt">Photographias, PDF aut documenta adde ut ea purges.\n\nOmnia in hoc telephono fiunt. Nihil imponitur, et documenta tua solum tanguntur cum «Purga» premis.</string>
+    <string name="opt_random_names">Da documentis purgatis nomina fortuita</string>
+    <string name="opt_keep_colour">Descriptionem coloris serva</string>
+    <string name="opt_keep_orientation">Rotationem imaginis serva</string>
+    <string name="opt_fingerprint">Vestigium photomachinae minue (photographiae)</string>
+    <string name="fingerprint_note">Pixella mollit ut vestigium sensoris quod photomachina in omni photographia relinquit debilius fiat. Hoc minuit quam facile photographiae ad unam photomachinam ligari possint. Vestigium non removet, et photographiam molliorem et paulo minorem facit. Photographiae ut JPEG servantur.</string>
+    <string name="strength_gentle">Lenis</string>
+    <string name="strength_balanced">Aequatus</string>
+    <string name="strength_thorough">Accuratus</string>
+
+    <!-- Actions -->
+    <string name="choose_files">Documenta selige</string>
+    <string name="add_more">Plura adde</string>
+    <string name="start_over">Iterum incipe</string>
+    <string name="scrubbing">Purgatur…</string>
+    <plurals name="scrub_files">
+        <item quantity="one">Purga 1 documentum</item>
+        <item quantity="other">Purga %1$d documenta</item>
+    </plurals>
+    <plurals name="save_files">
+        <item quantity="one">Exemplar purgatum serva</item>
+        <item quantity="other">Serva %1$d exempla purgata</item>
+    </plurals>
+    <plurals name="saved_files">
+        <item quantity="one">Exemplar purgatum servatum. Originale tuum non mutatum est.</item>
+        <item quantity="other">%1$d exempla purgata servata. Originalia tua non mutata sunt.</item>
+    </plurals>
+
+    <!-- Section titles -->
+    <string name="ready_header">Parata ad purgandum</string>
+    <string name="results_header">Exitus</string>
+
+    <!-- Messages -->
+    <string name="too_large">Maius quam 100 MB — praeteritum. metascrub documentum in memoria telephoni purgat, ideo documenta permagna nondum sustinentur.</string>
+    <string name="read_failed">Legi non potuit: %1$s</string>
+    <string name="save_failed">Servari non potuit: %1$s</string>
+    <string name="nothing_to_save">Nihil servandum — nullum horum documentorum purgari potuit.</string>
+    <string name="remove">Aufer</string>
+
+    <!-- Assurance badges and their honest one-line meaning -->
+    <string name="badge_complete">COMPLETUM</string>
+    <string name="badge_best_effort">PRO VIRIBUS</string>
+    <string name="badge_not_cleaned">NON PURGATUM</string>
+    <string name="note_complete">Refectum ex partibus notis et tutis. Nihil ignotum servatum est.</string>
+    <string name="note_best_effort">In loco purgatum. Aliqua structura manere potest.</string>
+    <string name="note_none">Hanc formam dissolvere non potuit, ideo puta eam adhuc omnia ferre.</string>
+
+    <string name="found_location">Ubi captum sit inscripsit.</string>
+    <string name="removed_prefix">Remota: %1$s</string>
+    <string name="nothing_found">Iam purum. Nihil removendum.</string>
+
+    <!-- Tabs and language -->
+    <string name="tab_scrub">Purgatio</string>
+    <string name="tab_handbook">Manuale</string>
+    <string name="language">Lingua</string>
+    <string name="lang_more_soon">Plures linguae adduntur. Manuale et tota applicatio in unaquaque legentur.</string>
+    <string name="handbook_unavailable">Manuale onerari non potuit.</string>
+</resources>

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">metascrub</string>
+    <string name="tagline">прибирає те, що файл розповідає про вас</string>
+
+    <string name="share_prompt">Додайте фотографії, PDF або документи, щоб очистити їх.\n\nУсе відбувається на цьому телефоні. Нічого не завантажується, і ваші файли зачіпаються лише тоді, коли ви натискаєте «Очистити».</string>
+    <string name="opt_random_names">Давати очищеним файлам випадкові імена</string>
+    <string name="opt_keep_colour">Зберегти колірний профіль</string>
+    <string name="opt_keep_orientation">Зберегти орієнтацію зображення</string>
+    <string name="opt_fingerprint">Зменшити відбиток камери (фото)</string>
+    <string name="fingerprint_note">Пом\'якшує пікселі, щоб послабити відбиток сенсора, який камера залишає на кожній фотографії. Це зменшує те, наскільки легко фотографії можна пов\'язати з однією камерою. Це не видаляє відбиток і робить фотографію м\'якшою та трохи меншою. Фотографії зберігаються як JPEG.</string>
+    <string name="strength_gentle">М\'яко</string>
+    <string name="strength_balanced">Збалансовано</string>
+    <string name="strength_thorough">Ретельно</string>
+
+    <!-- Actions -->
+    <string name="choose_files">Вибрати файли</string>
+    <string name="add_more">Додати ще</string>
+    <string name="start_over">Почати заново</string>
+    <string name="scrubbing">Очищення…</string>
+    <plurals name="scrub_files">
+        <item quantity="one">Очистити 1 файл</item>
+        <item quantity="few">Очистити %1$d файли</item>
+        <item quantity="many">Очистити %1$d файлів</item>
+        <item quantity="other">Очистити %1$d файлу</item>
+    </plurals>
+    <plurals name="save_files">
+        <item quantity="one">Зберегти очищену копію</item>
+        <item quantity="few">Зберегти %1$d очищені копії</item>
+        <item quantity="many">Зберегти %1$d очищених копій</item>
+        <item quantity="other">Зберегти %1$d очищеної копії</item>
+    </plurals>
+    <plurals name="saved_files">
+        <item quantity="one">Збережено очищену копію. Ваш оригінал не змінено.</item>
+        <item quantity="few">Збережено %1$d очищені копії. Ваші оригінали не змінено.</item>
+        <item quantity="many">Збережено %1$d очищених копій. Ваші оригінали не змінено.</item>
+        <item quantity="other">Збережено %1$d очищеної копії. Ваші оригінали не змінено.</item>
+    </plurals>
+
+    <!-- Section titles -->
+    <string name="ready_header">Готово до очищення</string>
+    <string name="results_header">Результати</string>
+
+    <!-- Messages -->
+    <string name="too_large">Більше 100 МБ — пропущено. metascrub очищає файл у пам\'яті телефона, тому дуже великі файли поки не підтримуються.</string>
+    <string name="read_failed">Не вдалося прочитати: %1$s</string>
+    <string name="save_failed">Не вдалося зберегти: %1$s</string>
+    <string name="nothing_to_save">Нічого зберігати — жоден із цих файлів не вдалося очистити.</string>
+    <string name="remove">Видалити</string>
+
+    <!-- Assurance badges and their honest one-line meaning -->
+    <string name="badge_complete">ПОВНІСТЮ</string>
+    <string name="badge_best_effort">ЗА МОЖЛИВОСТІ</string>
+    <string name="badge_not_cleaned">НЕ ОЧИЩЕНО</string>
+    <string name="note_complete">Перезібрано із заздалегідь безпечних частин. Нічого невідомого не збережено.</string>
+    <string name="note_best_effort">Очищено на місці. Частина структури може залишитися.</string>
+    <string name="note_none">Не вдалося розібрати цей формат, тому вважайте, що він усе ще несе все.</string>
+
+    <string name="found_location">Записано, де було зроблено знімок.</string>
+    <string name="removed_prefix">Видалено: %1$s</string>
+    <string name="nothing_found">Уже чисто. Нічого видаляти.</string>
+
+    <!-- Tabs and language -->
+    <string name="tab_scrub">Очищення</string>
+    <string name="tab_handbook">Довідник</string>
+    <string name="language">Мова</string>
+    <string name="lang_more_soon">Додаються нові мови. Довідник і весь інтерфейс будуть доступні кожною з них.</string>
+    <string name="handbook_unavailable">Не вдалося завантажити Довідник.</string>
+</resources>

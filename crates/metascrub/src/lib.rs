@@ -65,6 +65,14 @@ mod policy;
 mod report;
 mod util;
 
+// These parse pure byte structure (or, for SVG, text) and pull in no decoding
+// library, so they are always built rather than gated on `image`.
+mod gif;
+mod raw;
+mod svg;
+mod tiff;
+mod xmp;
+
 #[cfg(feature = "image")]
 mod exif;
 #[cfg(feature = "image")]
@@ -89,7 +97,7 @@ mod zip;
 pub use detect::{detect, Format};
 pub use error::Error;
 pub use policy::{ColorProfile, Orientation, Policy};
-pub use report::{Assurance, Kind, Removed, Report};
+pub use report::{Assurance, Kind, Removed, Report, Retained, Verification};
 
 /// Result type for every fallible operation in this crate.
 pub type Result<T> = std::result::Result<T, Error>;
@@ -115,6 +123,42 @@ pub struct Sanitized {
 /// strip.
 pub fn sanitize(input: &[u8], policy: &Policy) -> Result<Sanitized> {
     sanitize_at_depth(input, policy, 0)
+}
+
+/// Sanitize, then check the result: re-scan the cleaned output to confirm
+/// nothing this tool removes survived, and confirm the clean is reproducible by
+/// running it a second time and comparing bytes.
+///
+/// This is the tool marking its own homework. It cannot catch a leak in a
+/// structure the tool does not know to look for (nothing can verify what it
+/// cannot see), but it does catch the failure that matters most: a `Complete`
+/// clean that quietly left recognised metadata behind, and any per-run value
+/// leaking into the output. The findings are attached as
+/// [`Report::verification`].
+pub fn sanitize_verified(input: &[u8], policy: &Policy) -> Result<Sanitized> {
+    let mut first = sanitize_at_depth(input, policy, 0)?;
+
+    // Verification only means anything for a file we actually took apart. When
+    // the format is one we cannot clean (`Assurance::None`) the output is the
+    // input returned verbatim, so a "re-scan found nothing removable, and the
+    // clean is reproducible" pass would be trivially true — and would render as
+    // a green tick beside the red "NOT CLEANED" badge, asserting a clean on the
+    // exact file we could not clean. Leave verification unset there.
+    if first.report.assurance != Assurance::None {
+        // Reproducibility: a second run must produce identical bytes.
+        let second = sanitize_at_depth(input, policy, 0)?;
+        let deterministic = first.data == second.data;
+
+        // Re-inspect the cleaned output: a second scan should find nothing left
+        // that we claim to remove. Disclosed residuals (a kept maker note) are
+        // not "removable", so they do not count against this.
+        let reinspection = sanitize_at_depth(&first.data, policy, 0)?.report;
+        let output_reinspected_clean = reinspection.removed.is_empty();
+
+        first.report.verification =
+            Some(Verification { output_reinspected_clean, deterministic });
+    }
+    Ok(first)
 }
 
 /// How deeply the sanitizer will recurse into embedded files.
@@ -160,10 +204,39 @@ pub(crate) fn sanitize_at_depth(input: &[u8], policy: &Policy, depth: u32) -> Re
         Format::WebP => webp::sanitize(input, policy, &mut report)?,
         #[cfg(feature = "image")]
         Format::Heif | Format::Avif => heif::sanitize(input, policy, &mut report)?,
+        Format::Gif => gif::sanitize(input, policy, &mut report)?,
+        Format::Tiff => tiff::sanitize(input, policy, &mut report)?,
+        Format::Svg => svg::sanitize(input, policy, &mut report)?,
+        Format::Xmp => xmp::sanitize(input, policy, &mut report)?,
+        Format::Raw => raw::sanitize(input, policy, &mut report)?,
         #[cfg(feature = "pdf")]
         Format::Pdf => pdf::sanitize(input, policy, &mut report)?,
         #[cfg(feature = "ooxml")]
         Format::Ooxml | Format::OpenDocument => ooxml::sanitize(input, policy, &mut report, depth)?,
+        // Video and audio are recognised so the user is told plainly what the
+        // file is and that it was NOT cleaned, rather than leaving them to
+        // assume an "unknown format" might be harmless. Cleaning these is not yet
+        // built.
+        Format::Video => {
+            report.assurance = Assurance::None;
+            report.warn(
+                "this is a video file, and metascrub cannot clean video yet, so nothing was \
+                 removed. Videos commonly carry the GPS location where they were shot, the device \
+                 model, and the exact date and time. Do not assume this file is clean. If it was \
+                 recorded on a phone, the safest option today is a platform that strips video \
+                 metadata, or a dedicated video tool.",
+            );
+            input.to_vec()
+        }
+        Format::Audio => {
+            report.assurance = Assurance::None;
+            report.warn(
+                "this is an audio file, and metascrub cannot clean audio yet, so nothing was \
+                 removed. Audio files carry tags that can include the device or software used, a \
+                 timestamp, and any title or artist text. Do not assume this file is clean.",
+            );
+            input.to_vec()
+        }
         _ => {
             report.assurance = Assurance::None;
             report.warn(
@@ -314,9 +387,60 @@ fn hex_lower(bytes: &[u8]) -> String {
     })
 }
 
+/// A random, lower-case, filesystem-safe token of `len` characters.
+///
+/// This is what the "random name" output option is built on. A file's *name* is
+/// metadata in its own right: `IMG_20230715_193042.jpg` carries a date, a time,
+/// a sequence position and a camera's `IMG_` prefix, and a hand-chosen name like
+/// `berlin-march.jpg` carries more. Stripping the bytes inside the file does not
+/// touch any of that, so an output whose name is a random token closes the gap.
+///
+/// The token only has to be unguessable enough to avoid colliding with a file
+/// already in the folder and to reveal nothing about the source. It is **not key
+/// material** and does not need to be: the name is public, and it says nothing
+/// about the original by construction. The entropy source is the same one the
+/// atomic writer uses for its temporary names.
+///
+/// The alphabet is RFC 4648 base32, lower-cased. Thirty-two symbols divide 256
+/// evenly, so masking each random byte introduces no bias, and lower-case only
+/// means a case-insensitive filesystem cannot fold two distinct names together.
+pub fn random_stem(len: usize) -> String {
+    const ALPHABET: &[u8; 32] = b"abcdefghijklmnopqrstuvwxyz234567";
+    let mut raw = vec![0u8; len];
+    getrandom_bytes(&mut raw);
+    raw.iter().map(|b| ALPHABET[(b & 0x1f) as usize] as char).collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn random_stem_has_the_right_length_alphabet_and_varies() {
+        let a = random_stem(24);
+        assert_eq!(a.chars().count(), 24);
+        // RFC 4648 base32, lower-cased: a-z and 2-7, nothing else.
+        assert!(a.chars().all(|c| matches!(c, 'a'..='z' | '2'..='7')), "unexpected char in {a}");
+        // The token is 24 base32 chars wide; its unguessable entropy is bounded
+        // by the ~64-bit seed, which is ample for the only jobs it has (not
+        // colliding in a directory, saying nothing about the source). Two rolls
+        // being equal is effectively impossible.
+        assert_ne!(random_stem(24), random_stem(24));
+        assert_eq!(random_stem(0), "");
+    }
+
+    #[test]
+    fn a_file_we_cannot_clean_is_never_marked_verified() {
+        // A format we cannot take apart comes back Assurance::None. Attaching a
+        // verification there would render as a green "verified clean" tick beside
+        // the "NOT CLEANED" badge — a clean asserted on the one file we did not
+        // clean. It must stay unset. (A file we DO rebuild still gets its
+        // verification: that path is exercised across the roundtrip suite.)
+        let junk = b"this is not a file format we know".to_vec();
+        let out = sanitize_verified(&junk, &Policy::default()).unwrap();
+        assert_eq!(out.report.assurance, Assurance::None);
+        assert!(out.report.verification.is_none(), "an uncleaned file must carry no verification");
+    }
 
     #[test]
     fn unknown_format_is_returned_untouched_and_flagged() {
@@ -332,6 +456,31 @@ mod tests {
     fn empty_input_does_not_panic() {
         let out = sanitize(&[], &Policy::default()).unwrap();
         assert_eq!(out.report.assurance, Assurance::None);
+    }
+
+    #[cfg(feature = "image")]
+    #[test]
+    fn verify_confirms_a_clean_jpeg_and_is_reproducible() {
+        // A minimal JPEG carrying a comment. After a Complete clean, re-scanning
+        // the output must find nothing removable, and the clean must be
+        // byte-reproducible.
+        let mut j = vec![0xFF, 0xD8]; // SOI
+        j.extend_from_slice(&[0xFF, 0xFE, 0x00, 0x09]); // COM, length 9
+        j.extend_from_slice(b"secret!");
+        j.extend_from_slice(&[0xFF, 0xDB, 0x00, 0x43, 0x00]);
+        j.extend_from_slice(&[0u8; 64]);
+        j.extend_from_slice(&[0xFF, 0xC0, 0x00, 0x0B, 0x08, 0, 8, 0, 8, 1, 1, 0x11, 0]);
+        j.extend_from_slice(&[0xFF, 0xC4, 0x00, 0x02]);
+        j.extend_from_slice(&[0xFF, 0xDA, 0x00, 0x08, 1, 1, 0, 0, 0x3F, 0]);
+        j.extend_from_slice(&[0x12, 0x34]);
+        j.extend_from_slice(&[0xFF, 0xD9]); // EOI
+
+        let out = sanitize_verified(&j, &Policy::default()).unwrap();
+        let v = out.report.verification.expect("verification was requested");
+        assert!(v.deterministic, "a Complete clean must be reproducible");
+        assert!(v.output_reinspected_clean, "re-scan found removable metadata in a Complete clean");
+        assert!(v.passed());
+        assert!(!out.data.windows(7).any(|w| w == b"secret!"), "the comment survived");
     }
 
     /// An Office document is a ZIP and can hold another Office document, so the

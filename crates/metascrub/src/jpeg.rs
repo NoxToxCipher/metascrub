@@ -116,11 +116,27 @@ pub(crate) fn sanitize(
         match marker {
             EOI => {
                 out.extend_from_slice(&[0xFF, EOI]);
-                let trailing = r.remaining();
-                if trailing > 0 {
-                    // Not an error: it is common, and it is exactly the kind of
-                    // thing an allowlist exists to catch.
-                    report.removed(Kind::Trailer, "after EOI", trailing);
+                let trailer = &input[r.pos()..];
+                if !trailer.is_empty() {
+                    // Not an error: trailing data is common, and exactly what an
+                    // allowlist exists to catch. A "Motion Photo" / "Live Photo"
+                    // hides a whole short video here, which most tools never see;
+                    // call that out specifically rather than as anonymous bytes.
+                    if trailer_is_embedded_video(trailer) {
+                        report.removed(
+                            Kind::Thumbnail,
+                            "embedded video (Motion Photo / Live Photo)",
+                            trailer.len(),
+                        );
+                        report.warn(
+                            "this photo had a short video clip embedded after its end, the kind a \
+                             phone saves as a 'Motion Photo' or 'Live Photo'. Most tools never see \
+                             it. It was removed. That video carried its own metadata, which can \
+                             include where and when it was taken.",
+                        );
+                    } else {
+                        report.removed(Kind::Trailer, "after EOI", trailer.len());
+                    }
                 }
                 break;
             }
@@ -309,6 +325,15 @@ fn scan_entropy<'a>(r: &mut Reader<'a>) -> &'a [u8] {
         }
     }
     r.slice_from(start)
+}
+
+/// Whether trailing data after `EOI` is an embedded video, as a Motion Photo or
+/// Live Photo carries. The tell is an ISO base media `ftyp` box (an MP4 or
+/// QuickTime container) sitting in the trailer.
+fn trailer_is_embedded_video(trailer: &[u8]) -> bool {
+    let head = &trailer[..trailer.len().min(8192)];
+    head.windows(4).any(|w| w == b"ftyp")
+        || head.windows(8).any(|w| w == b"MotionPh" || w == b"Motion_P")
 }
 
 fn emit(out: &mut Vec<u8>, marker: u8, payload: &[u8]) {
@@ -510,6 +535,25 @@ mod tests {
         assert!(!out.windows(6).any(|w| w == b"ABC123"));
         assert_eq!(report.removed[0].kind, Kind::UnknownStructure);
         assert_eq!(report.removed[0].location, "APP5");
+    }
+
+    #[test]
+    fn an_embedded_motion_photo_video_is_dropped_and_called_out() {
+        // A phone Motion Photo: a normal JPEG with a whole MP4 appended after
+        // EOI. It must be dropped (as any trailer is) and reported specifically
+        // as an embedded video, not as anonymous trailing bytes.
+        let mut input = skeleton(&[]);
+        input.extend_from_slice(&24u32.to_be_bytes());
+        input.extend_from_slice(b"ftypmp42\x00\x00\x00\x00mp42isomSECRET-VIDEO-GPS");
+        let (out, report) = run(&input, &Policy::default());
+
+        assert!(out.ends_with(&[0xFF, EOI]), "the video must be dropped, leaving a clean JPEG");
+        assert!(!out.windows(6).any(|w| w == b"SECRET"), "the embedded video survived");
+        assert!(
+            report.removed.iter().any(|r| r.location.contains("Motion Photo")),
+            "an embedded video was not called out specifically"
+        );
+        assert!(report.warnings.iter().any(|w| w.contains("Motion Photo") || w.contains("Live Photo")));
     }
 
     #[test]

@@ -1,0 +1,338 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  The shell: a header with a language chip, two tabs (Scrub, Handbook), and a
+  body for each tab. The Scrub body's finding cards and the Handbook body's
+  chapters are both built in code, so they can be styled and localised.
+-->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg">
+
+    <!-- Header: the Crake mark, the name, and the language chip. -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingLeft="20dp"
+        android:paddingRight="16dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="8dp">
+
+        <ImageView
+            android:layout_width="38dp"
+            android:layout_height="38dp"
+            android:src="@drawable/ic_launcher_foreground"
+            android:contentDescription="@string/app_name" />
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginStart="10dp"
+            android:orientation="vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/app_name"
+                android:textColor="@color/teal"
+                android:textSize="21sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/tagline"
+                android:textColor="@color/text_muted"
+                android:textSize="12.5sp" />
+        </LinearLayout>
+
+        <TextView
+            android:id="@+id/lang_chip"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/btn_ghost"
+            android:paddingLeft="14dp"
+            android:paddingRight="14dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="8dp"
+            android:text="EN"
+            android:textColor="@color/teal"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- Tabs. -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingLeft="12dp"
+        android:paddingRight="12dp"
+        android:paddingTop="4dp">
+
+        <LinearLayout
+            android:id="@+id/tab_scrub"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/tab_scrub_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/tab_scrub"
+                android:textColor="@color/teal"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+            <View
+                android:id="@+id/tab_scrub_rule"
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="@color/teal" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:id="@+id/tab_handbook"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView
+                android:id="@+id/tab_handbook_label"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:paddingTop="10dp"
+                android:paddingBottom="10dp"
+                android:text="@string/tab_handbook"
+                android:textColor="@color/text_muted"
+                android:textSize="15sp" />
+            <View
+                android:id="@+id/tab_handbook_rule"
+                android:layout_width="match_parent"
+                android:layout_height="2dp"
+                android:background="#00000000" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/stroke" />
+
+    <!-- Scrub tab. -->
+    <LinearLayout
+        android:id="@+id/scrub_tab"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginLeft="12dp"
+            android:layout_marginTop="4dp">
+
+            <CheckBox
+                android:id="@+id/opt_random"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="0dp"
+                android:paddingLeft="6dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:buttonTint="@color/teal"
+                android:checked="true"
+                android:text="@string/opt_random_names"
+                android:textColor="@color/text_muted"
+                android:textSize="14sp" />
+
+            <CheckBox
+                android:id="@+id/opt_keep_colour"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="0dp"
+                android:paddingLeft="6dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:buttonTint="@color/teal"
+                android:checked="false"
+                android:text="@string/opt_keep_colour"
+                android:textColor="@color/text_muted"
+                android:textSize="14sp" />
+
+            <CheckBox
+                android:id="@+id/opt_keep_orientation"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="0dp"
+                android:paddingLeft="6dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:buttonTint="@color/teal"
+                android:checked="false"
+                android:text="@string/opt_keep_orientation"
+                android:textColor="@color/text_muted"
+                android:textSize="14sp" />
+
+            <CheckBox
+                android:id="@+id/opt_fingerprint"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="0dp"
+                android:paddingLeft="6dp"
+                android:paddingTop="6dp"
+                android:paddingBottom="6dp"
+                android:buttonTint="@color/teal"
+                android:checked="false"
+                android:text="@string/opt_fingerprint"
+                android:textColor="@color/text_muted"
+                android:textSize="14sp" />
+
+            <LinearLayout
+                android:id="@+id/fingerprint_detail"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingLeft="36dp"
+                android:paddingRight="12dp"
+                android:paddingTop="2dp"
+                android:paddingBottom="6dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/fingerprint_note"
+                    android:textColor="@color/text_muted"
+                    android:textSize="12.5sp"
+                    android:lineSpacingExtra="2dp" />
+
+                <RadioGroup
+                    android:id="@+id/strength_group"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="6dp"
+                    android:orientation="horizontal">
+
+                    <RadioButton
+                        android:id="@+id/strength_gentle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:buttonTint="@color/teal"
+                        android:text="@string/strength_gentle"
+                        android:textColor="@color/text_muted"
+                        android:textSize="13sp" />
+
+                    <RadioButton
+                        android:id="@+id/strength_balanced"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:buttonTint="@color/teal"
+                        android:checked="true"
+                        android:text="@string/strength_balanced"
+                        android:textColor="@color/text_muted"
+                        android:textSize="13sp" />
+
+                    <RadioButton
+                        android:id="@+id/strength_thorough"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="8dp"
+                        android:buttonTint="@color/teal"
+                        android:text="@string/strength_thorough"
+                        android:textColor="@color/text_muted"
+                        android:textSize="13sp" />
+                </RadioGroup>
+            </LinearLayout>
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:fillViewport="true"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:id="@+id/findings_container"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
+                android:paddingTop="4dp"
+                android:paddingBottom="16dp" />
+        </ScrollView>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="16dp">
+
+            <Button
+                android:id="@+id/btn_secondary"
+                android:layout_width="wrap_content"
+                android:layout_height="52dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/btn_ghost"
+                android:paddingLeft="20dp"
+                android:paddingRight="20dp"
+                android:text="@string/add_more"
+                android:textColor="@color/teal"
+                android:textAllCaps="false"
+                android:textSize="15sp"
+                android:stateListAnimator="@null"
+                android:visibility="gone" />
+
+            <Button
+                android:id="@+id/btn_primary"
+                android:layout_width="0dp"
+                android:layout_height="52dp"
+                android:layout_weight="1"
+                android:background="@drawable/btn_primary"
+                android:text="@string/choose_files"
+                android:textColor="@color/btn_primary_text"
+                android:textAllCaps="false"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:stateListAnimator="@null" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <!-- Handbook tab. -->
+    <ScrollView
+        android:id="@+id/handbook_tab"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:fillViewport="true"
+        android:scrollbars="none"
+        android:visibility="gone">
+
+        <LinearLayout
+            android:id="@+id/handbook_container"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="8dp"
+            android:paddingBottom="24dp" />
+    </ScrollView>
+</LinearLayout>

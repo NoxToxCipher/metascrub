@@ -1,0 +1,233 @@
+{
+  "chapters": [
+    {
+      "title": "Quomodo metascrub purget",
+      "intro": "metascrub numquam signum viride dat quod non meruit. Omne documentum cum uno ex tribus honestis exitibus redit.",
+      "entries": [
+        {
+          "heading": "COMPLETUM",
+          "body": "Documentum dissolutum et ex indice partium servandarum refectum est. Quidquid in illo indice non est — fragmentis privatis, venditoris propriis aut occultis quae instrumentum numquam vidit inclusis — ex constructione relinquitur. Photographiae et documenta (JPEG, PNG, WebP, HEIC, AVIF, GIF, TIFF, PDF et documenta Office) hoc modo purgantur."
+        },
+        {
+          "heading": "PRO VIRIBUS",
+          "body": "Documentum in loco retractatum est potius quam refectum, quia id reficere periculum faceret ne aperiri non posset. Campi identificantes superscribuntur, sed aliqua structura quam instrumentum tuto tangere non potest manere potest. Documenta raw photomachinae hoc modo purgantur."
+        },
+        {
+          "heading": "NON PURGATUM",
+          "body": "metascrub hanc formam dissolvere non potuit, ideo intactum relictum est et putare debes id adhuc omnia ferre. Exitus cui fidere potes pluris est quam signum quod non meruit, ideo instrumentum tibi plane dicit potius quam simulat."
+        },
+        {
+          "heading": "Cur documenta reficiat potius quam retractet",
+          "body": "Instrumentum quod solum metadata quae agnoscit delet quidquid novum, privatum, aut consulto occultatum est tacite transire sinet. Ex indice servandorum reficere significat morem pro re ignota esse eam abicere."
+        }
+      ]
+    },
+    {
+      "title": "Quid purgare possit, et quam bene",
+      "intro": "metascrub formam ex ipso documenti contento detegit, numquam ex nomine. Ecce quid cum unoquoque faciat.",
+      "entries": [
+        {
+          "heading": "Plene refecta (COMPLETUM)",
+          "body": "Dissoluta et ex indice permissorum refecta, ita ut nihil ignotum supersit. Photographiae: JPEG, PNG, WebP, HEIC et HEIF, AVIF, GIF, TIFF. Vectoriales: SVG. Documenta: PDF, Word, Excel, PowerPoint, et OpenDocument. Photographiae intra documentum insertae quoque purgantur."
+        },
+        {
+          "heading": "In loco purgata (PRO VIRIBUS)",
+          "body": "Retractata, non refecta, quia reficere periculum faceret documento quod iterum capere non potes. Documenta raw photomachinae: Canon CR2 et CR3, Nikon NEF et NRW, Sony ARW et SR2, Fujifilm RAF, Olympus et OM System ORF, Panasonic RW2, Pentax PEF, Samsung SRW, Adobe DNG, Epson ERF, GoPro GPR, et medii formati backs. Nota, exemplar et nota fabricatoris servantur ut documentum adhuc aperiatur, ideo numerus serialis intra notam fabricatoris manere potest. Vide «Documenta raw photomachinae»."
+        },
+        {
+          "heading": "Intacta relicta (NON PURGATUM)",
+          "body": "Si metascrub formam dissolvere non potest, non coniectat. Documentum exacte ut est relinquit et NON PURGATUM notat, ita ut documentum intactum numquam pro purgato habeatur. Hoc includit video et audio, et raram raw dispositionem quam nondum resolvit, ut Sigma X3F."
+        }
+      ]
+    },
+    {
+      "title": "Quid removeat, et cur",
+      "entries": [
+        {
+          "heading": "EXIF",
+          "body": "Fragmentum notarum a photomachina scriptum: exemplar, lens, numerus serialis, numerus actionum obturamenti, expositionis optiones, dies et hora ad secundam usque, et saepe GPS-coordinatae.\n\nGPS est illud manifestum, et ad paucos metros exactum est, ita ut una feriarum photographia inscriptionem domus prodere possit. Cetera quietiora sunt sed accumulantur: idem photomachinae corpus eademque lens per photographiarum copiam eas ad unum hominem ligant, etiam cum nihil aliud id facit."
+        },
+        {
+          "heading": "Nota fabricatoris (maker note)",
+          "body": "Regio privata venditoris intra EXIF, in forma non documentata quae inter fabricatores et firmware versiones differt.\n\nHic plerumque numerus serialis sensoris habitat, una cum numero actionum obturamenti et optionibus internis. Est campus maxime identificans in photographia typica, et quia forma privata est, instrumenta quae solas notas standardas intellegunt eam saepe in loco relinquunt."
+        },
+        {
+          "heading": "Imago minuta (thumbnail)",
+          "body": "Parvum exemplar imaginis, intra documentum servatum ut spectatores praevisionem monstrare possint sine tota imagine decodenda.\n\nImagines minutae semel generantur et saepe post retractationem non regenerantur. Photographia recisa ut aliquem e margine tollat potest adhuc originale non recisum intra se ferre. Idem valet de faciebus obscuratis et particulis superpictis."
+        },
+        {
+          "heading": "XMP",
+          "body": "Forma metadatorum Adobe, ut XML servata. A programmatibus retractandi et ab aliquibus photomachinis scribitur.\n\nFert historiam retractationis, programma et versionem adhibitam, aestimationes, verba clavis, et saepe nomen auctoris aut possessoris licentiae. Hic etiam identificatores catalogi habitant, qui imaginem divulgatam ad certam bibliothecam in certa machina referre possunt."
+        },
+        {
+          "heading": "IPTC",
+          "body": "Fragmentum metadatorum prensae et editionis, saepe a programmatibus administrandi photographias scriptum.\n\nDestinatum ad nomen auctoris, notam iuris auctoris, contactus particulas et textum tituli ferendum. Omnia utilia officio nuntiorum, omnia identificantia cuivis qui sub suo nomine edere non intendebat."
+        },
+        {
+          "heading": "Descriptio coloris (ICC)",
+          "body": "Descriptio ICC quae explicat quomodo colorum numeri documenti interpretandi sint.\n\nPlerumque innoxia, et servata si rogas. Ex more removetur duabus de causis: descriptio textum liberum et exemplar instrumenti fert, et descriptio propria ex monitore calibrato satis singularis esse potest ut documenta liget. Si imagines tuae lati coloris sunt et colorum accuratio refert, eam iterum accende."
+        },
+        {
+          "heading": "Data adiuncta",
+          "body": "Quidquid post punctum ubi forma imaginis documentum finiri dicit adiungitur.\n\nPleraque instrumenta legere desinunt ad notam finis, quod spatium post eam bonum latibulum facit. Aliquae photomachinae telephonicae ibi secundam photographiam plenae resolutionis servant. Quidquid in eo est, non est pars imaginis et cum documento iter facit."
+        },
+        {
+          "heading": "Informatio documenti",
+          "body": "In PDF et documentis Office: titulus, argumentum, auctor, programma quod id produxit, et tempora creationis et mutationis.\n\nCampus auctoris saepe nomen verum aut nomen usoris corporati est, automatice ex ratione sub qua programma installatum est impletus, numquam ei qui scribit ostensus."
+        },
+        {
+          "heading": "Identificatores retractationum",
+          "body": "Identificatores fortuiti quos programmata verba tractantia in documentum scribunt et dum retractatur renovant.\n\nDuo documenta idem identificatorem retractationis communicantia in eadem sessione in eadem machina retractata sunt. Hoc documenta ligat quae nihil aliud commune habent, et fere nemo scit hunc campum exsistere."
+        },
+        {
+          "heading": "Structurae non agnitae",
+          "body": "Quilibet fragmentum in continente quod in indice servandorum non est, sectionibus privatis venditoris quas hoc instrumentum numquam vidit inclusis.\n\nCausa cur instrumentum documenta reficiat potius quam retractet. Instrumentum quod metadata quae agnoscit delet quidquid novum, privatum, aut consulto occultatum est tacite transire sinet. Ex indice servandorum reficere significat morem pro re ignota esse eam abicere."
+        }
+      ]
+    },
+    {
+      "title": "Documenta tua, et quid ferant",
+      "entries": [
+        {
+          "heading": "Photographia JPEG (.jpg)",
+          "body": "Fragmentum EXIF a photomachina aut telephono scriptum: GPS-coordinatae, photomachinae nota, exemplar et numerus serialis, lens, dies et hora exacta ad secundam, et parva imago minuta. Saepe etiam fragmentum XMP ex programmate retractandi.\n\nGPS ad paucos metros exactum est, ita ut una feriarum photographia domum prodere possit. Numerus serialis est ille fortis: idem est in omni photographia quam ea photomachina umquam cepit, itaque imaginem anonymam ad copiam quam sub tuo nomine posuisti ligat. Imago minuta semel generatur et saepe non renovatur, ita ut photographia recisa ut aliquem tollat originale non recisum intra se adhuc ferre possit."
+        },
+        {
+          "heading": "Photographia telephoni (HEIC, HEIF, AVIF)",
+          "body": "Eadem EXIF et XMP ac JPEG, et telephona moderna diligentia sunt: GPS exacta, exemplar instrumenti, capiendi optiones, et interdum mappa profunditatis aut series imaginum.\n\nOmnia quae casus JPEG describit, et quia recta e telephono cum loco accenso venit, GPS plerumque adest et exacta est. Exemplar instrumenti una cum systematis operandi particulis coartat cuius telephonum fuerit."
+        },
+        {
+          "heading": "Imago PNG (.png)",
+          "body": "Fragmenta textus quae commentarios liberos, programma quod documentum scripsit, tempus creationis, et interdum plenum fragmentum EXIF ex originali photographia translatum tenent.\n\nHomines PNG «purum» esse putant quia saepe pro imaginibus ecranicis adhibetur, sed conversores saepe EXIF originalis photographiae, cum GPS, in PNG ferunt. Campus programmatis instrumentum et versionem quam adhibuisti prodit."
+        },
+        {
+          "heading": "WebP et GIF",
+          "body": "WebP EXIF et XMP ut JPEG fert. GIF fragmenta commentariorum et applicationum fert, quae pro nominibus auctorum, textibus programmatum et XMP adhibita sunt.\n\nEadem loci et instrumenti fabula pro WebP. Pro GIF plerumque textus auctoris aut programmatis est potius quam GPS, sed id adhuc instrumentum, rationem, aut hominem nominat."
+        },
+        {
+          "heading": "TIFF (.tif)",
+          "body": "TIFF est continens super quo ipsum EXIF aedificatur, itaque totam copiam tenet: GPS, photomachinae notam, exemplar et numerum serialem, temporum notas, et imaginem minutam insertam.\n\nIdem ac JPEG, et TIFF communis est pro scansionibus et opere professionali, ubi numerus serialis scanneri aut photomachinae et nota temporis exacta documentum ad unam machinam referre possunt."
+        },
+        {
+          "heading": "Photomachinae raw (CR2, CR3, NEF, ARW, RAF, DNG, ...)",
+          "body": "Omnia quae JPEG fert, et plura. Maior nota fabricatoris numerum serialem internum et numerum obturamenti tenet. Plena JPEG praevisio intus inserta est, cum suo EXIF et GPS.\n\nRaw peior est effluvium quam JPEG eiusdem ictus, non melior. Numerus obturamenti photographias tuas re vera in ordine quo eas cepisti numerat. Nota fabricatoris data quae conversori ad documentum explicandum necessaria sunt tenet, ideo hoc instrumentum eam servat et numerus serialis in ea plerumque manet — quare raw numquam in loco plene purgari potest. Ut numerum serialem removeas, raw in JPEG explica et id purga."
+        },
+        {
+          "heading": "Imago vectorialis SVG (.svg)",
+          "body": "SVG est XML, itaque rationes retractatoris fert: programma pingendi et versionem, stratorum et fenestrarum dispositionem, interdum viam documenti, fragmentum metadatorum cum auctore et licentia, et relationes ad documenta externa.\n\nCampi retractatoris et quaevis via documenti inserta nomen usoris aut structuram scriniorum quae te nominat ferre possunt. Relatio externa imaginem facit rem a moderatro petere cum aliquis eam aperit, quod illi moderatro renuntiat eam visam esse. Scripta in SVG currere possunt cum in navigatro aperitur."
+        },
+        {
+          "heading": "Documentum comes XMP (.xmp)",
+          "body": "Documentum quod nihil nisi metadata est, iuxta photographiam a programmate retractandi scriptum: auctor, ius auctoris, GPS, dies quibus photographia capta et retractata est, plena historia retractationis, identificatores catalogi, et numerus serialis photomachinae.\n\nHomines comitem exsistere obliviscuntur et eum una cum photographia communicant. Fert identitatem a qua photographia purgata est. Historia retractationis documentum ad certam sessionem in certa machina ligat, et identificatores catalogi id ad unam photographiarum bibliothecam ligant."
+        },
+        {
+          "heading": "Documentum PDF (.pdf)",
+          "body": "Fragmentum informationis documenti cum auctore, programmate quod id produxit, et temporibus creationis et mutationis. Saepe etiam fragmentum XMP, et historiam retractationum gradatim additarum.\n\nCampus auctoris plerumque automatice ex ratione sub qua programma installatum est impletur, itaque saepe nomen verum aut nomen usoris corporati est quod scriptor numquam typis expressit neque vidit. Historia retractationum priores documenti versiones tenere potest — quo modo PDF «expurgata» textum sub quadris nigris effluere fecerunt."
+        },
+        {
+          "heading": "Word, Excel, PowerPoint, OpenDocument",
+          "body": "Nomina auctoris et ultimi retractatoris, societas, totum retractandi tempus, identificatores retractationum servatarum, mutationes vestigatae cum nominibus omnium qui retractaverunt, viae exemplarium, et quaevis imagines insertae, quae suum EXIF servant.\n\nCampi auctoris et ultimi retractatoris homines veros aut nomina rationum nominant. Identificatores retractationum servatarum sunt numeri fortuiti qui inter documenta in eadem sessione in eadem machina retractata congruunt, quod documenta nihil aliud commune habentia ligat. Mutationes vestigatae prodere possunt quis quid scripserit, et photographia inserta suum GPS secum affert."
+        }
+      ]
+    },
+    {
+      "title": "Documenta raw photomachinae",
+      "intro": "Raw sunt unica forma in loco purgata potius quam refecta, et verbum «raw» late male intellegitur. Hoc est quid raw sit, et exacte ubi instrumentum in eo limitatum sit.",
+      "entries": [
+        {
+          "heading": "Quid documentum raw re vera sit",
+          "body": "Documentum raw est lectura fere non tractata sensoris imaginum photomachinae, antequam photomachina eam in imaginem convertit. Non est imago spectabilis sensu ordinario. Nullos colores fixos habet, nullam contrarietatis curvam et nullam acutiem applicatam; propius est negativo photographico quam impressioni perfectae, et a programmate «explicandum» est antequam alicui simile videtur.\n\nQuia plena sensoris data fere nihil abiecto tenet, raw magnum est et solum a programmate quod illius photomachinae formam intellegit aperiri potest. Id est tota ratio raw capiendi: nihil adhuc decretum aut abiectum est, ita ut photographus illas electiones postea facere possit."
+        },
+        {
+          "heading": "JPEG non retractatum non est raw",
+          "body": "Hoc est error frequentissimus et carissimus, ideo apertum esse operae pretium est. JPEG recta e telephono aut photomachina, quod numquam in retractatore aperuisti, non est documentum raw. Iam intra photomachinam explicatum est: sensoris data in colores conversa sunt, contrarietatis curva et acuties applicatae, et exitus compressus et ad partem magnitudinis originalis abiectus. «A te non retractatum» non idem est ac «raw».\n\nModus certus ea distinguendi est genus documenti, non quomodo imago videtur. Raw extensiones fabricatoris proprias habent: Canon CR2 et CR3, Nikon NEF et NRW, Sony ARW, Panasonic RW2, Olympus ORF, Fujifilm RAF, Pentax PEF, universale Adobe DNG, et duodecim alia. Si documentum in .jpg aut .jpeg desinit, JPEG est, quidquid aliud de eo verum est. Si dubitas, instrumentum tibi dicit quam formam ex ipso documenti contento detexerit, nomine neglecto."
+        },
+        {
+          "heading": "Cur raw plura removenda ferat, non pauciora",
+          "body": "Raw peius periculum privatati est quam JPEG eiusdem photographiae, non melius. Plenum fragmentum EXIF fert, et eius nota fabricatoris, ubi numerus serialis sensoris et numerus obturamenti habitant, plerumque maior et particularior est quam in documento tractato.\n\nRaw etiam fere semper plenam JPEG praevisionem photographiae explicatae continet, intus insertam ut programma ictum monstrare possit sine sensoris datis decodendis. Illa praevisio suum EXIF, suum GPS habet, et versionem sceni ante retractationem etiam monstrare potest. Est documentum intra documentum, et id quoque purgandum est. Hoc instrumentum metadata intra illas insertas praevisiones necnon in ipsis raw notis invenit et vacuat."
+        },
+        {
+          "heading": "Duo gradus purgandi, et cur raw sit inferior",
+          "body": "Imagines et documenta ordinaria ab initio reficiuntur: instrumentum indicem partium servandarum tenet, solas eas in novum documentum copiat, et ex constructione nihil aliud superest. JPEG, PNG, WebP, HEIC, AVIF, GIF, TIFF, PDF et documenta Office hoc modo purgantur, ad exitum «Completum».\n\nRaw ita tractari non potest. Eius sensoris imago in sub-sectionibus fabricatoris propriis habitat quarum dispositio non documentata est et pro quoque fabricatore diversa, et probatio in veris documentis multarum notarum ostendit refectionem documentum reddere quod amplius non aperitur. Raw non est quod iterum capere possis, ideo instrumentum illud periculum non suscipiet. Raw in loco potius purgantur: documentum retractatur, non reficitur, nihil movetur, et longitudo non mutatur. Hoc semper est exitus «Pro viribus»."
+        },
+        {
+          "heading": "Quid exacte in raw mutetur, et quid non",
+          "body": "REMOTA, zeris superscripta: locus GPS; dies et hora quibus photographia capta et ultimo mutata est; nomina possessoris et artificis; quodvis fragmentum XMP aut IPTC; campi standardae numeri serialis et imaginis-ID; et metadata intra insertam praevisionem. Renuntiatio exacte enumerat quae ex his in documento tuo inventa sint.\n\nSERVATA de industria: photomachinae nota et exemplar, et nota fabricatoris.\n\nNON TACTA: ipsa sensoris imaginis data, et documenti facultas explicandi. Imago bit pro bit eadem est; sola informatio circa eam mutata est."
+        },
+        {
+          "heading": "Cur nota fabricatoris servetur, et quid id effluat",
+          "body": "Nota fabricatoris est fabricatoris fragmentum privatum. Numerum serialem internum photomachinae et numerum obturamenti, qui identificant, re vera tenet. Bonum esset id removere.\n\nSed fabricatores etiam optiones quas conversor raw ad documentum explicandum eget in eodem fragmento servant: nigri et albi gradus, sensoris colorum coli dispositionem, albi aequilibrium, lentis correctiones. In veris documentis Canon, Nikon, Olympus, Pentax et aliorum, notam fabricatoris removere aut raw aperiri desinere fecit aut quomodo decoderetur mutavit. Documentum corrumpere est unicus exitus quem hoc instrumentum recusat, ideo nota fabricatoris manet.\n\nConsecutio vera: in raw numerus serialis internus in nota fabricatoris plerumque superest. Quantum informationis identificantis maneat ideo a tua photomachina pendet, quia aliquae notae numerum serialem etiam in campum standardum scribunt, qui removetur, dum aliae eum solum in nota fabricatoris tenent, quae non removetur. Si ille numerus serialis tibi refert, via tuta infra utere."
+        },
+        {
+          "heading": "Via tutissima, et quae photomachinae comprehendantur",
+          "body": "Si quod eges est imaginem communicare potius quam negativum raw, raw primum in JPEG aut PNG explica et id purga. JPEG ad exitum «Completum» reficitur et nullam notam fabricatoris, insertam praevisionem, aut sub-sectiones venditoris quas raw habet fert. Ea est via numerum serialem quem raw servat removendi.\n\nInstrumentum raw agnoscit a Canon (CR2, CR3), Nikon (NEF, NRW), Sony (ARW, SR2), Fujifilm (RAF), Olympus et OM System (ORF), Panasonic (RW2), Pentax (PEF), Leica, Samsung (SRW), Adobe (DNG), Epson (ERF), GoPro (GPR), et medii formati backs a Hasselblad, Phase One et Leaf, inter alia. Quodque ex contento suo identificatur, numquam ex nomine documenti. Sigma X3F dispositionem utitur quam instrumentum nondum resolvit, ideo intactum relinquitur et ut non purgatum renuntiatur, potius quam male purgatum."
+        }
+      ]
+    },
+    {
+      "title": "Vestigium photomachinae minuere",
+      "intro": "Gradus separatus et optativus, ex more exstinctus quia photographiam mollit. Omnis photomachinae sensor leve exemplar fixum in pixellis omnis photographiae quam capit relinquit. Metadata removere nihil ad id facit.",
+      "entries": [
+        {
+          "heading": "Quid vestigium sensoris sit",
+          "body": "Sensor photomachinae est craticula ex milionibus puteolorum lucis sensibilium in silicio incisorum. Fabricatio eos perfecte pares facere non potest, ideo quisque ad lucem paulum aliter quam vicini respondet. Illa varietas per totam photomachinae vitam fixa est et leviter in omni photographia quam capit imprimitur. Vocatur Photo Response Non-Uniformity, sive PRNU — numerus serialis in ipsam imaginem scriptus potius quam in documenti campos informationis. EXIF removere eum non tangit, neque documentum renominare, id imagine ecranica capere, aut per applicationem quae metadata tollit mittere."
+        },
+        {
+          "heading": "Quomodo contra aliquem adhibeatur",
+          "body": "Est impetus ligandi, non identificandi. Analyticus tenuem particulam photographiae cum exemplari referentiae photomachinae comparat, aedificato aut ex ipsa photomachina aut ex photographiis iam notis ex ea venire. Nemo nomen ex pixellis photographiae anonymae derivat. Scaenarium verisimile: aliquis opus sub suo nomine edit, deinde aliquid anonyme edit, utrumque eadem photomachina captum, et analyticus ostendit duo ex uno sensore venisse."
+        },
+        {
+          "heading": "Quid haec optio faciat",
+          "body": "«Vestigium photomachinae minuere» photographiam in plena resolutione a strepitu purgat (exemplar in tenui particula habitat, ideo hoc est contrarium eius quo detectores id inveniunt), eam minuit (quodque pixellum exitus ex pluribus pixellis ingressus miscens, quod congruentiam pixelli pro pixello a qua correlatio pendet frangit — gradus solus efficacissimus), paulum novi strepitus addit, et ut JPEG iterum codicat. Lenis 90% magnitudinis servat, Aequatus 70%, Accuratus 50%. Quo fortior optio, eo mollior et minor photographia."
+        },
+        {
+          "heading": "Quid non operatur",
+          "body": "Colores aut albi aequilibrium mutare nihil omnino facit. Detectores correlatione normalizata utuntur, quae quamvis aequabilem per-canalem scalationem aut inclinationem ante comparationem dividit. Aequabilis coloris mutatio est exacte illud, ideo a mathematica ante comparationem removetur. Colorum accurationem constat et nullam protectionem emit. Hoc scribitur quia est opinio intuitiva quae falsa esse contingit."
+        },
+        {
+          "heading": "Limes verus",
+          "body": "Hoc correlationem minuit. Vestigium non removet, et nihil hic tibi dicet se id removisse. Analyticus forensicus cum forti exemplari referentiae, multis exemplaribus et tempore adhuc succedere potest. Omnis etiam optio photographiam deterit — mollior particula, pauciora pixella, plus compressionis. Si salus tua a non-ligabilitate pendet, mensura fortior est omnino non ex eadem photomachina sub duabus identitatibus a principio edere."
+        }
+      ]
+    },
+    {
+      "title": "Errores communes",
+      "intro": "Malum consilium hic peius est quam nullum: qui credit documentum purum esse aget quasi purum sit.",
+      "entries": [
+        {
+          "heading": "Photographiam per applicationem nuntiorum mittere omnia removet.",
+          "body": "Pleraque magna suggesta EXIF tollunt cum imaginem ut photographiam mittis, ideo locus plerumque abit. Duae cautiones. Idem documentum ut documentum aut adiunctum mittere originale intactum, cum metadatis omnibus, imponit, et homines illam optionem pro meliore qualitate eligunt sine intellectu quid aliud comitetur. WhatsApp et Telegram ambo ita se gerunt; Signal metadata etiam in modo documenti tollit, quod est vera differentia inter ea."
+        },
+        {
+          "heading": "Imaginem ecranicam capere metadata removet.",
+          "body": "Fere verum. Sed imago ecranica sua nova metadata fert, qualitas multo peior est quam recti exemplaris purgati, et error communis est imaginem ecranicam pro salute capere et deinde originale casu mittere."
+        },
+        {
+          "heading": "Documentum renominare, aut in zip ponere, metadata removet.",
+          "body": "Neutrum quicquam omnino facit. Nomen documenti non est pars contenti documenti, et archivum documentum exacte servat ut ex altera parte immutatum exeat. Id est tota ratio archivi."
+        },
+        {
+          "heading": "Photographia mea est documentum raw quia eam non retractavi.",
+          "body": "Photographia quam non tetigisti adhuc non est documentum raw. JPEG recta e telephono aut photomachina iam intra photomachinam explicatum est: colores, contrarietas et acuties applicatae, deinde compressum. Raw est sensoris data ante illa omnia, in forma fabricatoris propria (CR2, CR3, NEF, ARW, DNG, RW2, ORF, RAF et aliae) quae speciali programmate ad aperiendum eget. Genus documenti id decernit, non utrum imaginem retractaveris."
+        },
+        {
+          "heading": "In PNG convertere metadata tollit.",
+          "body": "PNG sua metadatorum fragmenta habet, pleno EXIF fragmento et campis textus liberi inclusis, et multi conversores notas transferunt potius quam eas abiciunt. Formam mutare non idem est ac informationem removere."
+        },
+        {
+          "heading": "Servitia loci exstinxi, ideo photographiae meae bene se habent.",
+          "body": "Id GPS-coordinatas removet, quae sunt maximum singulum elementum, et faciendum est. Cetera omnia manent: photomachinae exemplar, lens, numerus serialis in nota fabricatoris, nota temporis exacta, imago minuta inserta, et historia retractationis."
+        }
+      ]
+    },
+    {
+      "title": "Epistula a superstite",
+      "entries": [
+        {
+          "heading": "",
+          "body": "Salve.\n\nPhotographus sum, et didici quantum una photographia de eo qui eam cepit prodere possit: ubi steterit, photomachinam in manibus, nomen quod numquam apponere elegit. Per orbem terrarum, illa data occulta adhibita sunt ut hominibus privatatem, et interdum salutem, auferrent.\n\nmetascrub aedificavi ut id redderem. Est cuivis qui id vult, et ante omnia hominibus sub censura aut vigilantia viventibus, hominibus se ab aliquo periculoso liberantibus, et cuivis qui simpliciter difficilior ad sequendum esse vult.\n\nOmnia in telephono tuo fiunt. Nihil umquam imponitur.\n\nPerge.\n— Cipher"
+        }
+      ]
+    }
+  ]
+}

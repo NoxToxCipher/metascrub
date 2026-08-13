@@ -1,0 +1,27 @@
+[package]
+name = "metascrub-android"
+description = "JNI boundary for the metascrub Android app"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+rust-version.workspace = true
+publish = false
+
+# The only crate in this workspace that holds unsafe code, for the same reason
+# tox-sys and tox-android do in the sibling project: JNI is a boundary with the
+# Java VM, which hands over raw pointers and calls back into itself to read an
+# array. Confining the unsafety to this small crate is what lets `metascrub` and
+# `pixelwash` keep `#![forbid(unsafe_code)]` truthfully.
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+metascrub = { workspace = true }
+pixelwash = { workspace = true }
+jni = "0.21"
+# Wipe the one copy of the file this crate owns. The Java byte[] copies either
+# side of the boundary are the VM's and cannot be scrubbed from here; this is
+# the copy that can be, so it is.
+zeroize = { workspace = true }

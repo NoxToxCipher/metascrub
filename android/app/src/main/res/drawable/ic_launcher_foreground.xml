@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Adaptive-icon foreground: the Crake bird alone, scaled and centred into the
+     inner safe zone so a round or squircle launcher mask never clips the beak.
+     The dark eye reads against the teal head; the background is a flat colour
+     supplied by the adaptive icon, not drawn here. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <group
+        android:pivotX="48"
+        android:pivotY="50.5"
+        android:scaleX="0.8"
+        android:scaleY="0.8"
+        android:translateX="6"
+        android:translateY="3.5">
+        <!-- body -->
+        <path
+            android:fillColor="#FF5FB0BA"
+            android:pathData="M28,56 a24,24 0 1,0 48,0 a24,24 0 1,0 -48,0 Z" />
+        <!-- head -->
+        <path
+            android:fillColor="#FF5FB0BA"
+            android:pathData="M37,34 a13,13 0 1,0 26,0 a13,13 0 1,0 -26,0 Z" />
+        <!-- beak -->
+        <path
+            android:fillColor="#FF5FB0BA"
+            android:pathData="M38,29 L38,43 L20,35 Z" />
+        <!-- eye -->
+        <path
+            android:fillColor="#FF0F1418"
+            android:pathData="M49.4,31 a3.6,3.6 0 1,0 7.2,0 a3.6,3.6 0 1,0 -7.2,0 Z" />
+    </group>
+</vector>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Dark ground and surfaces -->
+    <color name="bg">#0E1417</color>
+    <color name="surface">#172025</color>
+    <color name="stroke">#26343B</color>
+
+    <!-- Crake brand -->
+    <color name="teal">#5FB0BA</color>
+    <color name="teal_press">#52979F</color>
+    <color name="on_teal">#052027</color>
+
+    <!-- Text -->
+    <color name="text">#EAF1F2</color>
+    <color name="text_muted">#93A6AC</color>
+
+    <!-- Assurance status. Colour is never the only signal — always paired with
+         the badge word — but it carries the tone at a glance. -->
+    <color name="ok">#57B982</color>       <!-- COMPLETE -->
+    <color name="warn">#E0A458</color>     <!-- BEST EFFORT -->
+    <color name="danger">#E0776A</color>   <!-- NOT CLEANED / location -->
+
+    <!-- The launcher icon background. -->
+    <color name="ic_launcher_bg">#0F1418</color>
+</resources>

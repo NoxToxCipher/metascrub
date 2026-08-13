@@ -246,7 +246,15 @@ fn walk(buf: &[u8], start: usize, end: usize) -> crate::Result<Vec<BoxSpan>> {
             1 => {
                 let Some(bytes) = buf.get(pos + 8..pos + 16) else { break };
                 let large = u64::from_be_bytes(bytes.try_into().unwrap_or([0; 8]));
-                (16usize, large as usize)
+                // `large as usize` would truncate on a 32-bit target (the crate
+                // cross-compiles to 32-bit Android ABIs), and a box mis-sized by
+                // a dropped high word could make the metadata box be walked wrong
+                // or missed — a false clean. The input is capped at 2 GB, so any
+                // size past usize is malformed regardless of platform.
+                let Ok(size) = usize::try_from(large) else {
+                    return Err(Error::malformed(FORMAT, "64-bit box size exceeds addressable range"));
+                };
+                (16usize, size)
             }
             // Runs to the end of the enclosing range.
             0 => (8usize, end - pos),

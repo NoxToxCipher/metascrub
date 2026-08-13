@@ -21,13 +21,15 @@
 
 use std::path::PathBuf;
 use std::sync::mpsc::{channel, Receiver, Sender};
-use zeroize::Zeroizing;
+use std::sync::{Arc, Mutex};
+use zeroize::{Zeroize, Zeroizing};
 
 use eframe::egui;
 use egui::{Color32, FontFamily, FontId, RichText, Stroke};
 use metascrub::{Assurance, ColorProfile, Orientation, Policy, Sanitized};
 use pixelwash::{Strength, WashReport};
 
+mod i18n;
 mod privacy;
 mod reference;
 
@@ -56,6 +58,70 @@ fn mono(size: f32) -> FontId {
     FontId::new(size, FontFamily::Monospace)
 }
 
+/// Add a Myanmar (Burmese) font as a fallback for both text families.
+///
+/// egui's default fonts (Ubuntu-Light, Hack) cover Latin and Cyrillic — so
+/// English, Russian and Latin render — but not the Myanmar script, so without
+/// this the entire Burmese interface renders as empty boxes. Padauk (SIL, OFL)
+/// is appended as a *fallback*: Latin and Cyrillic keep the default typeface,
+/// and only code points the default fonts lack fall through to Padauk. It is
+/// registered for the monospace family too, because the status badges and the
+/// finding rows draw in it.
+fn install_fonts(ctx: &egui::Context) {
+    use egui::{FontData, FontDefinitions, FontFamily};
+
+    // Pinned provenance — see fonts/PROVENANCE.md. Padauk (SIL, OFL-1.1),
+    // SHA-256 c89cf56e572abda9652d9e54203bd729b0c59541c4b569046b9b61acd0b532f3.
+    // This is a third-party binary that `cargo deny` cannot see. The length is
+    // checked at compile time so a swapped or truncated font of a different size
+    // fails the build; the SHA-256 in PROVENANCE.md is the authoritative value
+    // (re-verify it in CI).
+    const PADAUK: &[u8] = include_bytes!("../fonts/Padauk-Regular.ttf");
+    const _: () = assert!(
+        PADAUK.len() == 498_860,
+        "bundled Padauk font changed size — re-check fonts/PROVENANCE.md and the SHA-256"
+    );
+
+    let mut fonts = FontDefinitions::default();
+    fonts.font_data.insert("padauk".to_owned(), std::sync::Arc::new(FontData::from_static(PADAUK)));
+    for family in [FontFamily::Proportional, FontFamily::Monospace] {
+        fonts.families.entry(family).or_default().push("padauk".to_owned());
+    }
+    ctx.set_fonts(fonts);
+}
+
+/// Draw the Crake mark — a small teal bird — inside `rect`, from the suite's
+/// `icon.svg` (viewBox 15,16 66x68): body + head circles, a beak triangle, and
+/// an eye. Drawn from primitives, so no image/SVG dependency is pulled in.
+fn draw_crake(painter: &egui::Painter, rect: egui::Rect, tint: Color32, eye: Color32) {
+    let sx = rect.width() / 66.0;
+    let sy = rect.height() / 68.0;
+    let map = |x: f32, y: f32| egui::pos2(rect.left() + (x - 15.0) * sx, rect.top() + (y - 16.0) * sy);
+    let s = (sx + sy) / 2.0; // near-uniform radius scale
+    painter.circle_filled(map(52.0, 56.0), 24.0 * s, tint); // body
+    painter.circle_filled(map(50.0, 34.0), 13.0 * s, tint); // head
+    painter.add(egui::Shape::convex_polygon(
+        vec![map(38.0, 29.0), map(38.0, 43.0), map(20.0, 35.0)], // beak
+        tint,
+        Stroke::NONE,
+    ));
+    painter.circle_filled(map(53.0, 31.0), 3.6 * s, eye); // eye (a background dot, like the SVG cut-out)
+}
+
+/// Draw the Crake mark as a small brand watermark in a corner. Placed bottom-left
+/// because the bottom-right corner holds the Save button.
+fn draw_crake_mark(ctx: &egui::Context, area: egui::Rect) {
+    let size = 24.0;
+    let margin = 12.0;
+    let rect = egui::Rect::from_min_size(
+        egui::pos2(area.left() + margin, area.bottom() - size - margin),
+        egui::vec2(size, size),
+    );
+    let painter =
+        ctx.layer_painter(egui::LayerId::new(egui::Order::Foreground, egui::Id::new("crake_mark")));
+    draw_crake(&painter, rect, theme::ACCENT, theme::GROUND);
+}
+
 // ---------------------------------------------------------------------------
 // One file's outcome
 // ---------------------------------------------------------------------------
@@ -69,6 +135,10 @@ struct Entry {
     wash: Option<Result<WashReport, String>>,
     /// Where the cleaned copy went, once saved.
     saved_to: Option<PathBuf>,
+    /// A stable random name for this file, generated once when the entry lands.
+    /// Kept on the entry so the card can show the exact name the file will be
+    /// saved under, and so it does not change on every repaint or every save.
+    random_stem: String,
 }
 
 impl Entry {
@@ -81,11 +151,25 @@ impl Entry {
         matches!(self.assurance(), Some(Assurance::Complete | Assurance::BestEffort))
             && self.saved_to.is_none()
     }
+
+    /// The extension the saved copy should carry. Pixel washing always
+    /// re-encodes to JPEG, so a washed PNG/WebP/TIFF/GIF must be saved as `.jpg`
+    /// — writing JPEG bytes into a `.png` name would produce a file that will
+    /// not open. Otherwise keep the original file's extension.
+    fn output_ext(&self) -> Option<String> {
+        if matches!(self.wash, Some(Ok(_))) {
+            Some("jpg".to_string())
+        } else {
+            self.path.extension().map(|e| e.to_string_lossy().into_owned())
+        }
+    }
 }
 
-/// Work happens off the UI thread so a large PDF cannot freeze the window.
+/// Work happens off the UI thread so a large PDF cannot freeze the window. The
+/// first field is the generation the work was started under; a result whose
+/// generation is stale (a setting changed while it was in flight) is discarded.
 enum Job {
-    Done(PathBuf, Result<Sanitized, String>, Option<Result<WashReport, String>>),
+    Done(u64, PathBuf, Result<Sanitized, String>, Option<Result<WashReport, String>>),
 }
 
 // ---------------------------------------------------------------------------
@@ -95,8 +179,11 @@ enum Job {
 struct App {
     entries: Vec<Entry>,
     policy: Policy,
-    tx: Sender<Job>,
+    /// Receives results from the worker pool. The matching senders live in the
+    /// pool workers (see `worker_loop`), which keep the channel open.
     rx: Receiver<Job>,
+    /// Sends files to the bounded worker pool.
+    job_tx: Sender<WorkItem>,
     pending: usize,
     /// Set when a save fails, so the failure is visible rather than silent.
     error: Option<String>,
@@ -107,53 +194,164 @@ struct App {
     wash_strength: Strength,
     /// Shown the first time washing is switched on, before any file is touched.
     intro_open: bool,
+    /// Whether the pixel-washing explanation has been shown this session. Kept
+    /// in memory, not on disk, so the tool leaves no "was used here" trace.
+    intro_seen: bool,
     /// The reference panel, explaining every removal and the PRNU work.
     reference_open: bool,
+    /// Handbook search query; empty shows everything.
+    ref_query: String,
+    /// Handbook category filter; `None` shows all categories.
+    ref_category: Option<RefCategory>,
+    /// Interface language for the core screen.
+    lang: i18n::Lang,
+    /// Whether to give each cleaned copy a random name. The file name is
+    /// metadata too (dates, places, a camera prefix), so this is on by default —
+    /// stripping the name is the more protective choice. Unchecked keeps the
+    /// original name with a `.clean` suffix.
+    randomize_name: bool,
+
+    /// Bumped whenever the working set is re-processed (a settings toggle, or a
+    /// clear). A worker result tagged with an older generation is discarded, so
+    /// toggling a setting while a large file is still in flight cannot leave a
+    /// stale, old-policy finding on screen.
+    generation: u64,
+    /// Paths with a worker running, so a re-run knows to reprocess a file that
+    /// has not landed yet, and a second drop of the same file is not queued twice.
+    in_flight: Vec<PathBuf>,
+}
+
+/// The sections of the handbook, used for the category filter and search.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum RefCategory {
+    FileTypes,
+    Metadata,
+    Raw,
+    Fingerprint,
+    BeyondFile,
+    Myths,
+    Evidence,
+}
+
+impl RefCategory {
+    const ALL: [RefCategory; 7] = [
+        RefCategory::FileTypes,
+        RefCategory::Metadata,
+        RefCategory::Raw,
+        RefCategory::Fingerprint,
+        RefCategory::BeyondFile,
+        RefCategory::Myths,
+        RefCategory::Evidence,
+    ];
+    fn label(self, lang: i18n::Lang) -> &'static str {
+        let t = i18n::T::for_lang(lang);
+        match self {
+            RefCategory::FileTypes => t.cat_files,
+            RefCategory::Metadata => t.cat_metadata,
+            RefCategory::Raw => t.cat_raw,
+            RefCategory::Fingerprint => t.cat_fingerprint,
+            RefCategory::BeyondFile => t.cat_beyond,
+            RefCategory::Myths => t.cat_myths,
+            RefCategory::Evidence => t.cat_evidence,
+        }
+    }
+}
+
+/// True if the (already-lowercased) query is empty or appears in any of the
+/// given text fields. The search that powers the handbook.
+fn handbook_hit(query: &str, fields: &[&str]) -> bool {
+    query.is_empty() || fields.iter().any(|f| f.to_lowercase().contains(query))
+}
+
+/// One file handed to the worker pool. Cheap to buffer (no file bytes), so a
+/// large drop queues these rather than spawning a thread each.
+struct WorkItem {
+    path: PathBuf,
+    policy: Policy,
+    wash: Option<Strength>,
+    lang: i18n::Lang,
+    generation: u64,
+}
+
+/// A pool worker: pull one job at a time, process it, post the result. Bounding
+/// the number of these bounds peak memory — only `pool size` files are read and
+/// parsed at once, instead of one 2 GB-capable thread per dropped file, which a
+/// folder of thousands of files would otherwise spawn all at once.
+fn worker_loop(jobs: Arc<Mutex<Receiver<WorkItem>>>, results: Sender<Job>) {
+    loop {
+        // Hold the lock only for the receive; processing runs unlocked so the
+        // other workers proceed in parallel.
+        let item = match jobs.lock() {
+            Ok(rx) => rx.recv(),
+            Err(_) => return, // a worker panicked holding the lock; give up
+        };
+        let Ok(item) = item else { return }; // channel closed: app is exiting
+        let (mut result, wash_report) = process(&item.path, &item.policy, item.wash, item.lang);
+        if let Ok(s) = &mut result {
+            if s.report.assurance == Assurance::None {
+                s.data.zeroize();
+            }
+        }
+        if results.send(Job::Done(item.generation, item.path, result, wash_report)).is_err() {
+            return; // UI gone
+        }
+    }
+}
+
+impl Drop for App {
+    fn drop(&mut self) {
+        // Wipe the cleaned bytes still held in the entry list on exit.
+        self.wipe_entries();
+    }
 }
 
 impl Default for App {
     fn default() -> Self {
         let (tx, rx) = channel();
+        // Bounded worker pool: a handful of long-lived threads draining a job
+        // queue, instead of one thread per file.
+        let (job_tx, job_rx) = channel::<WorkItem>();
+        let job_rx = Arc::new(Mutex::new(job_rx));
+        let workers = std::thread::available_parallelism().map(|n| n.get()).unwrap_or(2).clamp(1, 4);
+        for _ in 0..workers {
+            let jobs = Arc::clone(&job_rx);
+            let results = tx.clone();
+            std::thread::spawn(move || worker_loop(jobs, results));
+        }
+        // `tx` is not stored: the pool workers each hold a clone, which keeps the
+        // results channel open, and nothing else sends results.
+        drop(tx);
         Self {
+            job_tx,
             entries: Vec::new(),
             policy: Policy { max_input_bytes: Some(MAX_FILE_BYTES), ..Policy::default() },
-            tx,
             rx,
             pending: 0,
             error: None,
             wash_enabled: false,
             wash_strength: Strength::default(),
             intro_open: false,
+            intro_seen: false,
             reference_open: false,
+            ref_query: String::new(),
+            ref_category: None,
+            lang: i18n::Lang::En,
+            randomize_name: true,
+            generation: 0,
+            in_flight: Vec::new(),
         }
     }
 }
 
-/// Marker recording that the pixel-washing explanation has been read, so it
-/// appears once rather than every launch. A file rather than a registry entry
-/// or a settings service: one path, easy to find, easy to delete.
-fn intro_marker() -> Option<PathBuf> {
-    let base = std::env::var_os("APPDATA")
-        .or_else(|| std::env::var_os("XDG_CONFIG_HOME"))
-        .or_else(|| std::env::var_os("HOME"))?;
-    Some(PathBuf::from(base).join("metascrub").join("prnu-intro-seen"))
-}
-
-fn intro_already_seen() -> bool {
-    intro_marker().map(|p| p.exists()).unwrap_or(false)
-}
-
-fn remember_intro_seen() {
-    if let Some(path) = intro_marker() {
-        if let Some(dir) = path.parent() {
-            let _ = std::fs::create_dir_all(dir);
-        }
-        let _ = std::fs::write(path, b"read\n");
-    }
-}
+// The pixel-washing explanation is shown once per session, tracked in memory
+// (`App::intro_seen`), not with a file on disk. An earlier version wrote a
+// marker to %APPDATA%\metascrub\, but that directory's mere existence records
+// that the tool was run on this machine — the same class of trace privacy.rs
+// exists to remove. With this gone, metascrub writes no persistent files at all.
 
 impl App {
     fn new(cc: &eframe::CreationContext<'_>) -> Self {
+        install_fonts(&cc.egui_ctx);
         cc.egui_ctx.all_styles_mut(|style| {
             style.visuals.dark_mode = true;
             style.visuals.panel_fill = theme::GROUND;
@@ -194,44 +392,96 @@ impl App {
 
     fn queue(&mut self, paths: Vec<PathBuf>) {
         for path in paths {
-            if self.entries.iter().any(|e| e.path == path) {
-                continue; // already listed
+            // Skip a path that is already shown or already has a worker running,
+            // so dropping the same file twice before its first result lands does
+            // not spawn two workers and push two entries for it.
+            if self.entries.iter().any(|e| e.path == path) || self.in_flight.contains(&path) {
+                continue;
             }
             self.pending += 1;
-            let tx = self.tx.clone();
-            let policy = self.policy.clone();
-            let wash = self.wash_enabled.then_some(self.wash_strength);
-            std::thread::spawn(move || {
-                let (result, wash_report) = process(&path, &policy, wash);
-                let _ = tx.send(Job::Done(path, result, wash_report));
+            self.in_flight.push(path.clone());
+            // Hand the file to the bounded pool rather than spawning a thread per
+            // file, so a folder of thousands of files cannot spawn thousands of
+            // threads each holding up to a 2 GB buffer. (The worker wipes the
+            // original for un-cleanable files; see `worker_loop`.)
+            let sent = self.job_tx.send(WorkItem {
+                path: path.clone(),
+                policy: self.policy.clone(),
+                wash: self.wash_enabled.then_some(self.wash_strength),
+                lang: self.lang,
+                generation: self.generation,
             });
+            if sent.is_err() {
+                // Only reachable if the whole pool has died. Undo the accounting
+                // so a lost job cannot pin `pending` (which would spin the
+                // repaint loop forever waiting for a result that never comes).
+                self.pending = self.pending.saturating_sub(1);
+                self.in_flight.retain(|p| p != &path);
+            }
+        }
+    }
+
+    /// Zeroize the cleaned bytes held in the entry list. A Complete output is
+    /// low-sensitivity, but a BestEffort output still carries the *retained*
+    /// metadata the UI warns about (a raw's kept maker note, for instance), so
+    /// none of it should linger in freed heap after a Clear, a re-run, or exit.
+    fn wipe_entries(&mut self) {
+        for e in &mut self.entries {
+            if let Ok(s) = &mut e.result {
+                s.data.zeroize();
+            }
         }
     }
 
     fn drain(&mut self) {
-        while let Ok(Job::Done(path, result, wash)) = self.rx.try_recv() {
+        while let Ok(Job::Done(generation, path, result, wash)) = self.rx.try_recv() {
             self.pending = self.pending.saturating_sub(1);
-            self.entries.push(Entry { path, result, wash, saved_to: None });
+            if generation != self.generation {
+                // A result from before the last settings change or clear. Its
+                // path was already re-queued (its live worker holds the current
+                // in_flight slot), so drop this and leave in_flight untouched.
+                continue;
+            }
+            self.in_flight.retain(|p| p != &path);
+            if self.entries.iter().any(|e| e.path == path) {
+                continue; // guard against a duplicate landing
+            }
+            self.entries.push(Entry {
+                path,
+                result,
+                wash,
+                saved_to: None,
+                random_stem: metascrub::random_stem(24),
+            });
         }
     }
 
     /// Re-run everything against the current policy, so toggling a setting
-    /// updates the findings rather than leaving stale ones on screen.
+    /// updates the findings rather than leaving stale ones on screen. Files
+    /// still in flight are re-queued too (not just the completed ones), and the
+    /// generation bump makes their old-policy results be discarded on arrival.
     fn rerun(&mut self) {
-        let paths: Vec<PathBuf> = self.entries.iter().map(|e| e.path.clone()).collect();
+        let mut paths: Vec<PathBuf> = self.entries.iter().map(|e| e.path.clone()).collect();
+        paths.extend(self.in_flight.iter().cloned());
+        self.wipe_entries();
         self.entries.clear();
+        self.in_flight.clear();
+        self.generation += 1;
         self.queue(paths);
     }
 
     fn save_all(&mut self) {
         self.error = None;
+        let randomize = self.randomize_name;
         for entry in self.entries.iter_mut().filter(|e| e.is_writable()) {
+            let ext = entry.output_ext();
             let Ok(sanitized) = &entry.result else { continue };
-            let dst = clean_name(&entry.path);
+            let stem = randomize.then_some(entry.random_stem.as_str());
+            let dst = output_name(&entry.path, stem, ext.as_deref());
             match write_atomic(&dst, &sanitized.data) {
                 Ok(()) => entry.saved_to = Some(dst),
                 Err(e) => {
-                    self.error = Some(format!("could not write {}: {e}", dst.display()));
+                    self.error = Some(format!("{} {}: {e}", self.tr().could_not_write, dst.display()));
                     break;
                 }
             }
@@ -272,6 +522,7 @@ fn process(
     path: &std::path::Path,
     policy: &Policy,
     wash: Option<Strength>,
+    lang: i18n::Lang,
 ) -> (Result<Sanitized, String>, Option<Result<WashReport, String>>) {
     // Refuse an oversize file by its size on disk, before it is read. The
     // policy also carries this limit, but that check only runs after the bytes
@@ -280,9 +531,12 @@ fn process(
         Ok(m) if m.len() > MAX_FILE_BYTES => {
             return (
                 Err(format!(
-                    "file is {:.1} GB, larger than the {} GB limit",
+                    "{}{:.1}{}{}{}",
+                    i18n::T::for_lang(lang).size_a,
                     m.len() as f64 / 1e9,
-                    MAX_FILE_BYTES / 1_000_000_000
+                    i18n::T::for_lang(lang).size_b,
+                    MAX_FILE_BYTES / 1_000_000_000,
+                    i18n::T::for_lang(lang).size_c
                 )),
                 None,
             );
@@ -298,7 +552,9 @@ fn process(
         Err(e) => return (Err(e.to_string()), None),
     };
 
-    let stripped = match metascrub::sanitize(&bytes, policy) {
+    // Every interactive clean checks its own output: re-scan for anything
+    // removable that survived, and confirm the result is reproducible.
+    let stripped = match metascrub::sanitize_verified(&bytes, policy) {
         Ok(s) => s,
         Err(e) => return (Err(e.to_string()), None),
     };
@@ -307,19 +563,48 @@ fn process(
         return (Ok(stripped), None);
     };
 
-    // Only images can be washed. Anything else keeps its stripped form and says
-    // so, rather than silently ignoring the setting.
+    // Fingerprint reduction only makes sense for a camera-captured raster photo.
+    // It re-encodes and downscales the pixels, so it cannot apply to a raw (that
+    // would destroy the raw, and the raw is the strongest fingerprint carrier),
+    // nor to vector, document or non-photo files (there is no sensor pattern).
+    // Say so plainly instead of failing with a decode error.
+    use metascrub::Format;
+    let not_applicable = match metascrub::detect(&bytes) {
+        Format::Jpeg | Format::Png | Format::WebP | Format::Tiff | Format::Gif => None,
+        Format::Raw => Some(i18n::T::for_lang(lang).fp_raw.to_string()),
+        Format::Heif | Format::Avif => Some(i18n::T::for_lang(lang).fp_heif.to_string()),
+        _ => Some(i18n::T::for_lang(lang).fp_nonphoto.to_string()),
+    };
+    if let Some(reason) = not_applicable {
+        return (Ok(stripped), Some(Err(reason)));
+    }
+
     let settings = pixelwash::Settings { strength, ..Default::default() };
     match pixelwash::wash(&bytes, &settings) {
         Ok(washed) => {
-            let report = washed.report.clone();
+            let wash_report = washed.report.clone();
             // The intermediate carries the full-resolution washed image.
             let washed_data = Zeroizing::new(washed.data);
-            match metascrub::sanitize(&washed_data, policy) {
-                Ok(final_pass) => (
-                    Ok(Sanitized { data: final_pass.data, report: stripped.report }),
-                    Some(Ok(report)),
-                ),
+            // Verify the bytes that actually get saved, not the pre-wash strip.
+            // pixelwash always re-encodes to JPEG, so the saved artifact is a
+            // fresh JPEG; its format, size and verification must describe *it*.
+            match metascrub::sanitize_verified(&washed_data, policy) {
+                Ok(final_pass) => {
+                    // Keep the original file's findings (the GPS, the maker note,
+                    // the thumbnail the user needs to know were there), but retag
+                    // the format, size and verification to the washed JPEG that
+                    // lands on disk. Otherwise a 40 MP -> 10 MP reduction looks
+                    // like it barely changed the file, and the "verified" tick
+                    // would refer to a different artifact than the one saved.
+                    let mut report = stripped.report;
+                    report.format = final_pass.report.format;
+                    report.output_len = final_pass.data.len();
+                    report.verification = final_pass.report.verification;
+                    (
+                        Ok(Sanitized { data: final_pass.data, report }),
+                        Some(Ok(wash_report)),
+                    )
+                }
                 Err(e) => (Ok(stripped), Some(Err(e.to_string()))),
             }
         }
@@ -328,14 +613,35 @@ fn process(
 }
 
 /// `holiday.jpg` becomes `holiday.clean.jpg`. The original is never touched:
-/// nothing is overwritten unless the user explicitly asks for it.
-fn clean_name(path: &std::path::Path) -> PathBuf {
+/// nothing is overwritten unless the user explicitly asks for it. `ext` is the
+/// extension to give the copy (from [`Entry::output_ext`]), which differs from
+/// the source when the image was washed to JPEG.
+fn clean_name(path: &std::path::Path, ext: Option<&str>) -> PathBuf {
     let stem = path.file_stem().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default();
-    let name = match path.extension() {
-        Some(ext) => format!("{stem}.clean.{}", ext.to_string_lossy()),
-        None => format!("{stem}.clean"),
+    let name = match ext {
+        Some(ext) if !ext.is_empty() => format!("{stem}.clean.{ext}"),
+        _ => format!("{stem}.clean"),
     };
     path.with_file_name(name)
+}
+
+/// The name a cleaned copy is saved under. `random_stem` is the file's
+/// pre-generated random name (from the [`Entry`]) to use when random naming is
+/// on; `None` keeps the original name with a `.clean` suffix. `ext` is the
+/// extension the saved bytes call for (see [`Entry::output_ext`]), lower-cased
+/// for the random form so the file still opens by double-click.
+fn output_name(path: &std::path::Path, random_stem: Option<&str>, ext: Option<&str>) -> PathBuf {
+    match random_stem {
+        Some(stem) => {
+            let dir = path.parent().unwrap_or_else(|| std::path::Path::new("."));
+            let name = match ext.map(|e| e.to_lowercase()) {
+                Some(e) if !e.is_empty() => format!("{stem}.{e}"),
+                _ => stem.to_string(),
+            };
+            dir.join(name)
+        }
+        None => clean_name(path, ext),
+    }
 }
 
 /// Write cleaned bytes through the library's single hardened writer.
@@ -375,6 +681,7 @@ impl eframe::App for App {
     fn ui(&mut self, ui: &mut egui::Ui, _frame: &mut eframe::Frame) {
         let ctx = ui.ctx().clone();
         let ctx = &ctx;
+        let window_rect = ui.max_rect(); // full window, before panels consume it
         self.drain();
         if self.pending > 0 {
             ctx.request_repaint();
@@ -392,6 +699,7 @@ impl eframe::App for App {
         self.bottom_bar(ui);
         self.intro_window(ctx);
         self.reference_window(ctx);
+        draw_crake_mark(ctx, window_rect);
 
         egui::CentralPanel::default().show(ui, |ui| {
             if self.entries.is_empty() && self.pending == 0 {
@@ -407,7 +715,7 @@ impl eframe::App for App {
                         ui.horizontal(|ui| {
                             ui.spinner();
                             ui.label(
-                                RichText::new(format!("reading {} file(s)", self.pending))
+                                RichText::new(format!("{}{}{}", self.tr().reading_pre, self.pending, self.tr().reading_post))
                                     .color(theme::INK_DIM),
                             );
                         });
@@ -419,6 +727,29 @@ impl eframe::App for App {
 }
 
 impl App {
+    /// Current-language strings for the core screen.
+    fn tr(&self) -> i18n::T {
+        i18n::T::for_lang(self.lang)
+    }
+
+    fn strength_label(&self, s: Strength) -> &'static str {
+        let t = self.tr();
+        match s {
+            Strength::Gentle => t.wash_gentle,
+            Strength::Balanced => t.wash_balanced,
+            Strength::Thorough => t.wash_thorough,
+        }
+    }
+
+    fn strength_desc(&self, s: Strength) -> &'static str {
+        let t = self.tr();
+        match s {
+            Strength::Gentle => t.wash_gentle_desc,
+            Strength::Balanced => t.wash_balanced_desc,
+            Strength::Thorough => t.wash_thorough_desc,
+        }
+    }
+
     fn top_bar(&mut self, ui: &mut egui::Ui) {
         egui::Panel::top("top")
             .frame(egui::Frame::default().fill(theme::PANEL2).inner_margin(10.0))
@@ -426,70 +757,94 @@ impl App {
                 ui.horizontal(|ui| {
                     ui.label(RichText::new("metascrub").size(15.0).strong().color(theme::INK));
                     ui.label(
-                        RichText::new("removes what a file says about you")
+                        RichText::new(self.tr().tagline)
                             .size(12.0)
                             .color(theme::INK_FAINT),
                     );
 
                     ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
-                        if ui.button("What is removed, and why").clicked() {
+                        if ui.button(self.tr().handbook).clicked() {
                             self.reference_open = true;
                         }
                         ui.separator();
-
-                        // Both settings keep *more* than the safe minimum, so
-                        // the default state is the protective one.
-                        let mut keep_rotation =
-                            self.policy.orientation == Orientation::PreserveMinimal;
-                        if ui
-                            .checkbox(&mut keep_rotation, "Keep rotation")
-                            .on_hover_text(
-                                "Photos will not display sideways. The file keeps a small \
-                                 EXIF block holding only the rotation.",
-                            )
-                            .changed()
-                        {
-                            self.policy.orientation = if keep_rotation {
-                                Orientation::PreserveMinimal
-                            } else {
-                                Orientation::Drop
-                            };
-                            self.rerun();
+                        for lang in [i18n::Lang::La, i18n::Lang::My, i18n::Lang::Ru, i18n::Lang::En] {
+                            if ui
+                                .selectable_label(self.lang == lang, lang.label())
+                                .clicked()
+                            {
+                                self.lang = lang;
+                            }
                         }
-
-                        let mut keep_icc = self.policy.color_profile == ColorProfile::Keep;
-                        if ui
-                            .checkbox(&mut keep_icc, "Keep colour")
-                            .on_hover_text(
-                                "Wide-gamut images render correctly. The profile is a blob \
-                                 we do not parse and can name your monitor.",
-                            )
-                            .changed()
-                        {
-                            self.policy.color_profile =
-                                if keep_icc { ColorProfile::Keep } else { ColorProfile::Drop };
-                            self.rerun();
+                        if self.lang == i18n::Lang::My {
+                            ui.label(RichText::new("မူကြမ်း / draft").size(11.0).color(theme::WARN))
+                                .on_hover_text(
+                                    "Burmese is an unverified draft translation. The English text is authoritative until a native speaker has checked it.",
+                                );
                         }
                     });
                 });
 
-                // Second row: the pixel work, kept visually apart from the
+                // All the metadata settings on their own row, left-to-right, so
+                // the labels read before their controls and the brand + language
+                // row above keeps its room (the tagline used to end up under the
+                // Keep colour box). Keep-rotation and keep-colour change the
+                // findings and rerun; the output name only renames the copy.
+                ui.add_space(2.0);
+                ui.horizontal(|ui| {
+                    // Both keep *more* than the safe minimum, so the default
+                    // state is the protective one.
+                    let mut keep_rotation =
+                        self.policy.orientation == Orientation::PreserveMinimal;
+                    if ui
+                        .checkbox(&mut keep_rotation, self.tr().keep_rotation)
+                        .on_hover_text(self.tr().help_rotation)
+                        .changed()
+                    {
+                        self.policy.orientation = if keep_rotation {
+                            Orientation::PreserveMinimal
+                        } else {
+                            Orientation::Drop
+                        };
+                        self.rerun();
+                    }
+
+                    let mut keep_icc = self.policy.color_profile == ColorProfile::Keep;
+                    if ui
+                        .checkbox(&mut keep_icc, self.tr().keep_colour)
+                        .on_hover_text(self.tr().help_colour)
+                        .changed()
+                    {
+                        self.policy.color_profile =
+                            if keep_icc { ColorProfile::Keep } else { ColorProfile::Drop };
+                        self.rerun();
+                    }
+
+                    ui.separator();
+
+                    // The file name is metadata too (dates, places, a camera
+                    // prefix), so this is a privacy choice. A checkbox like the
+                    // others, ON by default: for a privacy tool, stripping the
+                    // name is the more protective option, and the exact random
+                    // name is shown on each file's card. Unchecked keeps the
+                    // original name with a `.clean` suffix.
+                    let label = self.tr().out_name_random;
+                    let hint = self.tr().help_out_name;
+                    ui.checkbox(&mut self.randomize_name, label).on_hover_text(hint);
+                });
+
+                // The pixel work, on its own row, kept visually apart from the
                 // metadata settings above because it is a different kind of
                 // claim and must not be read as part of the same guarantee.
                 ui.add_space(2.0);
                 ui.horizontal(|ui| {
                     let mut enabled = self.wash_enabled;
                     if ui
-                        .checkbox(&mut enabled, "Reduce camera fingerprint")
-                        .on_hover_text(
-                            "Denoises, shrinks and re-compresses the photograph to make the \
-                             pattern your sensor leaves in the pixels harder to match. \
-                             Reduces it; cannot remove it. Costs image quality.",
-                        )
+                        .checkbox(&mut enabled, self.tr().reduce_fingerprint)
+                        .on_hover_text(self.tr().help_fingerprint)
                         .changed()
                     {
                         self.wash_enabled = enabled;
-                        if enabled && !intro_already_seen() {
+                        if enabled && !self.intro_seen {
                             self.intro_open = true;
                         } else {
                             self.rerun();
@@ -499,33 +854,25 @@ impl App {
                     if self.wash_enabled {
                         let before = self.wash_strength;
                         egui::ComboBox::from_id_salt("wash_strength")
-                            .selected_text(match self.wash_strength {
-                                Strength::Gentle => "Gentle",
-                                Strength::Balanced => "Balanced",
-                                Strength::Thorough => "Thorough",
-                            })
+                            .selected_text(self.strength_label(self.wash_strength))
                             .show_ui(ui, |ui| {
                                 for s in [Strength::Gentle, Strength::Balanced, Strength::Thorough]
                                 {
-                                    let label = match s {
-                                        Strength::Gentle => "Gentle",
-                                        Strength::Balanced => "Balanced",
-                                        Strength::Thorough => "Thorough",
-                                    };
+                                    let label = self.strength_label(s);
                                     ui.selectable_value(&mut self.wash_strength, s, label)
-                                        .on_hover_text(s.describe());
+                                        .on_hover_text(self.strength_desc(s));
                                 }
                             });
                         if before != self.wash_strength {
                             self.rerun();
                         }
                         ui.label(
-                            RichText::new(self.wash_strength.describe())
+                            RichText::new(self.strength_desc(self.wash_strength))
                                 .size(11.0)
                                 .color(theme::INK_FAINT),
                         );
                         ui.label(
-                            RichText::new("best effort only").font(mono(10.0)).color(theme::WARN),
+                            RichText::new(self.tr().best_effort_only).font(mono(10.0)).color(theme::WARN),
                         );
                     }
                 });
@@ -538,7 +885,8 @@ impl App {
             return;
         }
         let mut open = true;
-        egui::Window::new("Before you use this")
+        egui::Window::new(self.tr().intro_title)
+            .id(egui::Id::new("intro_window"))
             .open(&mut open)
             .collapsible(false)
             .resizable(false)
@@ -546,35 +894,35 @@ impl App {
             .default_width(520.0)
             .show(ctx, |ui| {
                 ui.label(
-                    RichText::new("About your camera's fingerprint")
+                    RichText::new(self.tr().fp_title)
                         .size(16.0)
                         .strong()
                         .color(theme::INK),
                 );
                 ui.add_space(8.0);
-                ui.label(RichText::new(reference::FIRST_USE).size(13.0).color(theme::INK_DIM));
+                ui.label(RichText::new(reference::first_use(self.lang)).size(13.0).color(theme::INK_DIM));
                 ui.add_space(12.0);
                 ui.horizontal(|ui| {
                     if ui
                         .add(
                             egui::Button::new(
-                                RichText::new("I understand").color(theme::GROUND).strong(),
+                                RichText::new(self.tr().i_understand).color(theme::GROUND).strong(),
                             )
                             .fill(theme::ACCENT),
                         )
                         .clicked()
                     {
-                        remember_intro_seen();
+                        self.intro_seen = true;
                         self.intro_open = false;
                         self.rerun();
                     }
-                    if ui.button("Read the full explanation").clicked() {
-                        remember_intro_seen();
+                    if ui.button(self.tr().read_full).clicked() {
+                        self.intro_seen = true;
                         self.intro_open = false;
                         self.reference_open = true;
                         self.rerun();
                     }
-                    if ui.button("Cancel").clicked() {
+                    if ui.button(self.tr().cancel).clicked() {
                         self.wash_enabled = false;
                         self.intro_open = false;
                     }
@@ -594,195 +942,339 @@ impl App {
             return;
         }
         let mut open = self.reference_open;
-        egui::Window::new("What is removed, and why")
+        egui::Window::new(self.tr().handbook)
+            .id(egui::Id::new("handbook_window"))
             .open(&mut open)
             .collapsible(false)
-            .default_width(680.0)
+            .default_width(720.0)
             .default_height(620.0)
-            .vscroll(true)
+            .vscroll(false)
             .show(ctx, |ui| {
                 // Cap the measure. Dragged to full width on a wide monitor, the
                 // body text ran off the right edge, and lines that long are
-                // miserable to read even when they fit.
-                ui.set_max_width(660.0);
+                // miserable to read even when they fit. Wide enough that the
+                // category chips sit on a single row.
+                ui.set_max_width(700.0);
                 ui.style_mut().wrap_mode = Some(egui::TextWrapMode::Wrap);
 
-                ui.label(RichText::new("Metadata").size(17.0).strong().color(theme::INK));
-                ui.label(
-                    RichText::new(
-                        "Files are rebuilt from a list of what to keep, so anything not named \
-                         here is dropped as well, including private sections this tool has \
-                         never seen.",
-                    )
-                    .size(12.5)
-                    .color(theme::INK_FAINT),
-                );
-                ui.add_space(10.0);
+                // Handbook toolbar: search across everything, plus category filter.
+                ui.horizontal(|ui| {
+                    ui.label(RichText::new(self.tr().search).font(mono(10.5)).color(theme::INK_FAINT));
+                    ui.add(
+                        egui::TextEdit::singleline(&mut self.ref_query)
+                            .hint_text("gps, serial, thumbnail, raw, pdf\u{2026}")
+                            .desired_width(300.0),
+                    );
+                    if !self.ref_query.is_empty() && ui.button(self.tr().clear).clicked() {
+                        self.ref_query.clear();
+                    }
+                });
+                ui.add_space(6.0);
+                ui.horizontal_wrapped(|ui| {
+                    if ui.selectable_label(self.ref_category.is_none(), "All").clicked() {
+                        self.ref_category = None;
+                    }
+                    for c in RefCategory::ALL {
+                        if ui.selectable_label(self.ref_category == Some(c), c.label(self.lang)).clicked() {
+                            self.ref_category = if self.ref_category == Some(c) { None } else { Some(c) };
+                        }
+                    }
+                });
+                ui.add_space(8.0);
+                ui.separator();
+                ui.add_space(8.0);
 
-                for item in reference::METADATA {
-                    egui::Frame::default()
-                        .fill(theme::PANEL)
-                        .stroke(Stroke::new(1.0, theme::LINE))
-                        .corner_radius(6.0)
-                        .inner_margin(10.0)
-                        .show(ui, |ui| {
-                            ui.label(
-                                RichText::new(item.name).size(13.5).strong().color(theme::ACCENT),
-                            );
-                            ui.add_space(3.0);
-                            ui.label(RichText::new(item.what).size(12.5).color(theme::INK));
+                let q = self.ref_query.trim().to_lowercase();
+                let cat = self.ref_category;
+                let show_cat = |c: RefCategory| cat.is_none_or(|s| s == c);
+                let query_display = self.ref_query.clone();
+
+                // The toolbar above stays pinned; only the entries scroll.
+                egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
+                if show_cat(RefCategory::FileTypes) {
+                    let items: Vec<_> = reference::file_types(self.lang)
+                        .iter()
+                        .filter(|ft| handbook_hit(&q, &[ft.name, ft.carries, ft.identifies]))
+                        .collect();
+                    if !items.is_empty() {
+                        ui.label(
+                            RichText::new(self.tr().hb_filetypes)
+                                .size(17.0)
+                                .strong()
+                                .color(theme::INK),
+                        );
+                        ui.label(
+                            RichText::new(
+                                self.tr().intro_filetypes,
+                            )
+                            .size(12.5)
+                            .color(theme::INK_FAINT),
+                        );
+                        ui.add_space(10.0);
+                        for ft in items {
+                            egui::Frame::default()
+                                .fill(theme::PANEL)
+                                .stroke(Stroke::new(1.0, theme::LINE))
+                                .corner_radius(6.0)
+                                .inner_margin(10.0)
+                                .show(ui, |ui| {
+                                    ui.label(RichText::new(ft.name).size(13.5).strong().color(theme::ACCENT));
+                                    ui.add_space(3.0);
+                                    ui.label(RichText::new(self.tr().hb_carries).font(mono(9.5)).color(theme::INK_FAINT));
+                                    ui.label(RichText::new(ft.carries).size(12.5).color(theme::INK));
+                                    ui.add_space(4.0);
+                                    ui.label(RichText::new(self.tr().hb_identifies).font(mono(9.5)).color(theme::WARN));
+                                    ui.label(RichText::new(ft.identifies).size(12.5).color(theme::INK_DIM));
+                                });
+                            ui.add_space(6.0);
+                        }
+                        ui.add_space(10.0);
+                        ui.separator();
+                        ui.add_space(12.0);
+                    }
+                }
+
+                if show_cat(RefCategory::Metadata) {
+                    let items: Vec<_> = reference::metadata(self.lang)
+                        .iter()
+                        .filter(|it| handbook_hit(&q, &[it.name, it.what, it.why]))
+                        .collect();
+                    if !items.is_empty() {
+                        ui.label(RichText::new(self.tr().hb_metadata).size(17.0).strong().color(theme::INK));
+                        ui.label(
+                            RichText::new(
+                                self.tr().intro_metadata,
+                            )
+                            .size(12.5)
+                            .color(theme::INK_FAINT),
+                        );
+                        ui.add_space(10.0);
+                        for item in items {
+                            egui::Frame::default()
+                                .fill(theme::PANEL)
+                                .stroke(Stroke::new(1.0, theme::LINE))
+                                .corner_radius(6.0)
+                                .inner_margin(10.0)
+                                .show(ui, |ui| {
+                                    ui.label(
+                                        RichText::new(item.name).size(13.5).strong().color(theme::ACCENT),
+                                    );
+                                    ui.add_space(3.0);
+                                    ui.label(RichText::new(item.what).size(12.5).color(theme::INK));
+                                    ui.add_space(4.0);
+                                    ui.label(RichText::new(item.why).size(12.5).color(theme::INK_DIM));
+                                });
+                            ui.add_space(6.0);
+                        }
+                        ui.add_space(16.0);
+                        ui.separator();
+                        ui.add_space(12.0);
+                    }
+                }
+
+                if show_cat(RefCategory::Raw) {
+                    let items: Vec<_> = reference::raw(self.lang)
+                        .iter()
+                        .filter(|s| handbook_hit(&q, &[s.heading, s.body]))
+                        .collect();
+                    if !items.is_empty() {
+                        ui.label(
+                            RichText::new(self.tr().hb_raw).size(17.0).strong().color(theme::INK),
+                        );
+                        ui.label(
+                            RichText::new(
+                                self.tr().intro_raw,
+                            )
+                            .size(12.5)
+                            .color(theme::INK_FAINT),
+                        );
+                        ui.add_space(10.0);
+                        for section in items {
+                            ui.label(RichText::new(section.heading).size(14.0).strong().color(theme::WARN));
                             ui.add_space(4.0);
-                            ui.label(RichText::new(item.why).size(12.5).color(theme::INK_DIM));
-                        });
-                    ui.add_space(6.0);
+                            ui.label(RichText::new(section.body).size(12.5).color(theme::INK_DIM));
+                            ui.add_space(14.0);
+                        }
+                        ui.add_space(6.0);
+                        ui.separator();
+                        ui.add_space(12.0);
+                    }
                 }
 
-                ui.add_space(16.0);
-                ui.separator();
-                ui.add_space(12.0);
+                if show_cat(RefCategory::Fingerprint) {
+                    let items: Vec<_> = reference::prnu(self.lang)
+                        .iter()
+                        .filter(|s| handbook_hit(&q, &[s.heading, s.body]))
+                        .collect();
+                    if !items.is_empty() {
+                        ui.label(
+                            RichText::new(self.tr().hb_fingerprint)
+                                .size(17.0)
+                                .strong()
+                                .color(theme::INK),
+                        );
+                        ui.label(
+                            RichText::new(
+                                self.tr().intro_fingerprint,
+                            )
+                            .size(12.5)
+                            .color(theme::INK_FAINT),
+                        );
+                        ui.add_space(10.0);
+                        for section in items {
+                            ui.label(RichText::new(section.heading).size(14.0).strong().color(theme::ACCENT));
+                            ui.add_space(4.0);
+                            ui.label(RichText::new(section.body).size(12.5).color(theme::INK_DIM));
+                            ui.add_space(14.0);
+                        }
+                        ui.add_space(6.0);
+                        ui.separator();
+                        ui.add_space(12.0);
+                    }
+                }
 
-                ui.label(
-                    RichText::new("The camera's fingerprint in the pixels")
-                        .size(17.0)
-                        .strong()
-                        .color(theme::INK),
-                );
-                ui.label(
-                    RichText::new(
-                        "A separate problem from metadata, addressed by a separate, optional \
-                         tool, with a weaker guarantee.",
-                    )
-                    .size(12.5)
-                    .color(theme::INK_FAINT),
-                );
-                ui.add_space(10.0);
+                if show_cat(RefCategory::BeyondFile) {
+                    let items: Vec<_> = reference::beyond_the_file(self.lang)
+                        .iter()
+                        .filter(|s| handbook_hit(&q, &[s.heading, s.body]))
+                        .collect();
+                    if !items.is_empty() {
+                        ui.label(
+                            RichText::new(self.tr().hb_cannot_reach)
+                                .size(17.0)
+                                .strong()
+                                .color(theme::INK),
+                        );
+                        ui.label(
+                            RichText::new(
+                                self.tr().intro_beyond,
+                            )
+                            .size(12.5)
+                            .color(theme::INK_FAINT),
+                        );
+                        ui.add_space(10.0);
+                        for section in items {
+                            ui.label(RichText::new(section.heading).size(14.0).strong().color(theme::DANGER));
+                            ui.add_space(4.0);
+                            ui.label(RichText::new(section.body).size(12.5).color(theme::INK_DIM));
+                            ui.add_space(14.0);
+                        }
+                        ui.add_space(6.0);
+                        ui.separator();
+                        ui.add_space(12.0);
+                    }
+                }
 
-                for section in reference::PRNU {
+                if show_cat(RefCategory::Myths) {
+                    let items: Vec<_> = reference::myths(self.lang)
+                        .iter()
+                        .filter(|m| handbook_hit(&q, &[m.claim, m.reality]))
+                        .collect();
+                    if !items.is_empty() {
+                        ui.label(
+                            RichText::new(self.tr().hb_myths)
+                                .size(17.0)
+                                .strong()
+                                .color(theme::INK),
+                        );
+                        ui.label(
+                            RichText::new(
+                                self.tr().intro_myths,
+                            )
+                            .size(12.5)
+                            .color(theme::INK_FAINT),
+                        );
+                        ui.add_space(10.0);
+                        for myth in items {
+                            egui::Frame::default()
+                                .fill(theme::PANEL)
+                                .stroke(Stroke::new(1.0, theme::LINE))
+                                .corner_radius(6.0)
+                                .inner_margin(10.0)
+                                .show(ui, |ui| {
+                                    ui.horizontal_top(|ui| {
+                                        ui.label(RichText::new(self.tr().hb_claim).font(mono(9.5)).color(theme::WARN));
+                                        ui.label(RichText::new(myth.claim).size(12.5).italics().color(theme::INK));
+                                    });
+                                    ui.add_space(5.0);
+                                    ui.horizontal_top(|ui| {
+                                        ui.label(RichText::new(self.tr().hb_truth).font(mono(9.5)).color(theme::OK));
+                                        ui.label(RichText::new(myth.reality).size(12.5).color(theme::INK_DIM));
+                                    });
+                                });
+                            ui.add_space(6.0);
+                        }
+                        ui.add_space(16.0);
+                        ui.separator();
+                        ui.add_space(12.0);
+                    }
+                }
+
+                if show_cat(RefCategory::Evidence) {
+                    let items: Vec<_> = reference::evidence(self.lang)
+                        .iter()
+                        .filter(|s| handbook_hit(&q, &[s.heading, s.body]))
+                        .collect();
+                    if !items.is_empty() {
+                        ui.label(
+                            RichText::new(self.tr().hb_evidence)
+                                .size(17.0)
+                                .strong()
+                                .color(theme::INK),
+                        );
+                        ui.label(
+                            RichText::new(
+                                self.tr().intro_evidence,
+                            )
+                            .size(12.5)
+                            .color(theme::INK_FAINT),
+                        );
+                        ui.add_space(10.0);
+                        for section in items {
+                            ui.label(RichText::new(section.heading).size(14.0).strong().color(theme::ACCENT));
+                            ui.add_space(4.0);
+                            ui.label(RichText::new(section.body).size(12.5).color(theme::INK_DIM));
+                            ui.add_space(14.0);
+                        }
+                        ui.add_space(8.0);
+                        ui.label(
+                            RichText::new(
+                                "Sources: Luk\u{00E1}\u{0161}, Fridrich & Goljan, 'Digital Camera \
+                                 Identification from Sensor Pattern Noise', IEEE Transactions on \
+                                 Information Forensics and Security, 2006. Subsequent work on \
+                                 robustness under downscaling, on counter-forensic resampling, and \
+                                 on smartphone reliability.",
+                            )
+                            .size(11.0)
+                            .color(theme::INK_FAINT),
+                        );
+                        ui.add_space(8.0);
+                    }
+                }
+
+                // Nothing matched the search across any category.
+                if !q.is_empty()
+                    && reference::FILE_TYPES.iter().all(|ft| !handbook_hit(&q, &[ft.name, ft.carries, ft.identifies]))
+                    && reference::METADATA.iter().all(|it| !handbook_hit(&q, &[it.name, it.what, it.why]))
+                    && reference::RAW.iter().all(|s| !handbook_hit(&q, &[s.heading, s.body]))
+                    && reference::PRNU.iter().all(|s| !handbook_hit(&q, &[s.heading, s.body]))
+                    && reference::BEYOND_THE_FILE.iter().all(|s| !handbook_hit(&q, &[s.heading, s.body]))
+                    && reference::MYTHS.iter().all(|m| !handbook_hit(&q, &[m.claim, m.reality]))
+                    && reference::EVIDENCE.iter().all(|s| !handbook_hit(&q, &[s.heading, s.body]))
+                {
+                    ui.add_space(16.0);
                     ui.label(
-                        RichText::new(section.heading).size(14.0).strong().color(theme::ACCENT),
+                        RichText::new(format!("{} \u{201C}{}\u{201D}.", self.tr().no_match, query_display))
+                            .size(13.0)
+                            .color(theme::INK_FAINT),
                     );
-                    ui.add_space(4.0);
-                    ui.label(RichText::new(section.body).size(12.5).color(theme::INK_DIM));
-                    ui.add_space(14.0);
-                }
-
-                ui.add_space(6.0);
-                ui.separator();
-                ui.add_space(12.0);
-
-                ui.label(
-                    RichText::new("What this tool cannot reach")
-                        .size(17.0)
-                        .strong()
-                        .color(theme::INK),
-                );
-                ui.label(
-                    RichText::new(
-                        "Identifying information that lives outside the file. The most \
-                         dangerous idea this app could leave you with is that a clean file \
-                         is an anonymous one.",
-                    )
-                    .size(12.5)
-                    .color(theme::INK_FAINT),
-                );
-                ui.add_space(10.0);
-
-                for section in reference::BEYOND_THE_FILE {
                     ui.label(
-                        RichText::new(section.heading).size(14.0).strong().color(theme::DANGER),
+                        RichText::new(self.tr().try_plainer)
+                            .size(12.0)
+                            .color(theme::INK_FAINT),
                     );
-                    ui.add_space(4.0);
-                    ui.label(RichText::new(section.body).size(12.5).color(theme::INK_DIM));
-                    ui.add_space(14.0);
                 }
-
-                ui.add_space(6.0);
-                ui.separator();
-                ui.add_space(12.0);
-
-                ui.label(
-                    RichText::new("Things you may have been told")
-                        .size(17.0)
-                        .strong()
-                        .color(theme::INK),
-                );
-                ui.label(
-                    RichText::new(
-                        "Bad advice is worse than none, because someone who believes a file is \
-                         clean will act as though it is.",
-                    )
-                    .size(12.5)
-                    .color(theme::INK_FAINT),
-                );
-                ui.add_space(10.0);
-
-                for myth in reference::MYTHS {
-                    egui::Frame::default()
-                        .fill(theme::PANEL)
-                        .stroke(Stroke::new(1.0, theme::LINE))
-                        .corner_radius(6.0)
-                        .inner_margin(10.0)
-                        .show(ui, |ui| {
-                            ui.horizontal_top(|ui| {
-                                ui.label(RichText::new("claim").font(mono(9.5)).color(theme::WARN));
-                                ui.label(
-                                    RichText::new(myth.claim)
-                                        .size(12.5)
-                                        .italics()
-                                        .color(theme::INK),
-                                );
-                            });
-                            ui.add_space(5.0);
-                            ui.horizontal_top(|ui| {
-                                ui.label(RichText::new("truth").font(mono(9.5)).color(theme::OK));
-                                ui.label(
-                                    RichText::new(myth.reality).size(12.5).color(theme::INK_DIM),
-                                );
-                            });
-                        });
-                    ui.add_space(6.0);
-                }
-
-                ui.add_space(16.0);
-                ui.separator();
-                ui.add_space(12.0);
-
-                ui.label(
-                    RichText::new("What the research actually shows")
-                        .size(17.0)
-                        .strong()
-                        .color(theme::INK),
-                );
-                ui.label(
-                    RichText::new(
-                        "Including the parts that limit what this tool is allowed to claim.",
-                    )
-                    .size(12.5)
-                    .color(theme::INK_FAINT),
-                );
-                ui.add_space(10.0);
-
-                for section in reference::EVIDENCE {
-                    ui.label(
-                        RichText::new(section.heading).size(14.0).strong().color(theme::ACCENT),
-                    );
-                    ui.add_space(4.0);
-                    ui.label(RichText::new(section.body).size(12.5).color(theme::INK_DIM));
-                    ui.add_space(14.0);
-                }
-
-                ui.add_space(8.0);
-                ui.label(
-                    RichText::new(
-                        "Sources: Lukáš, Fridrich & Goljan, 'Digital Camera Identification from \
-                         Sensor Pattern Noise', IEEE Transactions on Information Forensics and \
-                         Security, 2006. Subsequent work on robustness under downscaling, on \
-                         counter-forensic resampling, and on smartphone reliability.",
-                    )
-                    .size(11.0)
-                    .color(theme::INK_FAINT),
-                );
-                ui.add_space(8.0);
+                });
             });
         self.reference_open = open;
     }
@@ -795,20 +1287,20 @@ impl App {
                     let (complete, partial, skipped) = self.counts();
                     if !self.entries.is_empty() {
                         ui.label(
-                            RichText::new(format!("{complete} complete"))
+                            RichText::new(format!("{complete} {}", self.tr().r_complete))
                                 .font(mono(12.0))
                                 .color(theme::OK),
                         );
                         ui.label(RichText::new("·").color(theme::INK_FAINT));
                         ui.label(
-                            RichText::new(format!("{partial} best effort"))
+                            RichText::new(format!("{partial} {}", self.tr().r_best_effort))
                                 .font(mono(12.0))
                                 .color(theme::WARN),
                         );
                         if skipped > 0 {
                             ui.label(RichText::new("·").color(theme::INK_FAINT));
                             ui.label(
-                                RichText::new(format!("{skipped} skipped"))
+                                RichText::new(format!("{skipped} {}", self.tr().r_skipped))
                                     .font(mono(12.0))
                                     .color(theme::DANGER),
                             );
@@ -821,10 +1313,7 @@ impl App {
                             .add_enabled(
                                 writable > 0,
                                 egui::Button::new(
-                                    RichText::new(format!(
-                                        "Save {writable} cleaned cop{}",
-                                        if writable == 1 { "y" } else { "ies" }
-                                    ))
+                                    RichText::new(format!("{} ({writable})", self.tr().save_cleaned))
                                     .color(theme::GROUND)
                                     .strong(),
                                 )
@@ -835,13 +1324,18 @@ impl App {
                             self.save_all();
                         }
                         if ui
-                            .add_enabled(!self.entries.is_empty(), egui::Button::new("Clear"))
+                            .add_enabled(!self.entries.is_empty(), egui::Button::new(self.tr().clear_list))
                             .clicked()
                         {
+                            self.wipe_entries();
                             self.entries.clear();
+                            // Discard any in-flight results too, so a worker that
+                            // lands after Clear does not repopulate the list.
+                            self.in_flight.clear();
+                            self.generation += 1;
                             self.error = None;
                         }
-                        if ui.button("Add files...").clicked() {
+                        if ui.button(self.tr().add_files).clicked() {
                             if let Some(files) = rfd::FileDialog::new().pick_files() {
                                 privacy::forget_recent(&files);
                                 self.queue(files);
@@ -861,10 +1355,7 @@ impl App {
                 if self.entries.iter().any(|e| e.saved_to.is_some()) {
                     ui.add_space(3.0);
                     ui.label(
-                        RichText::new(
-                            "Your original files are untouched and still contain everything \
-                             listed above. Delete them yourself if that matters.",
-                        )
+                        RichText::new(self.tr().untouched)
                         .size(11.5)
                         .color(theme::WARN),
                     );
@@ -882,19 +1373,18 @@ impl App {
                 ui.vertical_centered(|ui| {
                     ui.add_space(40.0);
                     ui.label(
-                        RichText::new("Drop files here").size(20.0).strong().color(theme::INK),
+                        RichText::new(self.tr().drop_here).size(20.0).strong().color(theme::INK),
                     );
                     ui.add_space(6.0);
                     ui.label(
                         RichText::new(
-                            "Photos, PDFs and Office documents.\n\
-                             Nothing is uploaded. Nothing leaves this computer.",
+                            self.tr().drop_sub,
                         )
                         .size(13.0)
                         .color(theme::INK_FAINT),
                     );
                     ui.add_space(16.0);
-                    if ui.button("Choose files...").clicked() {
+                    if ui.button(self.tr().choose_files).clicked() {
                         if let Some(files) = rfd::FileDialog::new().pick_files() {
                             privacy::forget_recent(&files);
                             self.queue(files);
@@ -924,7 +1414,7 @@ impl App {
                     Err(e) => {
                         ui.horizontal(|ui| {
                             ui.label(RichText::new(&name).strong().color(theme::INK));
-                            badge(ui, "COULD NOT READ", theme::DANGER, Mark::Cross);
+                            badge(ui, self.tr().badge_could_not_read, theme::DANGER, Mark::Cross);
                         });
                         ui.label(RichText::new(e).size(12.0).color(theme::INK_DIM));
                     }
@@ -933,12 +1423,14 @@ impl App {
                         ui.horizontal(|ui| {
                             ui.label(RichText::new(&name).strong().color(theme::INK));
                             match report.assurance {
-                                Assurance::Complete => badge(ui, "COMPLETE", theme::OK, Mark::Disc),
+                                Assurance::Complete => {
+                                    badge(ui, self.tr().badge_complete, theme::OK, Mark::Disc)
+                                }
                                 Assurance::BestEffort => {
-                                    badge(ui, "BEST EFFORT", theme::WARN, Mark::Triangle)
+                                    badge(ui, self.tr().badge_best_effort, theme::WARN, Mark::Triangle)
                                 }
                                 Assurance::None => {
-                                    badge(ui, "NOT CLEANED", theme::DANGER, Mark::Cross)
+                                    badge(ui, self.tr().badge_not_cleaned, theme::DANGER, Mark::Cross)
                                 }
                             }
                         });
@@ -958,7 +1450,7 @@ impl App {
                         if report.found_location {
                             ui.add_space(4.0);
                             ui.label(
-                                RichText::new("This file recorded where it was taken")
+                                RichText::new(self.tr().recorded_location)
                                     .size(12.5)
                                     .strong()
                                     .color(theme::DANGER),
@@ -972,8 +1464,7 @@ impl App {
                             ui.add_space(6.0);
                             ui.label(
                                 RichText::new(
-                                    "No metadata found. The file was rebuilt anyway, so \
-                                     anything unrecognised was dropped in the process.",
+                                    self.tr().no_metadata,
                                 )
                                 .size(12.0)
                                 .color(theme::INK_FAINT),
@@ -985,7 +1476,7 @@ impl App {
                             for item in &report.removed {
                                 ui.horizontal(|ui| {
                                     ui.label(RichText::new("\u{00D7}").font(mono(12.0)).color(theme::OK));
-                                    ui.label(RichText::new(item.kind.to_string()).size(12.5).color(theme::INK));
+                                    ui.label(RichText::new(i18n::kind_label(item.kind, self.lang)).size(12.5).color(theme::INK));
                                     ui.label(RichText::new(&item.location).font(mono(10.5)).color(theme::INK_FAINT));
                                     if item.bytes > 0 {
                                         ui.with_layout(
@@ -1003,6 +1494,74 @@ impl App {
                             }
                         }
 
+                        // The tool checking its own output, shown plainly so the
+                        // guarantee is visible rather than implied.
+                        if let Some(v) = report.verification {
+                            ui.add_space(6.0);
+                            let (mark, colour, text) = if v.passed() {
+                                (
+                                    "\u{2713}",
+                                    theme::OK,
+                                    self.tr().verify_ok.to_string(),
+                                )
+                            } else if !v.output_reinspected_clean {
+                                (
+                                    "\u{2717}",
+                                    theme::DANGER,
+                                    self.tr().verify_fail_meta.to_string(),
+                                )
+                            } else {
+                                (
+                                    "\u{2717}",
+                                    theme::DANGER,
+                                    self.tr().verify_fail_determinism.to_string(),
+                                )
+                            };
+                            ui.horizontal(|ui| {
+                                ui.label(RichText::new(mark).font(mono(12.0)).color(colour));
+                                ui.label(RichText::new(text).size(12.0).color(colour));
+                            });
+                        }
+
+                        // What could not be removed, and what it would reveal.
+                        // Framed prominently: a partial clean that stays quiet
+                        // about its residue is worse than one that spells it out.
+                        if !report.retained.is_empty() {
+                            ui.add_space(8.0);
+                            egui::Frame::default()
+                                .fill(theme::PANEL)
+                                .stroke(Stroke::new(1.0, theme::WARN))
+                                .corner_radius(6.0)
+                                .inner_margin(10.0)
+                                .show(ui, |ui| {
+                                    ui.label(
+                                        RichText::new(self.tr().still_in_file)
+                                            .size(13.0)
+                                            .strong()
+                                            .color(theme::WARN),
+                                    );
+                                    ui.label(
+                                        RichText::new(self.tr().retained_explain)
+                                            .size(11.5)
+                                            .color(theme::INK_FAINT),
+                                    );
+                                    for r in &report.retained {
+                                        ui.add_space(6.0);
+                                        ui.label(
+                                            RichText::new(format!("\u{2022} {}", r.what))
+                                                .size(12.5)
+                                                .color(theme::INK),
+                                        );
+                                        ui.label(
+                                            RichText::new(format!("     {} {}", self.tr().investigator_see, r.reveals))
+                                            .size(11.5)
+                                            .italics()
+                                            .color(theme::INK_DIM),
+                                        );
+                                    }
+                                });
+                        }
+
                         for warning in &report.warnings {
                             ui.add_space(4.0);
                             ui.label(RichText::new(format!("! {warning}")).size(12.0).color(theme::WARN));
@@ -1015,11 +1574,13 @@ impl App {
                                 ui.add_space(6.0);
                                 ui.label(
                                     RichText::new(format!(
-                                        "fingerprint reduced (best effort): {}x{} -> {}x{}, quality {}",
+                                        "{}{}x{} -> {}x{}{}{}",
+                                        self.tr().fp_reduced,
                                         w.original.0,
                                         w.original.1,
                                         w.washed.0,
                                         w.washed.1,
+                                        self.tr().fp_quality,
                                         w.quality
                                     ))
                                     .font(mono(10.5))
@@ -1029,9 +1590,7 @@ impl App {
                             Some(Err(e)) => {
                                 ui.add_space(6.0);
                                 ui.label(
-                                    RichText::new(format!(
-                                        "fingerprint not reduced: {e}"
-                                    ))
+                                    RichText::new(format!("{}{e}", self.tr().fp_not_reduced))
                                     .size(12.0)
                                     .color(theme::WARN),
                                 );
@@ -1042,7 +1601,7 @@ impl App {
                         if let Some(dst) = &entry.saved_to {
                             ui.add_space(4.0);
                             ui.label(
-                                RichText::new(format!("saved to {}", dst.display()))
+                                RichText::new(format!("{} {}", self.tr().saved_to, dst.display()))
                                     .font(mono(10.5))
                                     .color(theme::OK),
                             );
@@ -1056,19 +1615,29 @@ impl App {
                             ui.add_space(6.0);
                             ui.horizontal(|ui| {
                                 if ui
-                                    .button("Save as...")
-                                    .on_hover_text("Choose the name and folder yourself")
+                                    .button(self.tr().save_as)
+                                    .on_hover_text(self.tr().save_as_hint)
                                     .clicked()
                                 {
                                     save_as = Some(index);
                                 }
+                                // Show the exact name the file will be saved
+                                // under — the random name is stable (generated
+                                // once per file), so it can be shown rather than
+                                // hidden behind a placeholder. The extension
+                                // follows the saved bytes (a washed PNG is saved
+                                // as .jpg), not the source name.
+                                let ext = entry.output_ext();
+                                let stem = self.randomize_name.then_some(entry.random_stem.as_str());
+                                let preview = output_name(&entry.path, stem, ext.as_deref())
+                                    .file_name()
+                                    .map(|s| s.to_string_lossy().into_owned())
+                                    .unwrap_or_default();
                                 ui.label(
                                     RichText::new(format!(
-                                        "otherwise saved as {}",
-                                        clean_name(&entry.path)
-                                            .file_name()
-                                            .map(|s| s.to_string_lossy().into_owned())
-                                            .unwrap_or_default()
+                                        "{} {}",
+                                        self.tr().otherwise_saved,
+                                        preview
                                     ))
                                     .font(mono(10.0))
                                     .color(theme::INK_FAINT),
@@ -1091,7 +1660,11 @@ impl App {
         let Some(entry) = self.entries.get(index) else { return };
         let Ok(sanitized) = &entry.result else { return };
 
-        let suggested = clean_name(&entry.path);
+        // Pre-fill the dialog with the file's chosen name (its stable random
+        // name, or the .clean name) — which the user can accept or type over,
+        // also how they get a fully custom name.
+        let stem = self.randomize_name.then_some(entry.random_stem.as_str());
+        let suggested = output_name(&entry.path, stem, entry.output_ext().as_deref());
         let dialog = rfd::FileDialog::new().set_file_name(
             suggested.file_name().map(|s| s.to_string_lossy().into_owned()).unwrap_or_default(),
         );
@@ -1102,14 +1675,15 @@ impl App {
 
         let Some(dst) = dialog.save_file() else { return };
         privacy::forget_recent(std::slice::from_ref(&dst));
-        let data = sanitized.data.clone();
+        // Wipe this copy of the cleaned bytes once written, like the input buffer.
+        let data = Zeroizing::new(sanitized.data.clone());
         match write_atomic(&dst, &data) {
             Ok(()) => {
                 if let Some(e) = self.entries.get_mut(index) {
                     e.saved_to = Some(dst);
                 }
             }
-            Err(e) => self.error = Some(format!("could not write {}: {e}", dst.display())),
+            Err(e) => self.error = Some(format!("{} {}: {e}", self.tr().could_not_write, dst.display())),
         }
     }
 }
