@@ -96,7 +96,8 @@ fn install_fonts(ctx: &egui::Context) {
 fn draw_crake(painter: &egui::Painter, rect: egui::Rect, tint: Color32, eye: Color32) {
     let sx = rect.width() / 66.0;
     let sy = rect.height() / 68.0;
-    let map = |x: f32, y: f32| egui::pos2(rect.left() + (x - 15.0) * sx, rect.top() + (y - 16.0) * sy);
+    let map =
+        |x: f32, y: f32| egui::pos2(rect.left() + (x - 15.0) * sx, rect.top() + (y - 16.0) * sy);
     let s = (sx + sy) / 2.0; // near-uniform radius scale
     painter.circle_filled(map(52.0, 56.0), 24.0 * s, tint); // body
     painter.circle_filled(map(50.0, 34.0), 13.0 * s, tint); // head
@@ -231,10 +232,11 @@ enum RefCategory {
     BeyondFile,
     Myths,
     Evidence,
+    Letter,
 }
 
 impl RefCategory {
-    const ALL: [RefCategory; 7] = [
+    const ALL: [RefCategory; 8] = [
         RefCategory::FileTypes,
         RefCategory::Metadata,
         RefCategory::Raw,
@@ -242,6 +244,7 @@ impl RefCategory {
         RefCategory::BeyondFile,
         RefCategory::Myths,
         RefCategory::Evidence,
+        RefCategory::Letter,
     ];
     fn label(self, lang: i18n::Lang) -> &'static str {
         let t = i18n::T::for_lang(lang);
@@ -253,6 +256,7 @@ impl RefCategory {
             RefCategory::BeyondFile => t.cat_beyond,
             RefCategory::Myths => t.cat_myths,
             RefCategory::Evidence => t.cat_evidence,
+            RefCategory::Letter => t.cat_letter,
         }
     }
 }
@@ -312,7 +316,8 @@ impl Default for App {
         // queue, instead of one thread per file.
         let (job_tx, job_rx) = channel::<WorkItem>();
         let job_rx = Arc::new(Mutex::new(job_rx));
-        let workers = std::thread::available_parallelism().map(|n| n.get()).unwrap_or(2).clamp(1, 4);
+        let workers =
+            std::thread::available_parallelism().map(|n| n.get()).unwrap_or(2).clamp(1, 4);
         for _ in 0..workers {
             let jobs = Arc::clone(&job_rx);
             let results = tx.clone();
@@ -481,7 +486,8 @@ impl App {
             match write_atomic(&dst, &sanitized.data) {
                 Ok(()) => entry.saved_to = Some(dst),
                 Err(e) => {
-                    self.error = Some(format!("{} {}: {e}", self.tr().could_not_write, dst.display()));
+                    self.error =
+                        Some(format!("{} {}: {e}", self.tr().could_not_write, dst.display()));
                     break;
                 }
             }
@@ -600,10 +606,7 @@ fn process(
                     report.format = final_pass.report.format;
                     report.output_len = final_pass.data.len();
                     report.verification = final_pass.report.verification;
-                    (
-                        Ok(Sanitized { data: final_pass.data, report }),
-                        Some(Ok(wash_report)),
-                    )
+                    (Ok(Sanitized { data: final_pass.data, report }), Some(Ok(wash_report)))
                 }
                 Err(e) => (Ok(stripped), Some(Err(e.to_string()))),
             }
@@ -715,8 +718,13 @@ impl eframe::App for App {
                         ui.horizontal(|ui| {
                             ui.spinner();
                             ui.label(
-                                RichText::new(format!("{}{}{}", self.tr().reading_pre, self.pending, self.tr().reading_post))
-                                    .color(theme::INK_DIM),
+                                RichText::new(format!(
+                                    "{}{}{}",
+                                    self.tr().reading_pre,
+                                    self.pending,
+                                    self.tr().reading_post
+                                ))
+                                .color(theme::INK_DIM),
                             );
                         });
                     }
@@ -893,14 +901,11 @@ impl App {
             .anchor(egui::Align2::CENTER_CENTER, [0.0, 0.0])
             .default_width(520.0)
             .show(ctx, |ui| {
-                ui.label(
-                    RichText::new(self.tr().fp_title)
-                        .size(16.0)
-                        .strong()
-                        .color(theme::INK),
-                );
+                ui.label(RichText::new(self.tr().fp_title).size(16.0).strong().color(theme::INK));
                 ui.add_space(8.0);
-                ui.label(RichText::new(reference::first_use(self.lang)).size(13.0).color(theme::INK_DIM));
+                ui.label(
+                    RichText::new(reference::first_use(self.lang)).size(13.0).color(theme::INK_DIM),
+                );
                 ui.add_space(12.0);
                 ui.horizontal(|ui| {
                     if ui
@@ -959,7 +964,9 @@ impl App {
 
                 // Handbook toolbar: search across everything, plus category filter.
                 ui.horizontal(|ui| {
-                    ui.label(RichText::new(self.tr().search).font(mono(10.5)).color(theme::INK_FAINT));
+                    ui.label(
+                        RichText::new(self.tr().search).font(mono(10.5)).color(theme::INK_FAINT),
+                    );
                     ui.add(
                         egui::TextEdit::singleline(&mut self.ref_query)
                             .hint_text("gps, serial, thumbnail, raw, pdf\u{2026}")
@@ -975,8 +982,12 @@ impl App {
                         self.ref_category = None;
                     }
                     for c in RefCategory::ALL {
-                        if ui.selectable_label(self.ref_category == Some(c), c.label(self.lang)).clicked() {
-                            self.ref_category = if self.ref_category == Some(c) { None } else { Some(c) };
+                        if ui
+                            .selectable_label(self.ref_category == Some(c), c.label(self.lang))
+                            .clicked()
+                        {
+                            self.ref_category =
+                                if self.ref_category == Some(c) { None } else { Some(c) };
                         }
                     }
                 });
@@ -991,253 +1002,320 @@ impl App {
 
                 // The toolbar above stays pinned; only the entries scroll.
                 egui::ScrollArea::vertical().auto_shrink([false, false]).show(ui, |ui| {
-                if show_cat(RefCategory::FileTypes) {
-                    let items: Vec<_> = reference::file_types(self.lang)
-                        .iter()
-                        .filter(|ft| handbook_hit(&q, &[ft.name, ft.carries, ft.identifies]))
-                        .collect();
-                    if !items.is_empty() {
-                        ui.label(
-                            RichText::new(self.tr().hb_filetypes)
-                                .size(17.0)
-                                .strong()
-                                .color(theme::INK),
-                        );
-                        ui.label(
-                            RichText::new(
-                                self.tr().intro_filetypes,
-                            )
-                            .size(12.5)
-                            .color(theme::INK_FAINT),
-                        );
-                        ui.add_space(10.0);
-                        for ft in items {
-                            egui::Frame::default()
-                                .fill(theme::PANEL)
-                                .stroke(Stroke::new(1.0, theme::LINE))
-                                .corner_radius(6.0)
-                                .inner_margin(10.0)
-                                .show(ui, |ui| {
-                                    ui.label(RichText::new(ft.name).size(13.5).strong().color(theme::ACCENT));
-                                    ui.add_space(3.0);
-                                    ui.label(RichText::new(self.tr().hb_carries).font(mono(9.5)).color(theme::INK_FAINT));
-                                    ui.label(RichText::new(ft.carries).size(12.5).color(theme::INK));
-                                    ui.add_space(4.0);
-                                    ui.label(RichText::new(self.tr().hb_identifies).font(mono(9.5)).color(theme::WARN));
-                                    ui.label(RichText::new(ft.identifies).size(12.5).color(theme::INK_DIM));
-                                });
-                            ui.add_space(6.0);
-                        }
-                        ui.add_space(10.0);
-                        ui.separator();
-                        ui.add_space(12.0);
-                    }
-                }
-
-                if show_cat(RefCategory::Metadata) {
-                    let items: Vec<_> = reference::metadata(self.lang)
-                        .iter()
-                        .filter(|it| handbook_hit(&q, &[it.name, it.what, it.why]))
-                        .collect();
-                    if !items.is_empty() {
-                        ui.label(RichText::new(self.tr().hb_metadata).size(17.0).strong().color(theme::INK));
-                        ui.label(
-                            RichText::new(
-                                self.tr().intro_metadata,
-                            )
-                            .size(12.5)
-                            .color(theme::INK_FAINT),
-                        );
-                        ui.add_space(10.0);
-                        for item in items {
-                            egui::Frame::default()
-                                .fill(theme::PANEL)
-                                .stroke(Stroke::new(1.0, theme::LINE))
-                                .corner_radius(6.0)
-                                .inner_margin(10.0)
-                                .show(ui, |ui| {
-                                    ui.label(
-                                        RichText::new(item.name).size(13.5).strong().color(theme::ACCENT),
-                                    );
-                                    ui.add_space(3.0);
-                                    ui.label(RichText::new(item.what).size(12.5).color(theme::INK));
-                                    ui.add_space(4.0);
-                                    ui.label(RichText::new(item.why).size(12.5).color(theme::INK_DIM));
-                                });
-                            ui.add_space(6.0);
-                        }
-                        ui.add_space(16.0);
-                        ui.separator();
-                        ui.add_space(12.0);
-                    }
-                }
-
-                if show_cat(RefCategory::Raw) {
-                    let items: Vec<_> = reference::raw(self.lang)
-                        .iter()
-                        .filter(|s| handbook_hit(&q, &[s.heading, s.body]))
-                        .collect();
-                    if !items.is_empty() {
-                        ui.label(
-                            RichText::new(self.tr().hb_raw).size(17.0).strong().color(theme::INK),
-                        );
-                        ui.label(
-                            RichText::new(
-                                self.tr().intro_raw,
-                            )
-                            .size(12.5)
-                            .color(theme::INK_FAINT),
-                        );
-                        ui.add_space(10.0);
-                        for section in items {
-                            ui.label(RichText::new(section.heading).size(14.0).strong().color(theme::WARN));
-                            ui.add_space(4.0);
-                            ui.label(RichText::new(section.body).size(12.5).color(theme::INK_DIM));
-                            ui.add_space(14.0);
-                        }
-                        ui.add_space(6.0);
-                        ui.separator();
-                        ui.add_space(12.0);
-                    }
-                }
-
-                if show_cat(RefCategory::Fingerprint) {
-                    let items: Vec<_> = reference::prnu(self.lang)
-                        .iter()
-                        .filter(|s| handbook_hit(&q, &[s.heading, s.body]))
-                        .collect();
-                    if !items.is_empty() {
-                        ui.label(
-                            RichText::new(self.tr().hb_fingerprint)
-                                .size(17.0)
-                                .strong()
-                                .color(theme::INK),
-                        );
-                        ui.label(
-                            RichText::new(
-                                self.tr().intro_fingerprint,
-                            )
-                            .size(12.5)
-                            .color(theme::INK_FAINT),
-                        );
-                        ui.add_space(10.0);
-                        for section in items {
-                            ui.label(RichText::new(section.heading).size(14.0).strong().color(theme::ACCENT));
-                            ui.add_space(4.0);
-                            ui.label(RichText::new(section.body).size(12.5).color(theme::INK_DIM));
-                            ui.add_space(14.0);
-                        }
-                        ui.add_space(6.0);
-                        ui.separator();
-                        ui.add_space(12.0);
-                    }
-                }
-
-                if show_cat(RefCategory::BeyondFile) {
-                    let items: Vec<_> = reference::beyond_the_file(self.lang)
-                        .iter()
-                        .filter(|s| handbook_hit(&q, &[s.heading, s.body]))
-                        .collect();
-                    if !items.is_empty() {
-                        ui.label(
-                            RichText::new(self.tr().hb_cannot_reach)
-                                .size(17.0)
-                                .strong()
-                                .color(theme::INK),
-                        );
-                        ui.label(
-                            RichText::new(
-                                self.tr().intro_beyond,
-                            )
-                            .size(12.5)
-                            .color(theme::INK_FAINT),
-                        );
-                        ui.add_space(10.0);
-                        for section in items {
-                            ui.label(RichText::new(section.heading).size(14.0).strong().color(theme::DANGER));
-                            ui.add_space(4.0);
-                            ui.label(RichText::new(section.body).size(12.5).color(theme::INK_DIM));
-                            ui.add_space(14.0);
-                        }
-                        ui.add_space(6.0);
-                        ui.separator();
-                        ui.add_space(12.0);
-                    }
-                }
-
-                if show_cat(RefCategory::Myths) {
-                    let items: Vec<_> = reference::myths(self.lang)
-                        .iter()
-                        .filter(|m| handbook_hit(&q, &[m.claim, m.reality]))
-                        .collect();
-                    if !items.is_empty() {
-                        ui.label(
-                            RichText::new(self.tr().hb_myths)
-                                .size(17.0)
-                                .strong()
-                                .color(theme::INK),
-                        );
-                        ui.label(
-                            RichText::new(
-                                self.tr().intro_myths,
-                            )
-                            .size(12.5)
-                            .color(theme::INK_FAINT),
-                        );
-                        ui.add_space(10.0);
-                        for myth in items {
-                            egui::Frame::default()
-                                .fill(theme::PANEL)
-                                .stroke(Stroke::new(1.0, theme::LINE))
-                                .corner_radius(6.0)
-                                .inner_margin(10.0)
-                                .show(ui, |ui| {
-                                    ui.horizontal_top(|ui| {
-                                        ui.label(RichText::new(self.tr().hb_claim).font(mono(9.5)).color(theme::WARN));
-                                        ui.label(RichText::new(myth.claim).size(12.5).italics().color(theme::INK));
+                    if show_cat(RefCategory::FileTypes) {
+                        let items: Vec<_> = reference::file_types(self.lang)
+                            .iter()
+                            .filter(|ft| handbook_hit(&q, &[ft.name, ft.carries, ft.identifies]))
+                            .collect();
+                        if !items.is_empty() {
+                            ui.label(
+                                RichText::new(self.tr().hb_filetypes)
+                                    .size(17.0)
+                                    .strong()
+                                    .color(theme::INK),
+                            );
+                            ui.label(
+                                RichText::new(self.tr().intro_filetypes)
+                                    .size(12.5)
+                                    .color(theme::INK_FAINT),
+                            );
+                            ui.add_space(10.0);
+                            for ft in items {
+                                egui::Frame::default()
+                                    .fill(theme::PANEL)
+                                    .stroke(Stroke::new(1.0, theme::LINE))
+                                    .corner_radius(6.0)
+                                    .inner_margin(10.0)
+                                    .show(ui, |ui| {
+                                        ui.label(
+                                            RichText::new(ft.name)
+                                                .size(13.5)
+                                                .strong()
+                                                .color(theme::ACCENT),
+                                        );
+                                        ui.add_space(3.0);
+                                        ui.label(
+                                            RichText::new(self.tr().hb_carries)
+                                                .font(mono(9.5))
+                                                .color(theme::INK_FAINT),
+                                        );
+                                        ui.label(
+                                            RichText::new(ft.carries).size(12.5).color(theme::INK),
+                                        );
+                                        ui.add_space(4.0);
+                                        ui.label(
+                                            RichText::new(self.tr().hb_identifies)
+                                                .font(mono(9.5))
+                                                .color(theme::WARN),
+                                        );
+                                        ui.label(
+                                            RichText::new(ft.identifies)
+                                                .size(12.5)
+                                                .color(theme::INK_DIM),
+                                        );
                                     });
-                                    ui.add_space(5.0);
-                                    ui.horizontal_top(|ui| {
-                                        ui.label(RichText::new(self.tr().hb_truth).font(mono(9.5)).color(theme::OK));
-                                        ui.label(RichText::new(myth.reality).size(12.5).color(theme::INK_DIM));
-                                    });
-                                });
-                            ui.add_space(6.0);
+                                ui.add_space(6.0);
+                            }
+                            ui.add_space(10.0);
+                            ui.separator();
+                            ui.add_space(12.0);
                         }
-                        ui.add_space(16.0);
-                        ui.separator();
-                        ui.add_space(12.0);
                     }
-                }
 
-                if show_cat(RefCategory::Evidence) {
-                    let items: Vec<_> = reference::evidence(self.lang)
-                        .iter()
-                        .filter(|s| handbook_hit(&q, &[s.heading, s.body]))
-                        .collect();
-                    if !items.is_empty() {
-                        ui.label(
-                            RichText::new(self.tr().hb_evidence)
-                                .size(17.0)
-                                .strong()
-                                .color(theme::INK),
-                        );
-                        ui.label(
-                            RichText::new(
-                                self.tr().intro_evidence,
-                            )
-                            .size(12.5)
-                            .color(theme::INK_FAINT),
-                        );
-                        ui.add_space(10.0);
-                        for section in items {
-                            ui.label(RichText::new(section.heading).size(14.0).strong().color(theme::ACCENT));
-                            ui.add_space(4.0);
-                            ui.label(RichText::new(section.body).size(12.5).color(theme::INK_DIM));
-                            ui.add_space(14.0);
+                    if show_cat(RefCategory::Metadata) {
+                        let items: Vec<_> = reference::metadata(self.lang)
+                            .iter()
+                            .filter(|it| handbook_hit(&q, &[it.name, it.what, it.why]))
+                            .collect();
+                        if !items.is_empty() {
+                            ui.label(
+                                RichText::new(self.tr().hb_metadata)
+                                    .size(17.0)
+                                    .strong()
+                                    .color(theme::INK),
+                            );
+                            ui.label(
+                                RichText::new(self.tr().intro_metadata)
+                                    .size(12.5)
+                                    .color(theme::INK_FAINT),
+                            );
+                            ui.add_space(10.0);
+                            for item in items {
+                                egui::Frame::default()
+                                    .fill(theme::PANEL)
+                                    .stroke(Stroke::new(1.0, theme::LINE))
+                                    .corner_radius(6.0)
+                                    .inner_margin(10.0)
+                                    .show(ui, |ui| {
+                                        ui.label(
+                                            RichText::new(item.name)
+                                                .size(13.5)
+                                                .strong()
+                                                .color(theme::ACCENT),
+                                        );
+                                        ui.add_space(3.0);
+                                        ui.label(
+                                            RichText::new(item.what).size(12.5).color(theme::INK),
+                                        );
+                                        ui.add_space(4.0);
+                                        ui.label(
+                                            RichText::new(item.why)
+                                                .size(12.5)
+                                                .color(theme::INK_DIM),
+                                        );
+                                    });
+                                ui.add_space(6.0);
+                            }
+                            ui.add_space(16.0);
+                            ui.separator();
+                            ui.add_space(12.0);
                         }
-                        ui.add_space(8.0);
-                        ui.label(
+                    }
+
+                    if show_cat(RefCategory::Raw) {
+                        let items: Vec<_> = reference::raw(self.lang)
+                            .iter()
+                            .filter(|s| handbook_hit(&q, &[s.heading, s.body]))
+                            .collect();
+                        if !items.is_empty() {
+                            ui.label(
+                                RichText::new(self.tr().hb_raw)
+                                    .size(17.0)
+                                    .strong()
+                                    .color(theme::INK),
+                            );
+                            ui.label(
+                                RichText::new(self.tr().intro_raw)
+                                    .size(12.5)
+                                    .color(theme::INK_FAINT),
+                            );
+                            ui.add_space(10.0);
+                            for section in items {
+                                ui.label(
+                                    RichText::new(section.heading)
+                                        .size(14.0)
+                                        .strong()
+                                        .color(theme::WARN),
+                                );
+                                ui.add_space(4.0);
+                                ui.label(
+                                    RichText::new(section.body).size(12.5).color(theme::INK_DIM),
+                                );
+                                ui.add_space(14.0);
+                            }
+                            ui.add_space(6.0);
+                            ui.separator();
+                            ui.add_space(12.0);
+                        }
+                    }
+
+                    if show_cat(RefCategory::Fingerprint) {
+                        let items: Vec<_> = reference::prnu(self.lang)
+                            .iter()
+                            .filter(|s| handbook_hit(&q, &[s.heading, s.body]))
+                            .collect();
+                        if !items.is_empty() {
+                            ui.label(
+                                RichText::new(self.tr().hb_fingerprint)
+                                    .size(17.0)
+                                    .strong()
+                                    .color(theme::INK),
+                            );
+                            ui.label(
+                                RichText::new(self.tr().intro_fingerprint)
+                                    .size(12.5)
+                                    .color(theme::INK_FAINT),
+                            );
+                            ui.add_space(10.0);
+                            for section in items {
+                                ui.label(
+                                    RichText::new(section.heading)
+                                        .size(14.0)
+                                        .strong()
+                                        .color(theme::ACCENT),
+                                );
+                                ui.add_space(4.0);
+                                ui.label(
+                                    RichText::new(section.body).size(12.5).color(theme::INK_DIM),
+                                );
+                                ui.add_space(14.0);
+                            }
+                            ui.add_space(6.0);
+                            ui.separator();
+                            ui.add_space(12.0);
+                        }
+                    }
+
+                    if show_cat(RefCategory::BeyondFile) {
+                        let items: Vec<_> = reference::beyond_the_file(self.lang)
+                            .iter()
+                            .filter(|s| handbook_hit(&q, &[s.heading, s.body]))
+                            .collect();
+                        if !items.is_empty() {
+                            ui.label(
+                                RichText::new(self.tr().hb_cannot_reach)
+                                    .size(17.0)
+                                    .strong()
+                                    .color(theme::INK),
+                            );
+                            ui.label(
+                                RichText::new(self.tr().intro_beyond)
+                                    .size(12.5)
+                                    .color(theme::INK_FAINT),
+                            );
+                            ui.add_space(10.0);
+                            for section in items {
+                                ui.label(
+                                    RichText::new(section.heading)
+                                        .size(14.0)
+                                        .strong()
+                                        .color(theme::DANGER),
+                                );
+                                ui.add_space(4.0);
+                                ui.label(
+                                    RichText::new(section.body).size(12.5).color(theme::INK_DIM),
+                                );
+                                ui.add_space(14.0);
+                            }
+                            ui.add_space(6.0);
+                            ui.separator();
+                            ui.add_space(12.0);
+                        }
+                    }
+
+                    if show_cat(RefCategory::Myths) {
+                        let items: Vec<_> = reference::myths(self.lang)
+                            .iter()
+                            .filter(|m| handbook_hit(&q, &[m.claim, m.reality]))
+                            .collect();
+                        if !items.is_empty() {
+                            ui.label(
+                                RichText::new(self.tr().hb_myths)
+                                    .size(17.0)
+                                    .strong()
+                                    .color(theme::INK),
+                            );
+                            ui.label(
+                                RichText::new(self.tr().intro_myths)
+                                    .size(12.5)
+                                    .color(theme::INK_FAINT),
+                            );
+                            ui.add_space(10.0);
+                            for myth in items {
+                                egui::Frame::default()
+                                    .fill(theme::PANEL)
+                                    .stroke(Stroke::new(1.0, theme::LINE))
+                                    .corner_radius(6.0)
+                                    .inner_margin(10.0)
+                                    .show(ui, |ui| {
+                                        ui.horizontal_top(|ui| {
+                                            ui.label(
+                                                RichText::new(self.tr().hb_claim)
+                                                    .font(mono(9.5))
+                                                    .color(theme::WARN),
+                                            );
+                                            ui.label(
+                                                RichText::new(myth.claim)
+                                                    .size(12.5)
+                                                    .italics()
+                                                    .color(theme::INK),
+                                            );
+                                        });
+                                        ui.add_space(5.0);
+                                        ui.horizontal_top(|ui| {
+                                            ui.label(
+                                                RichText::new(self.tr().hb_truth)
+                                                    .font(mono(9.5))
+                                                    .color(theme::OK),
+                                            );
+                                            ui.label(
+                                                RichText::new(myth.reality)
+                                                    .size(12.5)
+                                                    .color(theme::INK_DIM),
+                                            );
+                                        });
+                                    });
+                                ui.add_space(6.0);
+                            }
+                            ui.add_space(16.0);
+                            ui.separator();
+                            ui.add_space(12.0);
+                        }
+                    }
+
+                    if show_cat(RefCategory::Evidence) {
+                        let items: Vec<_> = reference::evidence(self.lang)
+                            .iter()
+                            .filter(|s| handbook_hit(&q, &[s.heading, s.body]))
+                            .collect();
+                        if !items.is_empty() {
+                            ui.label(
+                                RichText::new(self.tr().hb_evidence)
+                                    .size(17.0)
+                                    .strong()
+                                    .color(theme::INK),
+                            );
+                            ui.label(
+                                RichText::new(self.tr().intro_evidence)
+                                    .size(12.5)
+                                    .color(theme::INK_FAINT),
+                            );
+                            ui.add_space(10.0);
+                            for section in items {
+                                ui.label(
+                                    RichText::new(section.heading)
+                                        .size(14.0)
+                                        .strong()
+                                        .color(theme::ACCENT),
+                                );
+                                ui.add_space(4.0);
+                                ui.label(
+                                    RichText::new(section.body).size(12.5).color(theme::INK_DIM),
+                                );
+                                ui.add_space(14.0);
+                            }
+                            ui.add_space(8.0);
+                            ui.label(
                             RichText::new(
                                 "Sources: Luk\u{00E1}\u{0161}, Fridrich & Goljan, 'Digital Camera \
                                  Identification from Sensor Pattern Noise', IEEE Transactions on \
@@ -1248,32 +1326,72 @@ impl App {
                             .size(11.0)
                             .color(theme::INK_FAINT),
                         );
-                        ui.add_space(8.0);
+                            ui.add_space(8.0);
+                        }
                     }
-                }
 
-                // Nothing matched the search across any category.
-                if !q.is_empty()
-                    && reference::FILE_TYPES.iter().all(|ft| !handbook_hit(&q, &[ft.name, ft.carries, ft.identifies]))
-                    && reference::METADATA.iter().all(|it| !handbook_hit(&q, &[it.name, it.what, it.why]))
-                    && reference::RAW.iter().all(|s| !handbook_hit(&q, &[s.heading, s.body]))
-                    && reference::PRNU.iter().all(|s| !handbook_hit(&q, &[s.heading, s.body]))
-                    && reference::BEYOND_THE_FILE.iter().all(|s| !handbook_hit(&q, &[s.heading, s.body]))
-                    && reference::MYTHS.iter().all(|m| !handbook_hit(&q, &[m.claim, m.reality]))
-                    && reference::EVIDENCE.iter().all(|s| !handbook_hit(&q, &[s.heading, s.body]))
-                {
-                    ui.add_space(16.0);
-                    ui.label(
-                        RichText::new(format!("{} \u{201C}{}\u{201D}.", self.tr().no_match, query_display))
+                    if show_cat(RefCategory::Letter) {
+                        let items: Vec<_> = reference::letter(self.lang)
+                            .iter()
+                            .filter(|s| handbook_hit(&q, &[s.heading, s.body]))
+                            .collect();
+                        if !items.is_empty() {
+                            ui.label(
+                                RichText::new(self.tr().hb_letter)
+                                    .size(17.0)
+                                    .strong()
+                                    .color(theme::INK),
+                            );
+                            ui.add_space(10.0);
+                            for section in items {
+                                // The letter is one flowing piece; its heading is
+                                // empty, so only the body is shown.
+                                ui.label(
+                                    RichText::new(section.body).size(13.0).color(theme::INK_DIM),
+                                );
+                                ui.add_space(14.0);
+                            }
+                            ui.add_space(6.0);
+                            ui.separator();
+                            ui.add_space(12.0);
+                        }
+                    }
+
+                    // Nothing matched the search across any category.
+                    if !q.is_empty()
+                        && reference::FILE_TYPES
+                            .iter()
+                            .all(|ft| !handbook_hit(&q, &[ft.name, ft.carries, ft.identifies]))
+                        && reference::METADATA
+                            .iter()
+                            .all(|it| !handbook_hit(&q, &[it.name, it.what, it.why]))
+                        && reference::RAW.iter().all(|s| !handbook_hit(&q, &[s.heading, s.body]))
+                        && reference::PRNU.iter().all(|s| !handbook_hit(&q, &[s.heading, s.body]))
+                        && reference::BEYOND_THE_FILE
+                            .iter()
+                            .all(|s| !handbook_hit(&q, &[s.heading, s.body]))
+                        && reference::MYTHS.iter().all(|m| !handbook_hit(&q, &[m.claim, m.reality]))
+                        && reference::EVIDENCE
+                            .iter()
+                            .all(|s| !handbook_hit(&q, &[s.heading, s.body]))
+                        && reference::LETTER
+                            .iter()
+                            .all(|s| !handbook_hit(&q, &[s.heading, s.body]))
+                    {
+                        ui.add_space(16.0);
+                        ui.label(
+                            RichText::new(format!(
+                                "{} \u{201C}{}\u{201D}.",
+                                self.tr().no_match,
+                                query_display
+                            ))
                             .size(13.0)
                             .color(theme::INK_FAINT),
-                    );
-                    ui.label(
-                        RichText::new(self.tr().try_plainer)
-                            .size(12.0)
-                            .color(theme::INK_FAINT),
-                    );
-                }
+                        );
+                        ui.label(
+                            RichText::new(self.tr().try_plainer).size(12.0).color(theme::INK_FAINT),
+                        );
+                    }
                 });
             });
         self.reference_open = open;
@@ -1313,7 +1431,10 @@ impl App {
                             .add_enabled(
                                 writable > 0,
                                 egui::Button::new(
-                                    RichText::new(format!("{} ({writable})", self.tr().save_cleaned))
+                                    RichText::new(format!(
+                                        "{} ({writable})",
+                                        self.tr().save_cleaned
+                                    ))
                                     .color(theme::GROUND)
                                     .strong(),
                                 )
@@ -1324,7 +1445,10 @@ impl App {
                             self.save_all();
                         }
                         if ui
-                            .add_enabled(!self.entries.is_empty(), egui::Button::new(self.tr().clear_list))
+                            .add_enabled(
+                                !self.entries.is_empty(),
+                                egui::Button::new(self.tr().clear_list),
+                            )
                             .clicked()
                         {
                             self.wipe_entries();
@@ -1354,11 +1478,7 @@ impl App {
                 // the same folder carrying everything that was just removed.
                 if self.entries.iter().any(|e| e.saved_to.is_some()) {
                     ui.add_space(3.0);
-                    ui.label(
-                        RichText::new(self.tr().untouched)
-                        .size(11.5)
-                        .color(theme::WARN),
-                    );
+                    ui.label(RichText::new(self.tr().untouched).size(11.5).color(theme::WARN));
                 }
             });
     }
@@ -1376,13 +1496,7 @@ impl App {
                         RichText::new(self.tr().drop_here).size(20.0).strong().color(theme::INK),
                     );
                     ui.add_space(6.0);
-                    ui.label(
-                        RichText::new(
-                            self.tr().drop_sub,
-                        )
-                        .size(13.0)
-                        .color(theme::INK_FAINT),
-                    );
+                    ui.label(RichText::new(self.tr().drop_sub).size(13.0).color(theme::INK_FAINT));
                     ui.add_space(16.0);
                     if ui.button(self.tr().choose_files).clicked() {
                         if let Some(files) = rfd::FileDialog::new().pick_files() {
@@ -1426,12 +1540,18 @@ impl App {
                                 Assurance::Complete => {
                                     badge(ui, self.tr().badge_complete, theme::OK, Mark::Disc)
                                 }
-                                Assurance::BestEffort => {
-                                    badge(ui, self.tr().badge_best_effort, theme::WARN, Mark::Triangle)
-                                }
-                                Assurance::None => {
-                                    badge(ui, self.tr().badge_not_cleaned, theme::DANGER, Mark::Cross)
-                                }
+                                Assurance::BestEffort => badge(
+                                    ui,
+                                    self.tr().badge_best_effort,
+                                    theme::WARN,
+                                    Mark::Triangle,
+                                ),
+                                Assurance::None => badge(
+                                    ui,
+                                    self.tr().badge_not_cleaned,
+                                    theme::DANGER,
+                                    Mark::Cross,
+                                ),
                             }
                         });
 
@@ -1463,11 +1583,9 @@ impl App {
                         if report.removed.is_empty() {
                             ui.add_space(6.0);
                             ui.label(
-                                RichText::new(
-                                    self.tr().no_metadata,
-                                )
-                                .size(12.0)
-                                .color(theme::INK_FAINT),
+                                RichText::new(self.tr().no_metadata)
+                                    .size(12.0)
+                                    .color(theme::INK_FAINT),
                             );
                         }
 
@@ -1475,9 +1593,19 @@ impl App {
                             ui.add_space(6.0);
                             for item in &report.removed {
                                 ui.horizontal(|ui| {
-                                    ui.label(RichText::new("\u{00D7}").font(mono(12.0)).color(theme::OK));
-                                    ui.label(RichText::new(i18n::kind_label(item.kind, self.lang)).size(12.5).color(theme::INK));
-                                    ui.label(RichText::new(&item.location).font(mono(10.5)).color(theme::INK_FAINT));
+                                    ui.label(
+                                        RichText::new("\u{00D7}").font(mono(12.0)).color(theme::OK),
+                                    );
+                                    ui.label(
+                                        RichText::new(i18n::kind_label(item.kind, self.lang))
+                                            .size(12.5)
+                                            .color(theme::INK),
+                                    );
+                                    ui.label(
+                                        RichText::new(&item.location)
+                                            .font(mono(10.5))
+                                            .color(theme::INK_FAINT),
+                                    );
                                     if item.bytes > 0 {
                                         ui.with_layout(
                                             egui::Layout::right_to_left(egui::Align::Center),
@@ -1499,17 +1627,9 @@ impl App {
                         if let Some(v) = report.verification {
                             ui.add_space(6.0);
                             let (mark, colour, text) = if v.passed() {
-                                (
-                                    "\u{2713}",
-                                    theme::OK,
-                                    self.tr().verify_ok.to_string(),
-                                )
+                                ("\u{2713}", theme::OK, self.tr().verify_ok.to_string())
                             } else if !v.output_reinspected_clean {
-                                (
-                                    "\u{2717}",
-                                    theme::DANGER,
-                                    self.tr().verify_fail_meta.to_string(),
-                                )
+                                ("\u{2717}", theme::DANGER, self.tr().verify_fail_meta.to_string())
                             } else {
                                 (
                                     "\u{2717}",
@@ -1553,7 +1673,11 @@ impl App {
                                                 .color(theme::INK),
                                         );
                                         ui.label(
-                                            RichText::new(format!("     {} {}", self.tr().investigator_see, r.reveals))
+                                            RichText::new(format!(
+                                                "     {} {}",
+                                                self.tr().investigator_see,
+                                                r.reveals
+                                            ))
                                             .size(11.5)
                                             .italics()
                                             .color(theme::INK_DIM),
@@ -1564,7 +1688,9 @@ impl App {
 
                         for warning in &report.warnings {
                             ui.add_space(4.0);
-                            ui.label(RichText::new(format!("! {warning}")).size(12.0).color(theme::WARN));
+                            ui.label(
+                                RichText::new(format!("! {warning}")).size(12.0).color(theme::WARN),
+                            );
                         }
 
                         // Reported below the metadata findings and in its own
@@ -1591,8 +1717,8 @@ impl App {
                                 ui.add_space(6.0);
                                 ui.label(
                                     RichText::new(format!("{}{e}", self.tr().fp_not_reduced))
-                                    .size(12.0)
-                                    .color(theme::WARN),
+                                        .size(12.0)
+                                        .color(theme::WARN),
                                 );
                             }
                             None => {}
@@ -1628,7 +1754,8 @@ impl App {
                                 // follows the saved bytes (a washed PNG is saved
                                 // as .jpg), not the source name.
                                 let ext = entry.output_ext();
-                                let stem = self.randomize_name.then_some(entry.random_stem.as_str());
+                                let stem =
+                                    self.randomize_name.then_some(entry.random_stem.as_str());
                                 let preview = output_name(&entry.path, stem, ext.as_deref())
                                     .file_name()
                                     .map(|s| s.to_string_lossy().into_owned())
@@ -1683,7 +1810,9 @@ impl App {
                     e.saved_to = Some(dst);
                 }
             }
-            Err(e) => self.error = Some(format!("{} {}: {e}", self.tr().could_not_write, dst.display())),
+            Err(e) => {
+                self.error = Some(format!("{} {}: {e}", self.tr().could_not_write, dst.display()))
+            }
         }
     }
 }

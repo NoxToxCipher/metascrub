@@ -808,28 +808,68 @@ is why it stays off unless you turn it on.";
 // ---------------------------------------------------------------------------
 
 pub fn metadata(l: Lang) -> &'static [Item] {
-    match l { Lang::Ru => METADATA_RU, Lang::My => METADATA_MY, Lang::La => METADATA_LA, _ => METADATA }
+    match l {
+        Lang::Ru => METADATA_RU,
+        Lang::My => METADATA_MY,
+        Lang::La => METADATA_LA,
+        _ => METADATA,
+    }
 }
 pub fn file_types(l: Lang) -> &'static [FileType] {
-    match l { Lang::Ru => FILE_TYPES_RU, Lang::My => FILE_TYPES_MY, Lang::La => FILE_TYPES_LA, _ => FILE_TYPES }
+    match l {
+        Lang::Ru => FILE_TYPES_RU,
+        Lang::My => FILE_TYPES_MY,
+        Lang::La => FILE_TYPES_LA,
+        _ => FILE_TYPES,
+    }
 }
 pub fn raw(l: Lang) -> &'static [Section] {
-    match l { Lang::Ru => RAW_RU, Lang::My => RAW_MY, Lang::La => RAW_LA, _ => RAW }
+    match l {
+        Lang::Ru => RAW_RU,
+        Lang::My => RAW_MY,
+        Lang::La => RAW_LA,
+        _ => RAW,
+    }
 }
 pub fn first_use(l: Lang) -> &'static str {
-    match l { Lang::Ru => FIRST_USE_RU, Lang::My => FIRST_USE_MY, Lang::La => FIRST_USE_LA, _ => FIRST_USE }
+    match l {
+        Lang::Ru => FIRST_USE_RU,
+        Lang::My => FIRST_USE_MY,
+        Lang::La => FIRST_USE_LA,
+        _ => FIRST_USE,
+    }
 }
 pub fn prnu(l: Lang) -> &'static [Section] {
-    match l { Lang::Ru => PRNU_RU, Lang::My => PRNU_MY, Lang::La => PRNU_LA, _ => PRNU }
+    match l {
+        Lang::Ru => PRNU_RU,
+        Lang::My => PRNU_MY,
+        Lang::La => PRNU_LA,
+        _ => PRNU,
+    }
 }
 pub fn myths(l: Lang) -> &'static [Myth] {
-    match l { Lang::Ru => MYTHS_RU, Lang::My => MYTHS_MY, Lang::La => MYTHS_LA, _ => MYTHS }
+    match l {
+        Lang::Ru => MYTHS_RU,
+        Lang::My => MYTHS_MY,
+        Lang::La => MYTHS_LA,
+        _ => MYTHS,
+    }
 }
 pub fn evidence(l: Lang) -> &'static [Section] {
-    match l { Lang::Ru => EVIDENCE_RU, Lang::My => EVIDENCE_MY, Lang::La => EVIDENCE_LA, _ => EVIDENCE }
+    match l {
+        Lang::Ru => EVIDENCE_RU,
+        Lang::My => EVIDENCE_MY,
+        Lang::La => EVIDENCE_LA,
+        _ => EVIDENCE,
+    }
 }
 pub fn beyond_the_file(l: Lang) -> &'static [Section] {
-    match l { Lang::Ru => BEYOND_THE_FILE_RU, Lang::My => BEYOND_THE_FILE_MY, Lang::La => BEYOND_THE_FILE_LA, _ => BEYOND_THE_FILE }
+    match l {
+        Lang::Ru => BEYOND_THE_FILE_RU,
+        Lang::My => BEYOND_THE_FILE_MY,
+        Lang::La => BEYOND_THE_FILE_LA,
+        _ => BEYOND_THE_FILE,
+    }
 }
 
 // ===========================================================================
@@ -1707,3 +1747,69 @@ const BEYOND_THE_FILE_LA: &[Section] = &[
         body: "Si sollicitudo est documentum, documentum purga. Ad id hoc instrumentum destinatum est et id bene facit.\n\nSi sollicitudo est impositionem ad te non retrahibilem esse debere, documentum minimum est. Ratio, coniunctio per quam facta est, solvendi methodus post rationem, et instrumentum ex quo venit omnia plus referunt, et nullum eorum hic tractatur.\n\nDe illo limite apertum esse utilius est quam instrumentum quod omnia se texisse innuit.",
     },
 ];
+
+pub const LETTER: &[Section] = &[Section {
+    heading: "",
+    body: "Hello,
+
+I'm a photographer, and I've learned how much a single photo can reveal about the person who took it: where they stood, the camera in their hands, a name they never chose to attach. Around the world, that hidden data has been used to take people's privacy, and sometimes their safety, away from them.
+
+I built metascrub to hand that back. It's for anyone who wants it, and above all for people living under censorship or surveillance, for people getting free of someone dangerous, and for anyone who simply wants to be harder to follow.
+
+Everything happens on your computer. Nothing is ever uploaded.
+
+Keep going,
+— Cipher",
+}];
+
+pub const LETTER_RU: &[Section] = &[Section {
+    heading: "",
+    body: "Здравствуйте,
+
+Я фотограф, и я узнал, как много одна-единственная фотография может рассказать о том, кто её сделал: где он стоял, какая камера была у него в руках, имя, которое он никогда не собирался к ней прикреплять. По всему миру эти скрытые данные использовали, чтобы лишить людей приватности, а иногда и безопасности.
+
+Я создал metascrub, чтобы вернуть это обратно. Он для любого, кому он нужен, и прежде всего для тех, кто живёт под цензурой или слежкой, для тех, кто освобождается от кого-то опасного, и для всех, кто просто хочет, чтобы за ними было труднее следить.
+
+Всё происходит на вашем компьютере. Ничего никогда не загружается.
+
+Держитесь,
+— Cipher",
+}];
+
+pub const LETTER_MY: &[Section] = &[Section {
+    heading: "",
+    body: "မင်္ဂလာပါ၊
+
+ကျွန်တော်သည် ဓာတ်ပုံဆရာတစ်ဦးဖြစ်ပြီး ဓာတ်ပုံတစ်ပုံတည်းက ၎င်းကိုရိုက်သူ၏အကြောင်း မည်မျှများစွာ ဖော်ပြနိုင်သည်ကို ကျွန်တော် သင်ယူခဲ့ရသည်— သူရပ်ခဲ့သည့်နေရာ၊ သူ့လက်ထဲရှိကင်မရာ၊ သူ တစ်ခါမျှ တွဲရန် မရွေးချယ်ခဲ့သောအမည်တစ်ခု။ ကမ္ဘာတစ်ဝှမ်းတွင် ထိုဖုံးကွယ်ထားသောဒေတာကို လူတို့၏ ကိုယ်ရေးလွတ်လပ်ခွင့်ကို၊ တစ်ခါတစ်ရံ ၎င်းတို့၏လုံခြုံရေးကိုပါ ဖယ်ရှားရန် အသုံးပြုခဲ့ကြသည်။
+
+ကျွန်တော်သည် ထိုအရာကို ပြန်ပေးအပ်ရန် metascrub ကို တည်ဆောက်ခဲ့သည်။ ၎င်းသည် လိုချင်သူတိုင်းအတွက်ဖြစ်ပြီး၊ အထူးသဖြင့် ဆင်ဆာဖြတ်တောက်မှု သို့မဟုတ် စောင့်ကြည့်မှုအောက်တွင် နေထိုင်ရသူများအတွက်၊ အန္တရာယ်ရှိသူတစ်ဦးထံမှ လွတ်မြောက်နေသူများအတွက်၊ နှင့် ခြေရာခံရန် ခက်ခဲစေလိုသူတိုင်းအတွက်ဖြစ်သည်။
+
+အရာအားလုံး သင့်ကွန်ပျူတာပေါ်တွင် ဖြစ်ပျက်သည်။ ဘာမျှ မည်သည့်အခါမျှ အပ်လုဒ်မတင်ပါ။
+
+ဆက်လျှောက်ပါ၊
+— Cipher",
+}];
+
+pub const LETTER_LA: &[Section] = &[Section {
+    heading: "",
+    body: "Salve,
+
+Photographus sum, et didici quantum una photographia de eo qui eam cepit prodere possit: ubi steterit, photomachinam in manibus, nomen quod numquam apponere elegit. Per orbem terrarum, illa data occulta adhibita sunt ut hominibus privatatem, et interdum salutem, auferrent.
+
+metascrub aedificavi ut id redderem. Est cuivis qui id vult, et ante omnia hominibus sub censura aut vigilantia viventibus, hominibus se ab aliquo periculoso liberantibus, et cuivis qui simpliciter difficilior ad sequendum esse vult.
+
+Omnia in computatro tuo fiunt. Nihil umquam imponitur.
+
+Perge,
+— Cipher",
+}];
+
+/// The letter from the creator, shown at the foot of the handbook.
+pub fn letter(l: Lang) -> &'static [Section] {
+    match l {
+        Lang::Ru => LETTER_RU,
+        Lang::My => LETTER_MY,
+        Lang::La => LETTER_LA,
+        _ => LETTER,
+    }
+}
