@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">metascrub</string>
+    <string name="tagline">ئەوە دەسڕێتەوە کە فایلێک دەربارەی تۆ دەیڵێت</string>
+
+    <string name="share_prompt">وێنە، PDF یان بەڵگەنامە زیاد بکە بۆ پاککردنەوەیان.\n\nهەموو شتێک لەسەر ئەم مۆبایلە ڕوودەدات. هیچ شتێک بار ناکرێت، و فایلەکانت تەنها کاتێک دەست لێ دەدرێن کە پەنجە بۆ پاککردنەوە دەنێیت.</string>
+    <string name="opt_random_names">ناوی هەڕەمەکی بدە بە فایلە پاککراوەکان</string>
+    <string name="opt_keep_colour">پرۆفایلی ڕەنگ بهێڵەرەوە</string>
+    <string name="opt_keep_orientation">ئاراستەی وێنە بهێڵەرەوە</string>
+    <string name="opt_fingerprint">پەنجەمۆری کامێرا کەم بکەرەوە (وێنەکان)</string>
+    <string name="fingerprint_note">پیکسڵەکان نەرم دەکات بۆ لاوازکردنی پەنجەمۆری سێنسەر کە کامێرا لە هەموو وێنەیەکدا بەجێی دەهێڵێت. ئەمە کەم دەکاتەوە کە بە چ ئاسانییەک وێنەکان دەکرێن ببەسترێنەوە بە یەک کامێراوە. پەنجەمۆرەکە ناسڕێتەوە، و وێنەکە نەرمتر و کەمێک بچووکتر دەکات. وێنەکان وەک JPEG هەڵدەگیرێن.</string>
+    <string name="strength_gentle">نەرم</string>
+    <string name="strength_balanced">هاوسەنگ</string>
+    <string name="strength_thorough">ورد</string>
+
+    <!-- کردارەکان -->
+    <string name="choose_files">فایلەکان هەڵبژێرە</string>
+    <string name="add_more">زیاتر زیاد بکە</string>
+    <string name="start_over">لە سەرەتاوە دەست پێبکەوە</string>
+    <string name="scrubbing">پاککردنەوە…</string>
+    <plurals name="scrub_files">
+        <item quantity="one">١ فایل پاک بکەرەوە</item>
+        <item quantity="other">%1$d فایل پاک بکەرەوە</item>
+    </plurals>
+    <plurals name="save_files">
+        <item quantity="one">کۆپیی پاککراو هەڵبگرە</item>
+        <item quantity="other">%1$d کۆپیی پاککراو هەڵبگرە</item>
+    </plurals>
+    <plurals name="saved_files">
+        <item quantity="one">کۆپییەکی پاککراو هەڵگیرا. فایلە ڕەسەنەکەت نەگۆڕدرا.</item>
+        <item quantity="other">%1$d کۆپیی پاککراو هەڵگیران. فایلە ڕەسەنەکانت نەگۆڕدران.</item>
+    </plurals>
+
+    <!-- ناونیشانی بەشەکان -->
+    <string name="ready_header">ئامادەیە بۆ پاککردنەوە</string>
+    <string name="results_header">ئەنجامەکان</string>
+
+    <!-- پەیامەکان -->
+    <string name="too_large">گەورەتر لە 100 MB — تێپەڕێنرا. metascrub فایل لە بیرگەی مۆبایلدا پاک دەکاتەوە، بۆیە فایلە زۆر گەورەکان تا ئێستا پشتگیری ناکرێن.</string>
+    <string name="read_failed">نەکرا بخوێنرێتەوە: %1$s</string>
+    <string name="save_failed">نەکرا هەڵبگیرێت: %1$s</string>
+    <string name="nothing_to_save">هیچ شتێک نییە بۆ هەڵگرتن — هیچ کام لەم فایلانە نەکران پاک بکرێنەوە.</string>
+    <string name="remove">لابردن</string>
+
+    <!-- نیشانەکانی دڵنیایی و واتای ڕاستگۆیانەی یەک دێڕییان -->
+    <string name="badge_complete">تەواو</string>
+    <string name="badge_best_effort">باشترین هەوڵ</string>
+    <string name="badge_not_cleaned">پاک نەکراوە</string>
+    <string name="note_complete">لە بەشە سەلامەت و ناسراوەکانەوە لەنوێ دروستکرایەوە. هیچ شتێکی نەناسراو نەهێڵدرایەوە.</string>
+    <string name="note_best_effort">لە شوێنی خۆیدا پاککرایەوە. لەوانەیە هەندێک پێکهاتە بمێنێتەوە.</string>
+    <string name="note_none">نەکرا ئەم فۆرماتە لێک بکرێتەوە، بۆیە وا دابنێ کە هێشتا هەموو شتێک هەڵدەگرێت.</string>
+
+    <string name="found_location">شوێنی گیرانی تۆمار کرابوو.</string>
+    <string name="removed_prefix">لابردرا: %1$s</string>
+    <string name="nothing_found">پێشتر پاکە. هیچ شتێک نییە بۆ لابردن.</string>
+
+    <!-- تابەکان و زمان -->
+    <string name="tab_scrub">پاککردنەوە</string>
+    <string name="tab_handbook">ڕێبەر</string>
+    <string name="language">زمان</string>
+    <string name="lang_more_soon">زمانی زیاتر زیاد دەکرێن. ڕێبەر و هەموو ڕووکارەکە بە هەریەکەیان دەخوێنرێنەوە.</string>
+    <string name="handbook_unavailable">ڕێبەرەکە نەکرا بار بکرێت.</string>
+</resources>

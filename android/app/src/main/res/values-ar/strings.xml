@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">metascrub</string>
+    <string name="tagline">يُزيل ما يقوله الملف عنك</string>
+
+    <string name="share_prompt">أضِف صورًا أو ملفات PDF أو مستندات لتنظيفها.\n\nكل شيء يجري على هذا الهاتف. لا يُرفَع أي شيء، ولا تُمَسّ ملفاتك إلا عندما تضغط على «تنظيف».</string>
+    <string name="opt_random_names">امنح الملفات المُنظَّفة أسماءً عشوائية</string>
+    <string name="opt_keep_colour">الإبقاء على ملف تعريف الألوان</string>
+    <string name="opt_keep_orientation">الإبقاء على اتجاه الصورة</string>
+    <string name="opt_fingerprint">تقليل بصمة الكاميرا (الصور)</string>
+    <string name="fingerprint_note">يُنعِّم البِكسلات لإضعاف بصمة المُستشعِر التي تتركها الكاميرا في كل صورة. هذا يُقلِّل سهولة ربط الصور بكاميرا واحدة. لا يُزيل البصمة، ويجعل الصورة أنعم وأصغر قليلًا. تُحفَظ الصور بصيغة JPEG.</string>
+    <string name="strength_gentle">لطيف</string>
+    <string name="strength_balanced">متوازن</string>
+    <string name="strength_thorough">شامل</string>
+
+    <!-- Actions -->
+    <string name="choose_files">اختَر الملفات</string>
+    <string name="add_more">أضِف المزيد</string>
+    <string name="start_over">ابدأ من جديد</string>
+    <string name="scrubbing">جارٍ التنظيف…</string>
+    <plurals name="scrub_files">
+        <item quantity="zero">لا ملفات لتنظيفها</item>
+        <item quantity="one">نظِّف ملفًا واحدًا</item>
+        <item quantity="two">نظِّف ملفَّين</item>
+        <item quantity="few">نظِّف %1$d ملفات</item>
+        <item quantity="many">نظِّف %1$d ملفًا</item>
+        <item quantity="other">نظِّف %1$d ملف</item>
+    </plurals>
+    <plurals name="save_files">
+        <item quantity="zero">لا نسخ لحفظها</item>
+        <item quantity="one">احفظ نسخة مُنظَّفة</item>
+        <item quantity="two">احفظ نسختين مُنظَّفتين</item>
+        <item quantity="few">احفظ %1$d نسخ مُنظَّفة</item>
+        <item quantity="many">احفظ %1$d نسخة مُنظَّفة</item>
+        <item quantity="other">احفظ %1$d نسخة مُنظَّفة</item>
+    </plurals>
+    <plurals name="saved_files">
+        <item quantity="zero">لم تُحفَظ أي نسخة.</item>
+        <item quantity="one">تم حفظ نسخة مُنظَّفة. لم يتغيّر ملفك الأصلي.</item>
+        <item quantity="two">تم حفظ نسختين مُنظَّفتين. لم تتغيّر ملفاتك الأصلية.</item>
+        <item quantity="few">تم حفظ %1$d نسخ مُنظَّفة. لم تتغيّر ملفاتك الأصلية.</item>
+        <item quantity="many">تم حفظ %1$d نسخة مُنظَّفة. لم تتغيّر ملفاتك الأصلية.</item>
+        <item quantity="other">تم حفظ %1$d نسخة مُنظَّفة. لم تتغيّر ملفاتك الأصلية.</item>
+    </plurals>
+
+    <!-- Section titles -->
+    <string name="ready_header">جاهز للتنظيف</string>
+    <string name="results_header">النتائج</string>
+
+    <!-- Messages -->
+    <string name="too_large">أكبر من 100 ميغابايت — جرى تخطّيه. يُنظِّف metascrub الملف في ذاكرة الهاتف، لذا لا تُدعَم الملفات الكبيرة جدًّا بعد.</string>
+    <string name="read_failed">تعذّرت القراءة: %1$s</string>
+    <string name="save_failed">تعذّر الحفظ: %1$s</string>
+    <string name="nothing_to_save">لا شيء لحفظه — لم يُتمكَّن من تنظيف أيٍّ من هذه الملفات.</string>
+    <string name="remove">إزالة</string>
+
+    <!-- Assurance badges and their honest one-line meaning -->
+    <string name="badge_complete">مكتمل</string>
+    <string name="badge_best_effort">أقصى جهد</string>
+    <string name="badge_not_cleaned">غير مُنظَّف</string>
+    <string name="note_complete">أُعيد بناؤه من أجزاء معروفة الأمان. لم يُبقَ على أي شيء مجهول.</string>
+    <string name="note_best_effort">نُظِّف في مكانه. قد تبقى بعض البُنى.</string>
+    <string name="note_none">تعذّر تفكيك هذه الصيغة، لذا افترِض أنها لا تزال تحمل كل شيء.</string>
+
+    <string name="found_location">سجّل مكان التقاطها.</string>
+    <string name="removed_prefix">أُزيل: %1$s</string>
+    <string name="nothing_found">نظيف بالفعل. لا شيء لإزالته.</string>
+
+    <!-- Tabs and language -->
+    <string name="tab_scrub">تنظيف</string>
+    <string name="tab_handbook">الدليل</string>
+    <string name="language">اللغة</string>
+    <string name="lang_more_soon">يجري إضافة مزيد من اللغات. سيظهر الدليل والواجهة بالكامل بكل واحدة منها.</string>
+    <string name="handbook_unavailable">تعذّر تحميل الدليل.</string>
+</resources>

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">metascrub</string>
+    <string name="tagline">آنچه را که یک فایل درباره‌ی شما می‌گوید حذف می‌کند</string>
+
+    <string name="share_prompt">عکس‌ها، PDFها یا اسناد را برای پاک‌سازی اضافه کنید.\n\nهمه‌چیز روی همین گوشی انجام می‌شود. هیچ‌چیزی آپلود نمی‌شود، و فایل‌های شما فقط زمانی لمس می‌شوند که دکمه‌ی پاک‌سازی را بزنید.</string>
+    <string name="opt_random_names">به فایل‌های پاک‌شده نام‌های تصادفی بده</string>
+    <string name="opt_keep_colour">حفظ نمایه‌ی رنگ</string>
+    <string name="opt_keep_orientation">حفظ جهت تصویر</string>
+    <string name="opt_fingerprint">کاهش اثرانگشت دوربین (عکس‌ها)</string>
+    <string name="fingerprint_note">پیکسل‌ها را نرم می‌کند تا اثرانگشت حسگری را که دوربین در هر عکس به‌جا می‌گذارد ضعیف کند. این کار، مرتبط‌کردن عکس‌ها به یک دوربین را دشوارتر می‌کند. اثرانگشت را حذف نمی‌کند، و عکس را نرم‌تر و کمی کوچک‌تر می‌کند. عکس‌ها با فرمت JPEG ذخیره می‌شوند.</string>
+    <string name="strength_gentle">ملایم</string>
+    <string name="strength_balanced">متعادل</string>
+    <string name="strength_thorough">عمیق</string>
+
+    <!-- Actions -->
+    <string name="choose_files">انتخاب فایل‌ها</string>
+    <string name="add_more">افزودن موارد بیشتر</string>
+    <string name="start_over">شروع دوباره</string>
+    <string name="scrubbing">در حال پاک‌سازی…</string>
+    <plurals name="scrub_files">
+        <item quantity="one">پاک‌سازی ۱ فایل</item>
+        <item quantity="other">پاک‌سازی %1$d فایل</item>
+    </plurals>
+    <plurals name="save_files">
+        <item quantity="one">ذخیره‌ی نسخه‌ی پاک‌شده</item>
+        <item quantity="other">ذخیره‌ی %1$d نسخه‌ی پاک‌شده</item>
+    </plurals>
+    <plurals name="saved_files">
+        <item quantity="one">یک نسخه‌ی پاک‌شده ذخیره شد. نسخه‌ی اصلی شما تغییری نکرد.</item>
+        <item quantity="other">%1$d نسخه‌ی پاک‌شده ذخیره شد. نسخه‌های اصلی شما تغییری نکردند.</item>
+    </plurals>
+
+    <!-- Section titles -->
+    <string name="ready_header">آماده‌ی پاک‌سازی</string>
+    <string name="results_header">نتایج</string>
+
+    <!-- Messages -->
+    <string name="too_large">بزرگ‌تر از ۱۰۰ مگابایت — رد شد. metascrub هر فایل را در حافظه‌ی گوشی پاک‌سازی می‌کند، بنابراین فایل‌های بسیار بزرگ هنوز پشتیبانی نمی‌شوند.</string>
+    <string name="read_failed">خوانده نشد: %1$s</string>
+    <string name="save_failed">ذخیره نشد: %1$s</string>
+    <string name="nothing_to_save">چیزی برای ذخیره نیست — هیچ‌کدام از این فایل‌ها قابل پاک‌سازی نبودند.</string>
+    <string name="remove">حذف</string>
+
+    <!-- Assurance badges and their honest one-line meaning -->
+    <string name="badge_complete">کامل</string>
+    <string name="badge_best_effort">بهترین تلاش</string>
+    <string name="badge_not_cleaned">پاک‌نشده</string>
+    <string name="note_complete">از بخش‌های شناخته‌شده و امن بازسازی شد. هیچ‌چیز ناشناخته‌ای نگه داشته نشد.</string>
+    <string name="note_best_effort">در جای خود پاک‌سازی شد. ممکن است بخشی از ساختار باقی مانده باشد.</string>
+    <string name="note_none">این فرمت قابل تجزیه نبود، پس فرض کنید هنوز همه‌چیز را با خود دارد.</string>
+
+    <string name="found_location">محل گرفته‌شدن آن را ثبت کرده بود.</string>
+    <string name="removed_prefix">حذف‌شده: %1$s</string>
+    <string name="nothing_found">از قبل پاک است. چیزی برای حذف نیست.</string>
+
+    <!-- Tabs and language -->
+    <string name="tab_scrub">پاک‌سازی</string>
+    <string name="tab_handbook">کتابچه‌ی راهنما</string>
+    <string name="language">زبان</string>
+    <string name="lang_more_soon">زبان‌های بیشتری در حال افزوده‌شدن هستند. کتابچه‌ی راهنما و کل رابط کاربری به هر زبان قابل خواندن خواهد بود.</string>
+    <string name="handbook_unavailable">کتابچه‌ی راهنما بارگذاری نشد.</string>
+</resources>

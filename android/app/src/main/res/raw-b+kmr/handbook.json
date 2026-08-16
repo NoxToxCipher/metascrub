@@ -1,0 +1,233 @@
+{
+  "chapters": [
+    {
+      "title": "metascrub çawa paqij dike",
+      "intro": "metascrub tu carî nîşaneke kesk a ku qezenc nekiribe nade. Her dosya bi yek ji sê encamên rastgo vedigere.",
+      "entries": [
+        {
+          "heading": "TEMAM",
+          "body": "Dosya ji hev hate veçirandin û ji lîsteyeke perçeyên hêja yên parastinê ji nû ve hate avakirin. Her tiştê ku ne di wê lîsteyê de ye — di nav de blokên taybet, yên xas bi firoşkar an yên veşartî yên ku amûrê qet nedîtine — bi xwezaya avabûnê li paş dimîne. Wêne û belge (JPEG, PNG, WebP, HEIC, AVIF, GIF, TIFF, PDF û dosyayên Office) bi vî awayî têne paqijkirin."
+        },
+        {
+          "heading": "HEWLA ÇÊTIRÎN",
+          "body": "Dosya li cihê xwe hate sererastkirin li şûna ku ji nû ve bê avakirin, ji ber ku ji nû ve avakirin dê metirsiya venebûnê çêbike. Qadên nasker li ser têne nivîsandin, lê hin avanî ya ku amûr nikare bi ewlehî dest lê bide dibe ku bimîne. Dosyayên raw ên kamerayê bi vî awayî têne paqijkirin."
+        },
+        {
+          "heading": "NEPAQIJKIRÎ",
+          "body": "metascrub nekarî vê formatê ji hev veçirîne, loma bêdestlêdan hate hiştin û divê tu bihesibînî ku hê her tiştî hildigire. Encama ku tu pê bawer bikî ji nîşaneke ku nehatiye qezenckirin bihatir e, loma amûr bi eşkereyî ji te re dibêje, ne ku xwe wek din nîşan bide."
+        },
+        {
+          "heading": "Çima dosyayan ji nû ve ava dike ne ku wan sererast bike",
+          "body": "Amûrek ku tenê meta-agahiyên ku nas dike jê dibe, dê bêdeng her tiştê nû, taybet, an bi zanetî veşartî derbas bike. Ji nû ve avakirin ji lîsteyeke tiştên ku divê bêne parastin, tê wateya ku ya xwerû ji bo her tiştê nenas ew e ku bê avêtin."
+        }
+      ]
+    },
+    {
+      "title": "Çi dikare paqij bike, û çiqas baş",
+      "intro": "metascrub formatê ji naveroka dosyayê bi xwe tesbît dike, ne ji navê wê. Va ye ka bi her yekê re çi dike.",
+      "entries": [
+        {
+          "heading": "Bi tevahî ji nû ve hate avakirin (TEMAM)",
+          "body": "Ji hev hate veçirandin û ji lîsteyeke destûrdayî ji nû ve hate avakirin, loma tiştek nenas namîne. Wêne: JPEG, PNG, WebP, HEIC û HEIF, AVIF, GIF, TIFF. Vektor: SVG. Belge: PDF, Word, Excel, PowerPoint, û OpenDocument. Wêneyên ku di nav belgeyekê de hatine pêvekirin jî têne paqijkirin."
+        },
+        {
+          "heading": "Li cihê xwe hate paqijkirin (HEWLA ÇÊTIRÎN)",
+          "body": "Hate sererastkirin, ne ji nû ve avakirin, ji ber ku ji nû ve avakirin dê dosyayeke ku tu nikarî dîsa bikişînî bixe metirsiyê. Dosyayên raw ên kamerayê: Canon CR2 û CR3, Nikon NEF û NRW, Sony ARW û SR2, Fujifilm RAF, Olympus û OM System ORF, Panasonic RW2, Pentax PEF, Samsung SRW, Adobe DNG, Epson ERF, GoPro GPR, û paşikên formata navîn. Marqe, model û nota çêker têne parastin da ku dosya hê vebe, loma hejmareke rêzeyî ya di nav nota çêker de dikare bimîne. Li Dosyayên raw ên kamerayê binêre."
+        },
+        {
+          "heading": "Bêdestlêdan hate hiştin (NEPAQIJKIRÎ)",
+          "body": "Heke metascrub nikaribe formatekê ji hev veçirîne, texmîn nake. Dosyayê tam wek xwe dihêle û wê wek NEPAQIJKIRÎ nîşan dike, da ku dosyayeke bêdestlêdan tu carî bi ya paqijkirî neyê tevlihevkirin. Ev vîdyo û deng jî di nav xwe de digire, û carinan avaniya raw a ku hê nikare ji hev veçirîne, wek X3F ya Sigma."
+        }
+      ]
+    },
+    {
+      "title": "Çi radike, û çima",
+      "entries": [
+        {
+          "heading": "EXIF",
+          "body": "Blokeke etîketan ku ji hêla kamerayê ve hatiye nivîsandin: model, lens, hejmara rêzeyî, hejmara vekirina şaterê, mîhengên ronahîdanê, dîrok û dem heta çirkeyê, û gelek caran koordînatên GPS.\n\nGPS ya eşkere ye, û heta çend metreyan rast e, loma tenê wêneyeke betlaneyê dikare navnîşana malê eşkere bike. Yên mayî bêdengtir in lê li hev kom dibin: heman gewdeyê kamerayê û lens li ser komeke wêneyan wan bi yek kesî ve girê dide tevî ku tu tiştê din wan negirêde jî."
+        },
+        {
+          "heading": "Nota çêker",
+          "body": "Devera taybet a firoşkarekî di nav EXIF de, di formateke bêbelge de ku di navbera çêkeran û guhertoyên firmware de cuda ye.\n\nLi vir e ku hejmara rêzeyî ya sensorê bi gelemperî lê ye, ligel hejmara çalakkirina şaterê û mîhengên hundirîn. Ev di wêneyeke asayî de yekane qada herî nasker e, û ji ber ku format taybet e, amûrên ku tenê etîketên standard fam dikin gelek caran wê li cihê xwe dihêlin."
+        },
+        {
+          "heading": "Wêneyê biçûk",
+          "body": "Kopiyeke biçûk a wêneyî, di hundirê dosyayê de tê hilanîn da ku nîşander bikaribin pêşdîtinekê nîşan bidin bêyî ku tevahiya wêneyî deşîfre bikin.\n\nWêneyên biçûk carekê têne çêkirin û pir caran piştî sererastkirinê ji nû ve nayên çêkirin. Wêneyekî ku hatiye birîn da ku kesek ji çarçoveyê were derxistin dikare hê ya orîjînal a nebirî di hundirê xwe de hilgire. Heman tişt ji bo rûyên xumamkirî û hûrgiliyên ku li ser wan hatiye boyaxkirin derbas dibe."
+        },
+        {
+          "heading": "XMP",
+          "body": "Formata meta-agahiyan a Adobe, wek XML tê hilanîn. Ji hêla nermalava sererastkirinê û ji hêla hin kamerayan ve tê nivîsandin.\n\nDîroka sererastkirinê, nermalav û guhertoya ku hatiye bikaranîn, nirxandin, peyvên sereke, û gelek caran navê nivîskar an xwedanê lîsansê hildigire. Her wiha li vir e ku naskerên katalogê hene, yên ku dikarin wêneyekî weşandî vegerînin ber pirtûkxaneyeke taybet li ser makîneyeke taybet."
+        },
+        {
+          "heading": "IPTC",
+          "body": "Blokeke meta-agahiyan a çapemenî û weşanê, ku gelek caran ji hêla nermalava rêveberiya wêneyan ve tê nivîsandin.\n\nJi bo ku navê nivîskar, agahdariya mafê kopîkirinê, hûrgiliyên têkiliyê û nivîsa binê wêneyî hilgire hatiye çêkirin. Hemû ji bo ajanseke nûçeyan bikêrhatî ne, hemû ji bo her kesê ku nexwestibe bi navê xwe biweşîne nasker in."
+        },
+        {
+          "heading": "Profîla rengan",
+          "body": "Profîleke ICC ku diyar dike ka hejmarên rengan ên dosyayê divê çawa bêne şîrovekirin.\n\nBi piranî bêziyan e, û heke tu bixwazî tê parastin. Ji ber du sedeman bi xwerû tê rakirin: profîlek danasîneke nivîsa azad û modeleke amûrê hildigire, û profîleke taybet ji ekraneke pîvankirî dikare têra xwe cihêreng be ku dosyayan girê bide. Heke wêneyên te berfireh (wide-gamut) bin û rastbûna rengan girîng be, wê ji nû ve veke."
+        },
+        {
+          "heading": "Daneyên li dûvê",
+          "body": "Her tiştê ku piştî wê xalê tê zêdekirin ku format dibêje dosya li wir diqede.\n\nPiraniya amûran li nîşana dawiyê xwendinê disekinin, ku ev cihê piştî wê dike veşargeheke baş. Hin kamerayên têlefonan wêneyekî duyemîn ê bi resana tam li wir hildigirin. Çi tê de hebe, ew ne beşek ji wêneyî ye û bi dosyayê re digere."
+        },
+        {
+          "heading": "Agahiya belgeyê",
+          "body": "Di PDF û belgeyên Office de: sernav, mijar, nivîskar, nermalava ku ew çêkiriye, û dema afirandin û guhertinê.\n\nQada nivîskar gelek caran navekî rastîn an navekî bikarhêner ê pargîdanî ye, ku bixweber ji hesabê ku nermalav lê hatiye sazkirin tê dagirtin, bêyî ku qet ji kesê ku dinivîse re were nîşandan."
+        },
+        {
+          "heading": "Naskerên guhertoyê",
+          "body": "Naskerên rasthatî yên ku nermalavên peyvê di belgeyekê de dinivîsin û dema ku tê sererastkirin nûve dikin.\n\nDu belgeyên ku heman naskerê guhertoyê parve dikin di heman danişînê de li ser heman makîneyê hatine sererastkirin. Ev dosyayên ku tu tiştê din wan bi hev re tune girê dide, û hema bêje tu kes nizane ku ev qad heye."
+        },
+        {
+          "heading": "Avaniyên nenaskirî",
+          "body": "Her bloka di nav konteynerê de ya ku ne di lîsteya parastinê de ye, di nav de beşên taybet ên firoşkar ên ku vê amûrê qet nedîtine.\n\nSedema ku amûr dosyayan ji nû ve ava dike ne ku wan sererast bike. Amûrek ku meta-agahiyên ku nas dike jê dibe, dê bêdeng her tiştê nû, taybet, an bi zanetî veşartî derbas bike. Ji nû ve avakirin ji lîsteyeke tiştên ku divê bêne parastin, tê wateya ku ya xwerû ji bo her tiştê nenas ew e ku bê avêtin."
+        }
+      ]
+    },
+    {
+      "title": "Dosyayên te, û tiştê ku hildigirin",
+      "entries": [
+        {
+          "heading": "Wêneyê JPEG (.jpg)",
+          "body": "Blokeke EXIF ku ji hêla kamera an têlefonê ve hatiye nivîsandin: koordînatên GPS, marqe, model û hejmara rêzeyî ya kamerayê, lens, dîrok û dema tam heta çirkeyê, û wêneyekî biçûk. Gelek caran blokeke XMP jî ji nermalava sererastkirinê.\n\nGPS heta çend metreyan rast e, loma tenê wêneyekî betlaneyê dikare malê eşkere bike. Hejmara rêzeyî ya bihêz e: ew li ser her wêneyê ku wê kamerayê heta niha kişandiye heman e, loma wêneyekî nenas bi koma ku te bi navê xwe weşandiye ve girê dide. Wêneyê biçûk carekê tê çêkirin û gelek caran nayê nûvekirin, loma wêneyekî ku hatiye birîn da ku kesek were rakirin dikare hê ya orîjînal a nebirî di hundirê xwe de hilgire."
+        },
+        {
+          "heading": "Wêneyê têlefonê (HEIC, HEIF, AVIF)",
+          "body": "Heman EXIF û XMP wek JPEGekê, û têlefonên nûjen kûr in: GPS a rast, modela amûrê, mîhengên kişandinê, û carinan nexşeyeke kûrahiyê an rêzeyek çarçoveyan.\n\nHer tiştê ku rewşa JPEG diyar dike, û ji ber ku rasterast ji têlefoneke ku cih vekirî bû hatiye, GPS bi gelemperî heye û rast e. Modela amûrê ligel hûrgiliyên pergala xebitandinê teng dike ka têlefona kê bû."
+        },
+        {
+          "heading": "Wêneyê PNG (.png)",
+          "body": "Perçeyên nivîsê ku şîroveyên serbest, nermalava ku dosya nivîsî, dema afirandinê, û carinan blokeke EXIF a tam a ji wêneyekî orîjînal hatî kopîkirin hildigirin.\n\nMirov texmîn dikin ku PNG 'paqij' e ji ber ku pir caran ji bo dîmengirtinan tê bikaranîn, lê veguherîner gelek caran EXIF a wêneyê orîjînal, ligel GPS û her tiştî, dixin nav PNGyê. Qada nermalavê amûr û guhertoya ku te bikar aniye wek şopa tiliyê diyar dike."
+        },
+        {
+          "heading": "WebP û GIF",
+          "body": "WebP mîna JPEGekê EXIF û XMP hildigire. GIF blokên şîrove û sepanê hildigire, yên ku ji bo navên nivîskaran, rêzikên nermalavê û XMP hatine bikaranîn.\n\nHeman çîroka cih û amûrê ji bo WebP. Ji bo GIF bi gelemperî ne GPS e lê navê nivîskar an rêzika nermalavê ye, lê ew jî amûrek, hesabek, an kesek bi nav dike."
+        },
+        {
+          "heading": "TIFF (.tif)",
+          "body": "TIFF ew konteyner e ku EXIF bi xwe li ser hatiye avakirin, loma tevahiya komê hildigire: GPS, marqe, model û hejmara rêzeyî ya kamerayê, mohrên demê, û wêneyekî biçûk ê cîgirkirî.\n\nWek JPEGekê, û TIFF ji bo skankirinan û xebata pîşeyî gelemperî ye, li cihê ku hejmara rêzeyî ya skaner an kamerayê û mohreke demê ya rast dikare belgeyekê bi yek makîneyê ve girê bide."
+        },
+        {
+          "heading": "Raw a kamerayê (CR2, CR3, NEF, ARW, RAF, DNG, ...)",
+          "body": "Her tiştê ku JPEGek hildigire, û bêtir. Nota çêker a mezintir hejmara rêzeyî ya hundirîn û hejmara şaterê hildigire. Pêşdîtineke JPEG a bi mezinahiya tam di hundir de cîgirkirî ye, bi EXIF û GPS a xwe.\n\nRaw ji JPEG a heman kişandinê ji bo nihêniyê xetereyeke mezintir e, ne kêmtir. Hejmara şaterê bi bandor wêneyên te li gorî rêza ku te ew kişandine hejmar dike. Nota çêker daneyên ku veguherînerek ji bo pêşxistina dosyayê hewce dike hildigire, loma ev amûr wê diparêze û hejmara rêzeyî ya tê de bi gelemperî dimîne, ku ji ber vê yekê raw tu carî nikare bi tevahî li cihê xwe were paqijkirin. Ji bo rakirina hejmara rêzeyî, raw wek JPEGekê pêşbixe û wê paqij bike."
+        },
+        {
+          "heading": "Wêneyê vektorî yê SVG (.svg)",
+          "body": "SVG XML e, loma tomarên edîtorê hildigire: bernameya xêzkirinê û guhertoya wê, avaniya qat û pencereyê, carinan rêça belgeyekê, blokeke meta-agahiyan bi nivîskar û lîsansê re, û referansên bo dosyayên derveyî.\n\nQadên edîtorê û her rêça belgeyê ya cîgirkirî dikare navê bikarhêner an avaniya peldankê ya ku te bi nav dike hilgire. Referanseke derveyî dike ku wêne dema kesek wê veke ji serverekê çavkaniyekê bîne, ku vê yekê ji wî serverî re radigihîne ku hatiye dîtin. Skrîptên di nav SVGyê de dikarin dema ku di gerokekê de tê vekirin bixebitin."
+        },
+        {
+          "heading": "Dosyaya kêlekê ya XMP (.xmp)",
+          "body": "Dosyayeke ku ji meta-agahiyan pê ve tu tişt nine, ji hêla nermalava sererastkirinê ve li kêleka wêneyekî tê nivîsandin: nivîskar, mafê kopîkirinê, GPS, dîrokên ku wêne lê hatiye kişandin û sererastkirin, tevahiya dîroka sererastkirinê, naskerên katalogê, û hejmara rêzeyî ya kamerayê.\n\nMirov ji bîr dikin ku dosyaya kêlekê heye û wê ligel wêneyî parve dikin. Ew nasnameya ku wêne jê hatiye paqijkirin hildigire. Dîroka sererastkirinê dosyayê bi danişîneke taybet li ser makîneyeke taybet ve girê dide, û naskerên katalogê wê bi yek pirtûkxaneya wêneyan ve girê didin."
+        },
+        {
+          "heading": "Belgeya PDF (.pdf)",
+          "body": "Blokeke agahiya belgeyê bi nivîskar, nermalava ku ew çêkiriye, û dema afirandin û guhertinê re. Gelek caran blokeke XMP jî, û dîrokeke sererastkirinên gav-bi-gav.\n\nQada nivîskar bi gelemperî bixweber ji hesabê ku nermalav lê hatiye sazkirin tê dagirtin, loma pir caran navekî rastîn an navekî bikarhêner ê pargîdanî ye ku nivîskar qet nenivîsî û nedît. Dîroka sererastkirinê dikare guhertoyên berê yên dosyayê hilgire, ku bi vî awayî PDFên 'sansurkirî' nivîsa binê qutiyên reş eşkere kirine."
+        },
+        {
+          "heading": "Word, Excel, PowerPoint, OpenDocument",
+          "body": "Navên nivîskar û yê ku dawî guhertiye, pargîdanî, tevahiya dema sererastkirinê, naskerên tomarkirina guhertoyê, guhertinên şopandî bi navên her kesê ku sererast kiriye, rêçên şablonê, û her wêneyê ku hatiye pêvekirin, yên ku EXIF a xwe diparêzin.\n\nQadên nivîskar û yê ku dawî sererast kiriye kesên rastîn an navên bikarhêner ên hesaban bi nav dikin. Naskerên tomarkirina guhertoyê hejmarên rasthatî ne ku di navbera belgeyên di heman danişînê de li ser heman makîneyê hatî sererastkirin de li hev tên, ku ev dosyayên ku tu tiştê din bi hev re tune girê dide. Guhertinên şopandî dikarin eşkere bikin kê çi nivîsandiye, û wêneyekî pêvekirî GPS a xwe bi xwe re tîne."
+        }
+      ]
+    },
+    {
+      "title": "Dosyayên raw ên kamerayê",
+      "intro": "Raw ew formata yekane ne ku li şûna ji nû ve avakirinê li cihê xwe têne paqijkirin, û peyva 'raw' bi berfirehî xelet tê fêmkirin. Ev e ka raw çi ye, û bi rastî li ku amûr li ser yekê bisînor e.",
+      "entries": [
+        {
+          "heading": "Dosyaya raw bi rastî çi ye",
+          "body": "Dosyaya raw xwendina hema-hema-neproseskirî ya sensorê wêneyî yê kamerayê ye, berî ku kamera ew kiribe wêne. Ew ne wêneyekî dîtbar e bi wateya asayî. Tu rengên sabît, tu xeta kontrastê û tu tûjkirin lê nehatiye kirin; ew ji çapeke qedandî zêdetir nêzî negatîfeke wênegiriyê ye, û divê berî ku wek tiştekî xuya bike ji hêla nermalavê ve were 'pêşxistin'.\n\nJi ber ku daneyên sensorê yên tam bi hema-hema tu tiştê avêtî hildigire, raw mezin e, û tenê dikare ji hêla nermalava ku formata wê kamerayê ya taybet fam dike ve were vekirin. Ev tevahiya mebesta kişandina raw e: hê tu tişt nehatiye biryardan an avêtin, loma wênegêr dikare wan hilbijartinan paşê bike."
+        },
+        {
+          "heading": "JPEGeke nesererastkirî ne raw e",
+          "body": "Ev şaşfêmkirina herî belav û herî biha ye, loma hêjayî eşkerebêjiyê ye. JPEGeke ku rasterast ji têlefon an kamerayê tê, ya ku te qet di edîtorekê de venekiriye, ne dosyaya raw e. Ew jixwe di hundirê kamerayê de hatiye pêşxistin: daneyên sensorê bûne reng, xeta kontrastê û tûjkirin hatin sepandin, û encam hate zextkirin û heta perçeyeke mezinahiya xwe ya orîjînal hate avêtin. 'Ji hêla te ve nesererastkirî' ne wek 'raw' e.\n\nRêya pêbawer a cihêkirina wan cureyê dosyayê ye, ne ka wêne çawa xuya dike. Raw dirêjkerên xas-bi-çêker hene: Canon CR2 û CR3, Nikon NEF û NRW, Sony ARW, Panasonic RW2, Olympus ORF, Fujifilm RAF, Pentax PEF, DNG a gerdûnî ya Adobe, û donzdehên din. Heke dosya bi .jpg an .jpeg biqede, ew JPEG e çi tiştê din jî li ser rast be. Heke tu di guman de bî, ev amûr ji te re dibêje ku kîjan format ji naveroka dosyayê bi xwe tesbît kir, navî paşguh dike."
+        },
+        {
+          "heading": "Çima raw bêtir ji bo rakirinê hildigirin, ne kêmtir",
+          "body": "Raw ji JPEG a heman wêneyî ji bo nihêniyê xetereyeke mezintir e, ne kêmtir. Ew bloka EXIF a tam hildigire, û nota çêker a wê, ku hejmara rêzeyî ya sensorê û hejmara şaterê lê ne, bi gelemperî ji ya di dosyayeke proseskirî de mezintir û hûrgilîtir e.\n\nRaw her wiha hema-hema herdem pêşdîtineke JPEG a temam a wêneyê pêşxistî di nav xwe de dihewîne, di hundir de cîgirkirî ye da ku nermalav bikaribe kişandinê bêyî deşîfrekirina daneyên sensorê nîşan bide. Ew pêşdîtin EXIF a xwe, GPS a xwe heye, û tewra dikare guhertoyeke dîmenê ya beriya sererastkirinê nîşan bide. Ew dosyayek e di nav dosyayê de, û divê ew jî were paqijkirin. Ev amûr meta-agahiyên di nav wan pêşdîtinên cîgirkirî de her wiha di etîketên raw ên xwe de dibîne û vala dike."
+        },
+        {
+          "heading": "Du astên paqijkirinê, û çima raw ya jêrîn e",
+          "body": "Wêne û belgeyên asayî ji nû ve ji binî ve têne avakirin: amûr lîsteyeke perçeyên hêja yên parastinê digire, tenê wan dixe nav dosyayeke nû, û bi xwezaya avabûnê tu tiştê din namîne. JPEG, PNG, WebP, HEIC, AVIF, GIF, TIFF, PDF û dosyayên Office bi vî awayî têne paqijkirin, bo encameke 'Temam'.\n\nRaw nikare wisa were derbaskirin. Wêneyê sensorê yê wê di beşên jêrîn ên xas-bi-firoşkar de ye ku avaniya wan bêbelge ye û ji bo her çêkerekî cuda ye, û ceribandin li ser dosyayên rastîn ji gelek marqeyan nîşan da ku ji nû ve avakirina yekê dosyayeke ku êdî venabe vedigerîne. Raw ne tiştek e ku tu dikarî dîsa bikişînî, loma amûr wê metirsiyê nagire ser xwe. Li şûna wê raw li cihê xwe têne paqijkirin: dosya tê sererastkirin, ne ji nû ve avakirin, tu tişt nayê livandin, û dirêjahî naguhere. Ev herdem encameke 'Hewla çêtirîn' e."
+        },
+        {
+          "heading": "Bi rastî di raw de çi diguhere, û çi naguhere",
+          "body": "TÊNE RAKIRIN, bi sifiran li ser têne nivîsandin: cihê GPS; dîrok û dema ku wêne lê hatiye kişandin û dawî hatiye guhertin; navên xwedan û hunermend; her bloka XMP an IPTC; qadên standard ên hejmara rêzeyî û ID-ya wêneyî; û meta-agahiyên di nav wêneyê pêşdîtinê yê cîgirkirî de. Rapor bi rastî lîste dike kîjan ji vana di dosyaya te de hatin dîtin.\n\nBI MEBEST TÊNE PARASTIN: marqe û modela kamerayê, û nota çêker a çêkerî.\n\nDEST LÊ NAYÊ DAN: daneyên wêneyê sensorê bi xwe, û şiyana dosyayê ya ku were pêşxistin. Wêne bit-bi-bit heman e; tenê agahiya derdora wê guherî."
+        },
+        {
+          "heading": "Çima nota çêker tê parastin, û ew çi eşkere dike",
+          "body": "Nota çêker bloka taybet a çêkerî ye. Ew bi rastî hejmara rêzeyî ya hundirîn a kamerayê û hejmara şaterê ya wê digire, yên ku nasker in. Baş bûya ku were rakirin.\n\nLê çêker her wiha di heman blokê de mîhengên ku veguherînerekî raw ji bo pêşxistina dosyayê hewce dike hildigirin: astên reş û spî, avaniya parzûna rengan a sensorê, hevsengiya spî, sererastkirinên lensê. Li ser dosyayên rastîn ji Canon, Nikon, Olympus, Pentax û yên din, rakirina nota çêker an raw ji vebûnê rawestand an awayê deşîfrekirina wê guherand. Xerabkirina dosyayê ew encama yekane ye ku ev amûr red dike, loma nota çêker dimîne.\n\nEncama rastgo: li ser raw, hejmara rêzeyî ya hundirîn a di nota çêker de bi gelemperî dimîne. Ji ber vê yekê çiqas daneyên nasker dimînin bi kamerayê te ve girêdayî ye, ji ber ku hin marqe hejmara rêzeyî di qadeke standard de jî dinivîsin, ku tê rakirin, lê yên din wê tenê di nota çêker de dihêlin, ku nayê rakirin. Heke ew hejmara rêzeyî ji bo te girîng be, rêya ewle ya jêrîn bikar bîne."
+        },
+        {
+          "heading": "Rêya herî ewle, û kîjan kamera di nav de ne",
+          "body": "Heke tiştê ku hewce dike ew be ku wêneyekî parve bikî ne ku negatîfa raw, pêşî raw bike JPEG an PNG û wê paqij bike. JPEGek bo encameke 'Temam' ji nû ve tê avakirin û tu tiştî ji nota çêker, pêşdîtina cîgirkirî, an beşên jêrîn ên firoşkar ên ku raw hildigire, hilnagire. Ev rêya rakirina hejmara rêzeyî ye ku raw diparêze.\n\nAmûr raw ji van nas dike: Canon (CR2, CR3), Nikon (NEF, NRW), Sony (ARW, SR2), Fujifilm (RAF), Olympus û OM System (ORF), Panasonic (RW2), Pentax (PEF), Leica, Samsung (SRW), Adobe (DNG), Epson (ERF), GoPro (GPR), û paşikên formata navîn ji Hasselblad, Phase One û Leaf, di nav yên din de. Her yek ji naveroka xwe tê nasîn, ne ji navê dosyaya xwe. X3F ya Sigma avaniyekê bikar tîne ku amûr hê nikare veçirîne, loma bêdestlêdan tê hiştin û wek nepaqijkirî tê ragihandin, ne ku xerab hatiye paqijkirin."
+        }
+      ]
+    },
+    {
+      "title": "Kêmkirina şopa tiliya kamerayê",
+      "intro": "Gaveke cuda, bijarî, ku bi xwerû girtî ye ji ber ku wêneyî nerm dike. Her sensorê kamerayê şêweyeke sabît a lawaz di pîkselên her wêneyê ku dikişîne de dihêle. Rakirina meta-agahiyan tu bandorê li wê nake.",
+      "entries": [
+        {
+          "heading": "Şopa tiliya sensorê çi ye",
+          "body": "Sensorê kamerayê tora bi milyonan bîrên hesas-bi-ronahiyê ye ku di silîkonê de hatine kolandin. Çêkirin nikare wan bi tevahî wek hev çêke, loma her yek hinekî ji cîranên xwe cudatir bertek dide ronahiyê. Ew guherbarî ji bo temenê kamerayê sabît e û bi lawazî li ser her wêneyê ku dikişîne tê çapkirin. Jê re Ne-Yeknesekiya Bertekê ya Wêneyî, an PRNU tê gotin — hejmareke rêzeyî ku di nav wêneyî bi xwe de hatiye nivîsandin ne ku di qadên agahiyan ên dosyayê de. Rakirina EXIF dest lê nade, û ne jî nûvekirina navê dosyayê, dîmengirtina wê, an şandina wê bi sepanekê ku meta-agahiyan jê dibe."
+        },
+        {
+          "heading": "Ew çawa li dijî kesekî tê bikaranîn",
+          "body": "Ew êrîşeke girêdanê ye, ne ya nasînê. Analîstek hûrgiliya wêneyekî ya hûr bi şêweyeke referansê ya kamerayekê re dide ber hev, ku an ji kamerayê fizîkî an ji wêneyên ku jixwe tê zanîn ji wê tên hatiye çêkirin. Tu kes navekî ji pîkselên wêneyekî nenas dernaxe. Senaryoya rastîn: kesek xebatê bi navê xwe diweşîne, paşê tiştekî bi nenasî diweşîne, herdu bi heman kamerayê hatine kişandin, û analîst nîşan dide ku herdu ji yek sensorê hatine."
+        },
+        {
+          "heading": "Ev vebijark çi dike",
+          "body": "Kêmkirina şopa tiliya kamerayê wêneyî di resana tam de ji dengî paqij dike (şêwe di hûrgiliya hûr de ye, loma ev berevajiyê awayê ku tesbîtker wê dibînin e), wê piçûk dike (her pîkselê derketinê ji çend pîkselên ketinê tevlihev dike, ku ev lihevhatina pîksel-bi-pîksel a ku hevrêzî pê ve girêdayî ye dişkîne — gava herî bi bandor a yekane), hinekî dengê nû lê zêde dike, û wek JPEG ji nû ve kod dike. Nerm 90% mezinahiyê diparêze, Hevseng 70%, Kûr 50%. Mîheng çiqas bihêztir be, wêne ewqas nermtir û piçûktir."
+        },
+        {
+          "heading": "Çi kar nake",
+          "body": "Guhertina rengan an hevsengiya spî qet tu tiştî nake. Tesbîtker hevrêziya normalîzekirî bikar tînin, ku her mezinkirin an veguhastina yekgirtî ya her-kanalê berî berhevkirinê dabeş dike û derdixe. Guhertineke rengan a giştî tam ew e, loma berî ku berhevkirin çêbibe ji hêla matematîkê ve tê rakirin. Ew rastbûna rengan dixe ber lê tu parastinê nakire. Ev tê nivîsandin ji ber ku ramaneke sezgînî ye ku tesadufî xelet e."
+        },
+        {
+          "heading": "Sînorê rastgo",
+          "body": "Ev hevrêziyê kêm dike. Ew şopê ranake, û tu tiştê li vir nabêje ku wê rakiriye. Analîstekî adlî yê xwedî şêweyeke referansê ya bihêz, gelek nimûne û dem hê jî dikare biserkeve. Her mîheng her wiha wêneyî xirabtir dike — hûrgiliyeke nermtir, pîkselên kêmtir, zextkirineke zêdetir. Heke ewlehiya te bi negirêdanabûnê ve girêdayî be, tedbîra bihêztir ew e ku tu ji serî ve ji heman kamerayê bi du nasnameyan neweşînî."
+        }
+      ]
+    },
+    {
+      "title": "Şaşfêmkirinên belav",
+      "intro": "Şîreta xerab li vir ji ya tune xerabtir e: kesê ku bawer dike dosyayek paqij e, wisa tevdigere ku ew e.",
+      "entries": [
+        {
+          "heading": "Şandina wêneyekî bi sepaneke peyaman her tiştî radike.",
+          "body": "Piraniya platformên mezin dema ku tu wêneyekî wek foto dişînî EXIF jê dibin, loma cih bi gelemperî diçe. Du xetere. Şandina heman dosyayê wek belge an pêveka dosyayê ya orîjînal a bêdestlêdan, ligel meta-agahiyan û her tiştî, bar dike, û mirov ji bo kalîteyeke baştir wê vebijarkê hildibijêrin bêyî ku fêm bikin çi tiştên din pê re tên. WhatsApp û Telegram herdu bi vî awayî tevdigerin; Signal di moda belgeyê de jî meta-agahiyan jê dibe, ku ev cudahiyeke rastîn di navbera wan de ye."
+        },
+        {
+          "heading": "Girtina dîmenê meta-agahiyan radike.",
+          "body": "Bi piranî rast e. Lê dîmengirtin meta-agahiyên xwe yên nû hildigire, kalîte ji kopiyeke paqij a rast pir xirabtir e, û şaşiya belav ew e ku ji bo ewlehiyê dîmen tê girtin û paşê ya orîjînal bi xeletî tê şandin."
+        },
+        {
+          "heading": "Nûvekirina navê dosyayê, an xistina wê di zipekê de, meta-agahiyan radike.",
+          "body": "Tu ji herduyan qet tu tiştî nake. Navê dosyayê ne beşek ji naveroka dosyayê ye, û arşîvek dosyayê bi tevahî diparêze da ku ew ji aliyê din bênguhertin derkeve. Ev tevahiya mebesta arşîvekê ye."
+        },
+        {
+          "heading": "Wêneyê min dosyaya raw e ji ber ku min ew sererast nekiriye.",
+          "body": "Wêneyekî ku te dest lê nedaye hê jî ne dosyaya raw e. JPEGeke ku rasterast ji têlefon an kamerayê tê jixwe di hundirê kamerayê de hatiye pêşxistin: reng, kontrast û tûjkirin hatin sepandin, paşê hate zextkirin. Raw daneyên sensorê beriya her tiştê wan e, di formateke xas-bi-çêker de (CR2, CR3, NEF, ARW, DNG, RW2, ORF, RAF û yên din) ku ji bo vekirinê nermalava taybet hewce dike. Cureyê dosyayê biryarê dide, ne ka te wêne sererast kiriye an na."
+        },
+        {
+          "heading": "Veguhertina bo PNG meta-agahiyan jê dibe.",
+          "body": "PNG perçeyên meta-agahiyan ên xwe hene, di nav de perçeyeke EXIF a tam û qadên nivîsa azad, û gelek veguherîner etîketan li şûna ku biavêjin kopî dikin. Guhertina formatê ne wek rakirina agahiyan e."
+        },
+        {
+          "heading": "Min karûbarên cih girt, loma wêneyên min baş in.",
+          "body": "Ev koordînatên GPS radike, ku hêmana yekane ya herî mezin e, û hêjayî kirinê ye. Her tiştê din dimîne: modela kamerayê, lens, hejmara rêzeyî ya di nota çêker de, mohra demê ya tam, wêneyê biçûk ê cîgirkirî, û dîroka sererastkirinê."
+        }
+      ]
+    },
+    {
+      "title": "Nameyek ji afirîner",
+      "entries": [
+        {
+          "heading": "",
+          "body": "Silav,\n\nEz wênegêrek im, û ez fêr bûme ka wêneyek tenê çiqas dikare li ser kesê ku ew kişandiye eşkere bike: ka li ku sekiniye, kamera di destên wan de, navekî ku wan qet nexwestiye pê ve girê bidin. Li seranserê cîhanê, ew daneyên veşartî hatine bikaranîn da ku nihêniya mirovan, û carinan ewlehiya wan jî, ji wan bistînin.\n\nMin metascrub ava kir da ku wê vegerînim. Ew ji bo her kesê ku wê dixwaze ye, û beriya her tiştî ji bo mirovên ku di bin sansur an çavdêriyê de dijîn, ji bo mirovên ku ji kesekî xeternak xelas dibin, û ji bo her kesê ku bi tenê dixwaze şopandina wî dijwartir be.\n\nHer tişt li ser têlefona te pêk tê. Tu carî tu tişt nayê barkirin.\n\nBidomîne,\n— Cipher"
+        }
+      ]
+    }
+  ]
+}

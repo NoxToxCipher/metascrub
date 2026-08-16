@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">metascrub</string>
+    <string name="tagline">tiştê ku dosyayek li ser te dibêje jê radike</string>
+
+    <string name="share_prompt">Wêne, PDF an belgeyan lê zêde bike da ku wan paqij bikî.\n\nHer tişt li ser vê têlefonê pêk tê. Tu tişt nayê barkirin, û em dest nadin dosyayên te heta ku tu pêl Paqijkirinê bikî.</string>
+    <string name="opt_random_names">Navên rasthatî li dosyayên paqijkirî bike</string>
+    <string name="opt_keep_colour">Profîla rengan biparêze</string>
+    <string name="opt_keep_orientation">Arasteya wêneyê biparêze</string>
+    <string name="opt_fingerprint">Şopa tiliya kamerayê kêm bike (wêne)</string>
+    <string name="fingerprint_note">Pîkselan nerm dike da ku şopa sensorê ya ku kamerayek di her wêneyî de dihêle qels bike. Ev kêm dike ka çiqas bi hêsanî wêne dikarin bi yek kamerayê ve bêne girêdan. Ew şopê ranake, û wêneyê nermtir û hinekî piçûktir dike. Wêne wek JPEG têne hilanîn.</string>
+    <string name="strength_gentle">Nerm</string>
+    <string name="strength_balanced">Hevseng</string>
+    <string name="strength_thorough">Kûr</string>
+
+    <!-- Actions -->
+    <string name="choose_files">Dosyayan hilbijêre</string>
+    <string name="add_more">Bêtir lê zêde bike</string>
+    <string name="start_over">Ji nû ve dest pê bike</string>
+    <string name="scrubbing">Tê paqijkirin…</string>
+    <plurals name="scrub_files">
+        <item quantity="one">1 dosyayê paqij bike</item>
+        <item quantity="other">%1$d dosyayan paqij bike</item>
+    </plurals>
+    <plurals name="save_files">
+        <item quantity="one">Kopiya paqijkirî hilîne</item>
+        <item quantity="other">%1$d kopiyên paqijkirî hilîne</item>
+    </plurals>
+    <plurals name="saved_files">
+        <item quantity="one">Kopiyeke paqijkirî hate hilanîn. Ya te ya orîjînal nehat guhertin.</item>
+        <item quantity="other">%1$d kopiyên paqijkirî hatin hilanîn. Yên te yên orîjînal nehatin guhertin.</item>
+    </plurals>
+
+    <!-- Section titles -->
+    <string name="ready_header">Ji bo paqijkirinê amade</string>
+    <string name="results_header">Encam</string>
+
+    <!-- Messages -->
+    <string name="too_large">Ji 100 MB mezintir — hate derbaskirin. metascrub dosyayekê di bîra têlefonê de paqij dike, loma dosyayên pir mezin hê nayên piştgirîkirin.</string>
+    <string name="read_failed">Nehat xwendin: %1$s</string>
+    <string name="save_failed">Nehat hilanîn: %1$s</string>
+    <string name="nothing_to_save">Tiştek ji bo hilanînê tune — tu ji van dosyayan nehat paqijkirin.</string>
+    <string name="remove">Rake</string>
+
+    <!-- Assurance badges and their honest one-line meaning -->
+    <string name="badge_complete">TEMAM</string>
+    <string name="badge_best_effort">HEWLA ÇÊTIRÎN</string>
+    <string name="badge_not_cleaned">NEPAQIJKIRÎ</string>
+    <string name="note_complete">Ji perçeyên naskirî-ewle ji nû ve hate avakirin. Tiştek nenas nehat parastin.</string>
+    <string name="note_best_effort">Li cihê xwe hate paqijkirin. Hin avanî dibe ku bimîne.</string>
+    <string name="note_none">Ev format nehat ji hev veçirandin, loma bihesibîne ku hê her tiştî hildigire.</string>
+
+    <string name="found_location">Cihê ku lê hate kişandin tomar kiribû.</string>
+    <string name="removed_prefix">Hat rakirin: %1$s</string>
+    <string name="nothing_found">Jixwe paqij e. Tiştek ji bo rakirinê tune.</string>
+
+    <!-- Tabs and language -->
+    <string name="tab_scrub">Paqijkirin</string>
+    <string name="tab_handbook">Rêbername</string>
+    <string name="language">Ziman</string>
+    <string name="lang_more_soon">Zêdetir ziman têne zêdekirin. Rêbername û hemû navrû wê bi her yekê bêne xwendin.</string>
+    <string name="handbook_unavailable">Rêbername nehat barkirin.</string>
+</resources>
