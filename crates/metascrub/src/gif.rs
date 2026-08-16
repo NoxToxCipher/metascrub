@@ -29,7 +29,11 @@ const COMMENT: u8 = 0xFE;
 const PLAIN_TEXT: u8 = 0x01;
 const APPLICATION: u8 = 0xFF;
 
-pub(crate) fn sanitize(input: &[u8], _policy: &crate::Policy, report: &mut Report) -> crate::Result<Vec<u8>> {
+pub(crate) fn sanitize(
+    input: &[u8],
+    _policy: &crate::Policy,
+    report: &mut Report,
+) -> crate::Result<Vec<u8>> {
     let mut r = Reader::new(input);
 
     // Header: "GIF87a" or "GIF89a".
@@ -49,7 +53,9 @@ pub(crate) fn sanitize(input: &[u8], _policy: &crate::Policy, report: &mut Repor
     let packed = lsd[4];
     if packed & 0x80 != 0 {
         let size = 3 * (1usize << ((packed & 0x07) + 1));
-        let gct = r.take(size).ok_or_else(|| Error::malformed(FORMAT, "truncated global colour table"))?;
+        let gct = r
+            .take(size)
+            .ok_or_else(|| Error::malformed(FORMAT, "truncated global colour table"))?;
         out.extend_from_slice(gct);
     }
 
@@ -60,7 +66,8 @@ pub(crate) fn sanitize(input: &[u8], _policy: &crate::Policy, report: &mut Repor
     loop {
         let Some(marker) = r.u8() else {
             // A GIF should end at its trailer; a missing one means truncation.
-            report.warn("the file ended without a trailer byte, so it was truncated; one was added");
+            report
+                .warn("the file ended without a trailer byte, so it was truncated; one was added");
             out.push(TRAILER);
             break;
         };
@@ -77,20 +84,26 @@ pub(crate) fn sanitize(input: &[u8], _policy: &crate::Policy, report: &mut Repor
                 // Image descriptor: 9 bytes, then an optional local colour table,
                 // then the LZW-compressed image as sub-blocks. All kept.
                 out.push(IMAGE_SEP);
-                let desc = r.take(9).ok_or_else(|| Error::malformed(FORMAT, "truncated image descriptor"))?;
+                let desc = r
+                    .take(9)
+                    .ok_or_else(|| Error::malformed(FORMAT, "truncated image descriptor"))?;
                 out.extend_from_slice(desc);
                 if desc[8] & 0x80 != 0 {
                     let size = 3 * (1usize << ((desc[8] & 0x07) + 1));
-                    let lct = r.take(size).ok_or_else(|| Error::malformed(FORMAT, "truncated local colour table"))?;
+                    let lct = r
+                        .take(size)
+                        .ok_or_else(|| Error::malformed(FORMAT, "truncated local colour table"))?;
                     out.extend_from_slice(lct);
                 }
                 // LZW minimum code size, then sub-blocks.
-                let min_code = r.u8().ok_or_else(|| Error::malformed(FORMAT, "truncated image data"))?;
+                let min_code =
+                    r.u8().ok_or_else(|| Error::malformed(FORMAT, "truncated image data"))?;
                 out.push(min_code);
                 copy_sub_blocks(&mut r, &mut out)?;
             }
             EXTENSION => {
-                let label = r.u8().ok_or_else(|| Error::malformed(FORMAT, "truncated extension"))?;
+                let label =
+                    r.u8().ok_or_else(|| Error::malformed(FORMAT, "truncated extension"))?;
                 match label {
                     GRAPHIC_CONTROL => {
                         // Animation timing and transparency: structural, kept —
@@ -123,7 +136,10 @@ pub(crate) fn sanitize(input: &[u8], _policy: &crate::Policy, report: &mut Repor
                         // whether an animation repeats. Everything else here,
                         // including XMP, is metadata.
                         let block = read_sub_blocks(&mut r)?;
-                        let is_loop = block.first().map(|b| b.len() >= 11 && &b[..11] == b"NETSCAPE2.0").unwrap_or(false);
+                        let is_loop = block
+                            .first()
+                            .map(|b| b.len() >= 11 && &b[..11] == b"NETSCAPE2.0")
+                            .unwrap_or(false);
                         if is_loop && !netscape_seen {
                             // Canonicalize instead of copying the parsed block back.
                             // Only the two-byte loop count is meaningful; trailing
@@ -163,8 +179,17 @@ pub(crate) fn sanitize(input: &[u8], _policy: &crate::Policy, report: &mut Repor
                             }
                         } else {
                             let bytes: usize = block.iter().map(|b| b.len()).sum();
-                            let name = block.first().map(|b| String::from_utf8_lossy(&b[..b.len().min(11)]).into_owned()).unwrap_or_default();
-                            let kind = if name.contains("XMP") { Kind::Xmp } else { Kind::UnknownStructure };
+                            let name = block
+                                .first()
+                                .map(|b| {
+                                    String::from_utf8_lossy(&b[..b.len().min(11)]).into_owned()
+                                })
+                                .unwrap_or_default();
+                            let kind = if name.contains("XMP") {
+                                Kind::Xmp
+                            } else {
+                                Kind::UnknownStructure
+                            };
                             report.removed(kind, format!("application extension {name}"), bytes);
                         }
                     }
@@ -178,12 +203,19 @@ pub(crate) fn sanitize(input: &[u8], _policy: &crate::Policy, report: &mut Repor
                     }
                     other => {
                         let bytes = skip_sub_blocks(&mut r)?;
-                        report.removed(Kind::UnknownStructure, format!("extension {other:#04x}"), bytes);
+                        report.removed(
+                            Kind::UnknownStructure,
+                            format!("extension {other:#04x}"),
+                            bytes,
+                        );
                     }
                 }
             }
             other => {
-                return Err(Error::malformed(FORMAT, format!("unexpected block marker {other:#04x}")));
+                return Err(Error::malformed(
+                    FORMAT,
+                    format!("unexpected block marker {other:#04x}"),
+                ));
             }
         }
     }
@@ -200,7 +232,9 @@ fn copy_sub_blocks(r: &mut Reader, out: &mut Vec<u8>) -> crate::Result<()> {
         if len == 0 {
             return Ok(());
         }
-        let data = r.take(len as usize).ok_or_else(|| Error::malformed(FORMAT, "truncated sub-block data"))?;
+        let data = r
+            .take(len as usize)
+            .ok_or_else(|| Error::malformed(FORMAT, "truncated sub-block data"))?;
         out.extend_from_slice(data);
     }
 }
@@ -227,7 +261,9 @@ fn read_sub_blocks(r: &mut Reader) -> crate::Result<Vec<Vec<u8>>> {
         if len == 0 {
             return Ok(blocks);
         }
-        let data = r.take(len as usize).ok_or_else(|| Error::malformed(FORMAT, "truncated sub-block data"))?;
+        let data = r
+            .take(len as usize)
+            .ok_or_else(|| Error::malformed(FORMAT, "truncated sub-block data"))?;
         blocks.push(data.to_vec());
     }
 }

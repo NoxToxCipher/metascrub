@@ -298,6 +298,67 @@ pub(crate) fn remove_elements(xml: &[u8], local_names: &[&str]) -> (Vec<u8>, usi
     (out, removed)
 }
 
+/// Blank the text content of every element whose local name is in `local_names`,
+/// keeping the element and its start/end tags.
+///
+/// Some formats carry an author or a change date as element *text* rather than as
+/// an attribute, which the attribute pass cannot reach: Excel legacy comment
+/// authors (`<author>Name</author>`, referenced elsewhere by list index, so the
+/// element itself must stay) and OpenDocument change-info / annotation authors
+/// (`<dc:creator>Name</dc:creator>`). The targeted elements are text-only, so
+/// clearing everything up to the matching close tag removes exactly the identity
+/// and nothing structural. Returns the rewritten bytes and how many were blanked.
+pub(crate) fn blank_element_text(xml: &[u8], local_names: &[&str]) -> (Vec<u8>, usize) {
+    let mut out = Vec::with_capacity(xml.len());
+    let mut blanked = 0usize;
+    let mut i = 0;
+
+    while i < xml.len() {
+        if xml[i] != b'<' {
+            out.push(xml[i]);
+            i += 1;
+            continue;
+        }
+        if let Some(end) = skip_verbatim(xml, i) {
+            out.extend_from_slice(&xml[i..end]);
+            i = end;
+            continue;
+        }
+        let Some(tag_end) = find_tag_end(xml, i) else {
+            out.extend_from_slice(&xml[i..]);
+            break;
+        };
+        let tag = &xml[i..tag_end];
+        out.extend_from_slice(tag);
+        i = tag_end;
+
+        // A matching, non-self-closing start tag: drop its text content, then
+        // re-emit only the matching close tag.
+        if let Some(name) = element_name(tag)
+            .filter(|n| local_names.iter().any(|w| n.eq_ignore_ascii_case(w.as_bytes())))
+        {
+            if !tag.ends_with(b"/>") {
+                let close_end = skip_to_close(xml, tag_end, name);
+                // The close tag is the last `<…>` in the span; for a text-only
+                // element that is `</name>`, and everything before it is the text
+                // we discard.
+                let span = &xml[tag_end..close_end];
+                match span.iter().rposition(|&b| b == b'<') {
+                    Some(rel) => {
+                        if rel > 0 {
+                            blanked += 1;
+                        }
+                        out.extend_from_slice(&span[rel..]);
+                    }
+                    None => out.extend_from_slice(span),
+                }
+                i = close_end;
+            }
+        }
+    }
+    (out, blanked)
+}
+
 /// The local name of a start tag, or `None` for an end tag.
 fn element_name(tag: &[u8]) -> Option<&[u8]> {
     let body = tag.strip_prefix(b"<")?;

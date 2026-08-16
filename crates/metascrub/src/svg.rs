@@ -92,9 +92,12 @@ pub(crate) fn sanitize(
             break;
         }
 
-        // A tag. Find its end '>' (naively; attribute values here do not contain
-        // unescaped '>').
-        let Some(gt) = memchr(bytes, i, b'>') else {
+        // A tag. Find its end '>', skipping any '>' that sits inside a quoted
+        // attribute value. XML allows a literal '>' inside a value (only '<',
+        // '&' and the delimiting quote are forbidden there), so a naive scan to
+        // the first '>' could cut a tag short and re-emit the remainder — a live
+        // on* handler or external href — as verbatim text, byte-for-byte.
+        let Some(gt) = find_tag_gt(bytes, i) else {
             break;
         };
         let tag = &text[i..gt + 1];
@@ -179,8 +182,7 @@ fn is_dropped_element(lname: &str) -> bool {
     // Match the LOCAL name (after any `prefix:`), so a namespaced `<svg:script>`
     // or `<html:script>` is dropped the same as a bare `<script>`.
     let local = lname.rsplit(':').next().unwrap_or(lname);
-    DROP_ELEMENTS.contains(&local)
-        || EDITOR_PREFIXES.iter().any(|p| lname.starts_with(p))
+    DROP_ELEMENTS.contains(&local) || EDITOR_PREFIXES.iter().any(|p| lname.starts_with(p))
 }
 
 /// Presentation attributes whose value can be a FuncIRI `url(...)` reaching an
@@ -265,25 +267,44 @@ fn scrub_start_tag(tag: &str) -> (String, usize, usize) {
     (s, editor, ext)
 }
 
+/// Find the '>' that ends the tag beginning at `start`, ignoring any '>' inside
+/// a quoted attribute value. Byte-based; the quote/`>` markers are all ASCII, so
+/// a lossy-UTF-8 multi-byte char (high bytes only) can never be mistaken for one.
+fn find_tag_gt(bytes: &[u8], start: usize) -> Option<usize> {
+    let mut quote: Option<u8> = None;
+    let mut j = start;
+    while j < bytes.len() {
+        let b = bytes[j];
+        match (quote, b) {
+            (Some(q), c) if c == q => quote = None,
+            (Some(_), _) => {}
+            (None, b'"') | (None, b'\'') => quote = Some(b),
+            (None, b'>') => return Some(j),
+            (None, _) => {}
+        }
+        j += 1;
+    }
+    None
+}
+
+/// True if a URL points off the document once a browser has normalised its
+/// scheme: numeric character references decoded, ASCII whitespace/control
+/// characters stripped. This is what catches obfuscated forms like
+/// `&#104;ttp://`, `ht\ttp://` and `java\nscript:` that a raw `starts_with`
+/// misses. `data:` is deliberately allowed (legitimate inline images); bare
+/// relative paths and in-document `#id` fragments have no scheme.
+fn points_off_document(v: &str) -> bool {
+    let scheme = deobfuscate_scheme(v);
+    scheme.starts_with("//") // protocol-relative //host, inherits the page scheme
+        || matches!(
+            scheme.as_str(),
+            "http" | "https" | "ftp" | "ftps" | "file" | "ws" | "wss" | "javascript" | "vbscript"
+        )
+}
+
 fn is_external_ref(val: &str) -> bool {
     let v = val.trim().trim_matches(['"', '\'']).trim();
-    let lv = v.to_ascii_lowercase();
-    if lv.starts_with("http://")
-        || lv.starts_with("https://")
-        || lv.starts_with("//")
-        || lv.starts_with("file:")
-        || lv.starts_with("ftp:")
-    {
-        return true;
-    }
-    // Script-bearing schemes, checked against a DE-OBFUSCATED scheme: a browser
-    // strips ASCII whitespace/control characters inside the scheme and decodes
-    // character references before running it, so `java\nscript:` and
-    // `&#106;avascript:` both execute. A plain `starts_with` missed those.
-    // (`data:` is deliberately not flagged here — it is how legitimate inline
-    // images are carried in href, and dropping it would break them.)
-    let scheme = deobfuscate_scheme(v);
-    scheme == "javascript" || scheme == "vbscript"
+    points_off_document(v)
 }
 
 /// The leading URI scheme (lower-cased, without the trailing `:`), de-obfuscated
@@ -359,13 +380,7 @@ fn neutralize_css(css: &str) -> (String, usize) {
             if let Some(close_rel) = rest.find(')') {
                 let inner = &rest[4..close_rel];
                 let target = inner.trim().trim_matches(['"', '\'']).trim();
-                let lt = target.to_ascii_lowercase();
-                let external = lt.starts_with("http://")
-                    || lt.starts_with("https://")
-                    || lt.starts_with("//")
-                    || lt.starts_with("file:")
-                    || lt.starts_with("ftp:");
-                if external {
+                if points_off_document(target) {
                     out.push_str("url(about:blank)");
                     count += 1;
                     i += close_rel + 1;
@@ -466,7 +481,10 @@ fn skip_element(bytes: &[u8], text: &str, from: usize, name: &str) -> usize {
                 continue;
             } else if rest.len() >= open.len()
                 && rest[..open.len()].eq_ignore_ascii_case(&open)
-                && rest.as_bytes().get(open.len()).is_some_and(|c| c.is_ascii_whitespace() || *c == b'>' || *c == b'/')
+                && rest
+                    .as_bytes()
+                    .get(open.len())
+                    .is_some_and(|c| c.is_ascii_whitespace() || *c == b'>' || *c == b'/')
             {
                 // a nested open of the same name (self-closing does not deepen)
                 if let Some(gt) = memchr(bytes, i, b'>') {
@@ -601,8 +619,37 @@ mod tests {
     }
 
     #[test]
+    fn a_greater_than_inside_an_attribute_does_not_end_the_tag_early() {
+        // XML allows a literal '>' inside a quoted value. A naive scan to the
+        // first '>' cut the tag at `data-x="a>` and re-emitted the trailing
+        // href as verbatim text, smuggling the external reference through intact.
+        let svg = r#"<svg><image data-x="a>b" href="https://tracker.example/pixel.png"/></svg>"#;
+        let (out, report) = run(svg);
+        assert!(!out.contains("tracker.example"), "external ref smuggled past the tag scan");
+        assert!(report.removed.iter().any(|r| r.location.contains("external")));
+    }
+
+    #[test]
+    fn an_obfuscated_external_scheme_is_still_removed() {
+        // A browser decodes character references and strips control characters
+        // inside a URL scheme before fetching, so these reach the network; the
+        // scrub must compare against the de-obfuscated scheme, not the raw text.
+        let svg = concat!(
+            "<svg>",
+            r#"<image href="&#104;ttp://tracker.example/a.png"/>"#,
+            r#"<image href="ht&#9;tp://tracker.example/b.png"/>"#,
+            "</svg>"
+        );
+        let (out, report) = run(svg);
+        assert!(!out.contains("tracker.example"), "obfuscated external ref survived");
+        assert!(report.removed.iter().filter(|r| r.location.contains("external")).count() >= 1);
+    }
+
+    #[test]
     fn malformed_svg_does_not_panic() {
-        for s in ["<svg", "<svg><metadata", "<!--", "<![CDATA[", "<svg><script>", "<>", "<svg attr='"] {
+        for s in
+            ["<svg", "<svg><metadata", "<!--", "<![CDATA[", "<svg><script>", "<>", "<svg attr='"]
+        {
             let mut report = Report::new(Format::Svg, s.len());
             let _ = sanitize(s.as_bytes(), &crate::Policy::default(), &mut report);
         }

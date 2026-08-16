@@ -155,8 +155,7 @@ pub fn sanitize_verified(input: &[u8], policy: &Policy) -> Result<Sanitized> {
         let reinspection = sanitize_at_depth(&first.data, policy, 0)?.report;
         let output_reinspected_clean = reinspection.removed.is_empty();
 
-        first.report.verification =
-            Some(Verification { output_reinspected_clean, deterministic });
+        first.report.verification = Some(Verification { output_reinspected_clean, deterministic });
     }
     Ok(first)
 }

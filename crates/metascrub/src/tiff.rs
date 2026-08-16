@@ -52,11 +52,33 @@ const T_SAMPLE_FORMAT: u16 = 339;
 const T_JPEG_TABLES: u16 = 347;
 
 const KEEP: &[u16] = &[
-    T_NEW_SUBFILE_TYPE, T_SUBFILE_TYPE, T_IMAGE_WIDTH, T_IMAGE_LENGTH, T_BITS_PER_SAMPLE,
-    T_COMPRESSION, T_PHOTOMETRIC, T_THRESHOLDING, T_FILL_ORDER, T_STRIP_OFFSETS, T_ORIENTATION,
-    T_SAMPLES_PER_PIXEL, T_ROWS_PER_STRIP, T_STRIP_BYTE_COUNTS, T_X_RESOLUTION, T_Y_RESOLUTION,
-    T_PLANAR_CONFIG, T_RESOLUTION_UNIT, T_PREDICTOR, T_COLOR_MAP, T_TILE_WIDTH, T_TILE_LENGTH,
-    T_TILE_OFFSETS, T_TILE_BYTE_COUNTS, T_EXTRA_SAMPLES, T_SAMPLE_FORMAT, T_JPEG_TABLES,
+    T_NEW_SUBFILE_TYPE,
+    T_SUBFILE_TYPE,
+    T_IMAGE_WIDTH,
+    T_IMAGE_LENGTH,
+    T_BITS_PER_SAMPLE,
+    T_COMPRESSION,
+    T_PHOTOMETRIC,
+    T_THRESHOLDING,
+    T_FILL_ORDER,
+    T_STRIP_OFFSETS,
+    T_ORIENTATION,
+    T_SAMPLES_PER_PIXEL,
+    T_ROWS_PER_STRIP,
+    T_STRIP_BYTE_COUNTS,
+    T_X_RESOLUTION,
+    T_Y_RESOLUTION,
+    T_PLANAR_CONFIG,
+    T_RESOLUTION_UNIT,
+    T_PREDICTOR,
+    T_COLOR_MAP,
+    T_TILE_WIDTH,
+    T_TILE_LENGTH,
+    T_TILE_OFFSETS,
+    T_TILE_BYTE_COUNTS,
+    T_EXTRA_SAMPLES,
+    T_SAMPLE_FORMAT,
+    T_JPEG_TABLES,
 ];
 
 /// A raw 12-byte directory entry, as read.
@@ -70,12 +92,12 @@ struct Entry {
 
 fn type_size(ty: u16) -> Option<u32> {
     Some(match ty {
-        1 | 2 | 6 | 7 => 1,  // BYTE, ASCII, SBYTE, UNDEFINED
-        3 | 8 => 2,          // SHORT, SSHORT
-        4 | 9 | 13 => 4,     // LONG, SLONG, IFD
-        5 | 10 => 8,         // RATIONAL, SRATIONAL
-        11 => 4,             // FLOAT
-        12 => 8,             // DOUBLE
+        1 | 2 | 6 | 7 => 1, // BYTE, ASCII, SBYTE, UNDEFINED
+        3 | 8 => 2,         // SHORT, SSHORT
+        4 | 9 | 13 => 4,    // LONG, SLONG, IFD
+        5 | 10 => 8,        // RATIONAL, SRATIONAL
+        11 => 4,            // FLOAT
+        12 => 8,            // DOUBLE
         _ => return None,
     })
 }
@@ -85,7 +107,11 @@ struct Rd {
 }
 impl Rd {
     fn u16(&self, b: &[u8]) -> u16 {
-        if self.big { u16::from_be_bytes([b[0], b[1]]) } else { u16::from_le_bytes([b[0], b[1]]) }
+        if self.big {
+            u16::from_be_bytes([b[0], b[1]])
+        } else {
+            u16::from_le_bytes([b[0], b[1]])
+        }
     }
     fn u32(&self, b: &[u8]) -> u32 {
         if self.big {
@@ -95,14 +121,26 @@ impl Rd {
         }
     }
     fn put16(&self, out: &mut Vec<u8>, v: u16) {
-        if self.big { out.extend_from_slice(&v.to_be_bytes()) } else { out.extend_from_slice(&v.to_le_bytes()) }
+        if self.big {
+            out.extend_from_slice(&v.to_be_bytes())
+        } else {
+            out.extend_from_slice(&v.to_le_bytes())
+        }
     }
     fn put32(&self, out: &mut Vec<u8>, v: u32) {
-        if self.big { out.extend_from_slice(&v.to_be_bytes()) } else { out.extend_from_slice(&v.to_le_bytes()) }
+        if self.big {
+            out.extend_from_slice(&v.to_be_bytes())
+        } else {
+            out.extend_from_slice(&v.to_le_bytes())
+        }
     }
 }
 
-pub(crate) fn sanitize(input: &[u8], policy: &crate::Policy, report: &mut Report) -> crate::Result<Vec<u8>> {
+pub(crate) fn sanitize(
+    input: &[u8],
+    policy: &crate::Policy,
+    report: &mut Report,
+) -> crate::Result<Vec<u8>> {
     if input.len() < 8 {
         return Err(Error::malformed(FORMAT, "shorter than a TIFF header"));
     }
@@ -127,7 +165,11 @@ pub(crate) fn sanitize(input: &[u8], policy: &crate::Policy, report: &mut Report
         }
         ifd_offsets.push(next);
         let Some(entries_end) = ifd_entry_table_end(input, next, &rd) else { break };
-        next = rd.u32(input.get(entries_end..entries_end + 4).ok_or_else(|| Error::malformed(FORMAT, "truncated IFD chain"))?) as usize;
+        next = rd.u32(
+            input
+                .get(entries_end..entries_end + 4)
+                .ok_or_else(|| Error::malformed(FORMAT, "truncated IFD chain"))?,
+        ) as usize;
     }
     if ifd_offsets.is_empty() {
         return Err(Error::malformed(FORMAT, "no image directory"));
@@ -162,7 +204,8 @@ pub(crate) fn sanitize(input: &[u8], policy: &crate::Policy, report: &mut Report
     let mut first_ifd_pos: Option<usize> = None;
 
     for (idx, &off) in ifd_offsets.iter().enumerate() {
-        let entries = read_entries(input, off, &rd).ok_or_else(|| Error::malformed(FORMAT, "unreadable directory"))?;
+        let entries = read_entries(input, off, &rd)
+            .ok_or_else(|| Error::malformed(FORMAT, "unreadable directory"))?;
 
         // A reduced-resolution directory after the first is the embedded
         // thumbnail; drop it whole.
@@ -196,10 +239,15 @@ pub(crate) fn sanitize(input: &[u8], policy: &crate::Policy, report: &mut Report
         // Chain the previous directory's next-pointer to this one.
         if let Some(pos) = prev_next_ptr_pos.take() {
             let v = ifd_start as u32;
-            out[pos..pos + 4].copy_from_slice(&if rd.big { v.to_be_bytes() } else { v.to_le_bytes() });
+            out[pos..pos + 4].copy_from_slice(&if rd.big {
+                v.to_be_bytes()
+            } else {
+                v.to_le_bytes()
+            });
         }
 
-        let next_ptr_pos = build_ifd(input, &entries, &rd, policy, &mut out, report, &mut dropped_unknown)?;
+        let next_ptr_pos =
+            build_ifd(input, &entries, &rd, policy, &mut out, report, &mut dropped_unknown)?;
         prev_next_ptr_pos = Some(next_ptr_pos);
     }
 
@@ -208,12 +256,17 @@ pub(crate) fn sanitize(input: &[u8], policy: &crate::Policy, report: &mut Report
         out[pos..pos + 4].copy_from_slice(&0u32.to_ne_bytes());
     }
     // Patch the header's first-IFD offset.
-    let first = first_ifd_pos.ok_or_else(|| Error::malformed(FORMAT, "every directory was a thumbnail"))?;
+    let first =
+        first_ifd_pos.ok_or_else(|| Error::malformed(FORMAT, "every directory was a thumbnail"))?;
     let v = first as u32;
     out[4..8].copy_from_slice(&if rd.big { v.to_be_bytes() } else { v.to_le_bytes() });
 
     if dropped_unknown > 0 {
-        report.removed(Kind::UnknownStructure, format!("{dropped_unknown} non-structural tag(s)"), 0);
+        report.removed(
+            Kind::UnknownStructure,
+            format!("{dropped_unknown} non-structural tag(s)"),
+            0,
+        );
     }
 
     Ok(out)
@@ -324,8 +377,13 @@ fn read_uint_array(input: &[u8], e: &Entry, rd: &Rd) -> Option<Vec<u64>> {
     let raw: Vec<u8> = if byte_len <= 4 {
         e.value[..byte_len as usize].to_vec()
     } else {
+        // `byte_len` is a u64 and the target includes 32-bit Android, where a
+        // truncating `as usize` and an unchecked add would panic in debug and
+        // wrap to a reversed (empty) range in release. try_from + checked_add
+        // decline such an entry cleanly instead.
         let off = rd.u32(&e.value) as usize;
-        input.get(off..off + byte_len as usize)?.to_vec()
+        let len = usize::try_from(byte_len).ok()?;
+        input.get(off..off.checked_add(len)?)?.to_vec()
     };
     let mut vals = Vec::with_capacity(e.count as usize);
     for chunk in raw.chunks_exact(size as usize) {
@@ -343,12 +401,15 @@ fn read_uint_array(input: &[u8], e: &Entry, rd: &Rd) -> Option<Vec<u64>> {
 /// The raw value bytes of an entry (inline or followed to its offset).
 fn value_bytes(input: &[u8], e: &Entry, rd: &Rd) -> Option<Vec<u8>> {
     let size = type_size(e.ty)?;
-    let byte_len = (size as u64).checked_mul(e.count as u64)? as usize;
+    let byte_len = (size as u64).checked_mul(e.count as u64)?;
     if byte_len <= 4 {
-        Some(e.value[..byte_len].to_vec())
+        Some(e.value[..byte_len as usize].to_vec())
     } else {
+        // See read_uint_array: guard the u64->usize narrowing and the add so a
+        // 32-bit build declines rather than panics or wraps.
         let off = rd.u32(&e.value) as usize;
-        input.get(off..off + byte_len).map(|s| s.to_vec())
+        let len = usize::try_from(byte_len).ok()?;
+        input.get(off..off.checked_add(len)?).map(|s| s.to_vec())
     }
 }
 
@@ -411,8 +472,10 @@ fn build_ifd(
     let (Some(off_e), Some(cnt_e)) = (offsets_entry, counts_entry) else {
         return Err(Error::malformed(FORMAT, "directory has no strip or tile data"));
     };
-    let orig_offsets = read_uint_array(input, &off_e, rd).ok_or_else(|| Error::malformed(FORMAT, "unreadable pixel offsets"))?;
-    let orig_counts = read_uint_array(input, &cnt_e, rd).ok_or_else(|| Error::malformed(FORMAT, "unreadable pixel byte counts"))?;
+    let orig_offsets = read_uint_array(input, &off_e, rd)
+        .ok_or_else(|| Error::malformed(FORMAT, "unreadable pixel offsets"))?;
+    let orig_counts = read_uint_array(input, &cnt_e, rd)
+        .ok_or_else(|| Error::malformed(FORMAT, "unreadable pixel byte counts"))?;
     if orig_offsets.len() != orig_counts.len() || orig_offsets.is_empty() {
         return Err(Error::malformed(FORMAT, "pixel offset/count mismatch"));
     }
@@ -422,7 +485,11 @@ fn build_ifd(
     for (o, c) in orig_offsets.iter().zip(&orig_counts) {
         let o = *o as usize;
         let c = *c as usize;
-        let block = input.get(o..o.checked_add(c).ok_or_else(|| Error::malformed(FORMAT, "pixel block overflows"))?)
+        let block = input
+            .get(
+                o..o.checked_add(c)
+                    .ok_or_else(|| Error::malformed(FORMAT, "pixel block overflows"))?,
+            )
             .ok_or_else(|| Error::malformed(FORMAT, "pixel block out of bounds"))?;
         blocks.push(block);
     }
@@ -449,7 +516,8 @@ fn build_ifd(
     let mut ool: Vec<(usize, Vec<u8>)> = Vec::new(); // (absolute offset, bytes)
 
     for e in &kept {
-        let bytes = value_bytes(input, e, rd).ok_or_else(|| Error::malformed(FORMAT, "unreadable tag value"))?;
+        let bytes = value_bytes(input, e, rd)
+            .ok_or_else(|| Error::malformed(FORMAT, "unreadable tag value"))?;
         if bytes.len() <= 4 {
             let mut v = [0u8; 4];
             v[..bytes.len()].copy_from_slice(&bytes);
@@ -461,7 +529,11 @@ fn build_ifd(
             let at = cursor;
             cursor += bytes.len();
             let mut vf = [0u8; 4];
-            vf.copy_from_slice(&if rd.big { (at as u32).to_be_bytes() } else { (at as u32).to_le_bytes() });
+            vf.copy_from_slice(&if rd.big {
+                (at as u32).to_be_bytes()
+            } else {
+                (at as u32).to_le_bytes()
+            });
             emit.push(Emit { tag: e.tag, ty: e.ty, count: e.count, value: vf });
             ool.push((at, bytes));
         }
@@ -491,7 +563,11 @@ fn build_ifd(
         }
         offsets_at = Some(cursor);
         cursor += offsets_byte_len;
-        offsets_value = if rd.big { (offsets_at.unwrap() as u32).to_be_bytes() } else { (offsets_at.unwrap() as u32).to_le_bytes() };
+        offsets_value = if rd.big {
+            (offsets_at.unwrap() as u32).to_be_bytes()
+        } else {
+            (offsets_at.unwrap() as u32).to_le_bytes()
+        };
     }
 
     // Pixel data begins after all out-of-line values, word-aligned.
@@ -519,7 +595,11 @@ fn build_ifd(
     let offsets_final_value = if offsets_byte_len <= 4 {
         // inline single offset
         let v = new_offsets.first().copied().unwrap_or(0);
-        if rd.big { v.to_be_bytes() } else { v.to_le_bytes() }
+        if rd.big {
+            v.to_be_bytes()
+        } else {
+            v.to_le_bytes()
+        }
     } else {
         offsets_value
     };
@@ -564,7 +644,12 @@ fn build_ifd(
 }
 
 /// Append an out-of-line array, or return its inline bytes if it fits in 4.
-fn place_array(bytes: &[u8], cursor: &mut usize, ool: &mut Vec<(usize, Vec<u8>)>, rd: &Rd) -> [u8; 4] {
+fn place_array(
+    bytes: &[u8],
+    cursor: &mut usize,
+    ool: &mut Vec<(usize, Vec<u8>)>,
+    rd: &Rd,
+) -> [u8; 4] {
     if bytes.len() <= 4 {
         let mut v = [0u8; 4];
         v[..bytes.len()].copy_from_slice(bytes);
@@ -576,7 +661,11 @@ fn place_array(bytes: &[u8], cursor: &mut usize, ool: &mut Vec<(usize, Vec<u8>)>
         let at = *cursor;
         *cursor += bytes.len();
         ool.push((at, bytes.to_vec()));
-        if rd.big { (at as u32).to_be_bytes() } else { (at as u32).to_le_bytes() }
+        if rd.big {
+            (at as u32).to_be_bytes()
+        } else {
+            (at as u32).to_le_bytes()
+        }
     }
 }
 
@@ -642,10 +731,18 @@ mod tests {
             W { big, buf: Vec::new() }
         }
         fn u16(&mut self, v: u16) {
-            if self.big { self.buf.extend_from_slice(&v.to_be_bytes()) } else { self.buf.extend_from_slice(&v.to_le_bytes()) }
+            if self.big {
+                self.buf.extend_from_slice(&v.to_be_bytes())
+            } else {
+                self.buf.extend_from_slice(&v.to_le_bytes())
+            }
         }
         fn u32(&mut self, v: u32) {
-            if self.big { self.buf.extend_from_slice(&v.to_be_bytes()) } else { self.buf.extend_from_slice(&v.to_le_bytes()) }
+            if self.big {
+                self.buf.extend_from_slice(&v.to_be_bytes())
+            } else {
+                self.buf.extend_from_slice(&v.to_le_bytes())
+            }
         }
     }
 
@@ -734,8 +831,8 @@ mod tests {
             let input = tiff(
                 big,
                 &[
-                    (271, 2, 5, 0), // Make (points somewhere; count small enough to be inline-ish)
-                    (306, 2, 4, 0), // DateTime
+                    (271, 2, 5, 0),   // Make (points somewhere; count small enough to be inline-ish)
+                    (306, 2, 4, 0),   // DateTime
                     (34853, 4, 1, 8), // GPS IFD pointer
                 ],
                 &pixels,
@@ -953,7 +1050,8 @@ mod tests {
         assert!(!tags.contains(&T_ORIENTATION), "orientation kept under the strict default");
 
         let mut report = Report::new(Format::Tiff, input.len());
-        let out_keep = sanitize(&input, &crate::Policy::preserve_appearance(), &mut report).unwrap();
+        let out_keep =
+            sanitize(&input, &crate::Policy::preserve_appearance(), &mut report).unwrap();
         let (tags2, _p2) = read_back(&out_keep);
         assert!(tags2.contains(&T_ORIENTATION), "orientation dropped even when asked to keep it");
     }
@@ -986,8 +1084,12 @@ mod tests {
 
         // keep: preserved
         let mut report = Report::new(Format::Tiff, input.len());
-        let out_keep = sanitize(&input, &crate::Policy::preserve_appearance(), &mut report).unwrap();
-        assert!(out_keep.windows(icc.len()).any(|w| w == icc), "ICC dropped even when asked to keep it");
+        let out_keep =
+            sanitize(&input, &crate::Policy::preserve_appearance(), &mut report).unwrap();
+        assert!(
+            out_keep.windows(icc.len()).any(|w| w == icc),
+            "ICC dropped even when asked to keep it"
+        );
     }
 
     #[test]

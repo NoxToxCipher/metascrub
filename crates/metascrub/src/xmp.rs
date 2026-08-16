@@ -48,7 +48,11 @@ const MARKERS: &[(&[u8], Kind)] = &[
     (b"lr:hierarchicalSubject", Kind::CustomProperty),
 ];
 
-pub(crate) fn sanitize(input: &[u8], _policy: &crate::Policy, report: &mut Report) -> crate::Result<Vec<u8>> {
+pub(crate) fn sanitize(
+    input: &[u8],
+    _policy: &crate::Policy,
+    report: &mut Report,
+) -> crate::Result<Vec<u8>> {
     // Report what the sidecar carried, so the outcome is not just "here is an
     // empty file". GPS gets the same special surfacing it does everywhere.
     for (marker, kind) in MARKERS {
@@ -105,7 +109,11 @@ mod tests {
             b"48,51.5N",
             b"jane-laptop",
         ] {
-            assert!(!out.windows(needle.len()).any(|w| w == needle), "{:?} survived", String::from_utf8_lossy(needle));
+            assert!(
+                !out.windows(needle.len()).any(|w| w == needle),
+                "{:?} survived",
+                String::from_utf8_lossy(needle)
+            );
         }
         // The output is still a valid, empty XMP packet.
         assert!(out.windows(9).any(|w| w == b"<?xpacket"));

@@ -252,7 +252,10 @@ fn walk(buf: &[u8], start: usize, end: usize) -> crate::Result<Vec<BoxSpan>> {
                 // or missed — a false clean. The input is capped at 2 GB, so any
                 // size past usize is malformed regardless of platform.
                 let Ok(size) = usize::try_from(large) else {
-                    return Err(Error::malformed(FORMAT, "64-bit box size exceeds addressable range"));
+                    return Err(Error::malformed(
+                        FORMAT,
+                        "64-bit box size exceeds addressable range",
+                    ));
                 };
                 (16usize, size)
             }

@@ -62,7 +62,8 @@ fn identify(input: &[u8]) -> Option<(&'static str, Container)> {
     }
     if input.len() >= 16 && &input[4..8] == b"ftyp" {
         // ISO base media: Canon CR3 declares the brand "crx ".
-        let end = u32::from_be_bytes([input[0], input[1], input[2], input[3]]).clamp(16, input.len() as u32) as usize;
+        let end = u32::from_be_bytes([input[0], input[1], input[2], input[3]])
+            .clamp(16, input.len() as u32) as usize;
         if input[8..end].chunks_exact(4).any(|b| b == b"crx ") {
             return Some(("Canon CR3", Container::Bmff));
         }
@@ -131,9 +132,8 @@ fn identify(input: &[u8]) -> Option<(&'static str, Container)> {
 }
 
 /// Distinctive vendor tokens that mark a TIFF as a raw when no IFD Make says so.
-const RAW_MARKERS: &[&[u8]] = &[
-    b"Hasselblad", b"Phase One", b"PhaseOne", b"Mamiya", b"Leaf", b"Imacon", b"Sinar",
-];
+const RAW_MARKERS: &[&[u8]] =
+    &[b"Hasselblad", b"Phase One", b"PhaseOne", b"Mamiya", b"Leaf", b"Imacon", b"Sinar"];
 
 /// True if a bounded prefix of the file contains a raw-vendor marker.
 fn scan_for_raw_marker(input: &[u8]) -> bool {
@@ -162,9 +162,9 @@ fn probe_ifd0(input: &[u8], off: usize, big: bool) -> (Option<String>, Ifd0Indic
         };
         match tag {
             0x010F => make = read_ascii(input, p, ty, cnt, big),
-            0x014A => ind.sub_images = true,      // SubIFDs
-            0xC612 => ind.dng = true,             // DNGVersion
-            0x00FE => {}                          // NewSubfileType (structural)
+            0x014A => ind.sub_images = true, // SubIFDs
+            0xC612 => ind.dng = true,        // DNGVersion
+            0x00FE => {}                     // NewSubfileType (structural)
             0x0106 => {
                 // PhotometricInterpretation == CFA (32803) means sensor mosaic.
                 if let Some(v) = inline_short(input, p, ty, big) {
@@ -173,7 +173,7 @@ fn probe_ifd0(input: &[u8], off: usize, big: bool) -> (Option<String>, Ifd0Indic
                     }
                 }
             }
-            0x828E => ind.cfa = true,             // CFAPattern
+            0x828E => ind.cfa = true, // CFAPattern
             _ => {}
         }
     }
@@ -212,7 +212,11 @@ fn vendor_name(make: &str) -> Option<&'static str> {
     TABLE.iter().find(|(k, _)| m.starts_with(k)).map(|(_, v)| *v)
 }
 
-pub(crate) fn sanitize(input: &[u8], _policy: &crate::Policy, report: &mut Report) -> crate::Result<Vec<u8>> {
+pub(crate) fn sanitize(
+    input: &[u8],
+    _policy: &crate::Policy,
+    report: &mut Report,
+) -> crate::Result<Vec<u8>> {
     report.assurance = Assurance::BestEffort;
     let Some((name, container)) = identify(input) else {
         // Detection said raw but we cannot re-confirm it: refuse to guess.
@@ -522,13 +526,15 @@ fn apply(buf: &mut [u8], plan: &Plan, report: &mut Report) {
         report.retain(
             "the manufacturer's maker note (kept because it holds the settings a raw converter \
              needs to develop the file)",
-            "the camera's internal serial number and shutter count, which can tie this file to \
-             one specific camera body",
+            "the camera's internal serial number and shutter count, and with some makers the \
+             owner's name or the location the photo was taken; any of these can tie this file to \
+             one specific camera or person. To remove them, develop the raw to a JPEG and clean that",
         );
     }
 
     // Out-of-line values.
-    let mut counts: std::collections::BTreeMap<Kind, (usize, usize)> = std::collections::BTreeMap::new();
+    let mut counts: std::collections::BTreeMap<Kind, (usize, usize)> =
+        std::collections::BTreeMap::new();
     for &(start, end, kind) in &plan.zero {
         if overlaps(&protect, start, end) {
             // Aliased onto something structural; refuse rather than risk the
@@ -625,7 +631,11 @@ fn scrub_jpeg_in_place(buf: &mut [u8], start: usize, report: &mut Report, ctx: &
         } else if matches!(marker, 0xE2..=0xEF) {
             // Other application segments (not JFIF): no structure we rely on.
             if blank(buf, payload, payload_end) {
-                report.removed(Kind::UnknownStructure, format!("{ctx} APP{}", marker - 0xE0), payload_end - payload);
+                report.removed(
+                    Kind::UnknownStructure,
+                    format!("{ctx} APP{}", marker - 0xE0),
+                    payload_end - payload,
+                );
                 bytes += payload_end - payload;
             }
         }
@@ -686,11 +696,18 @@ fn scrub_bmff(buf: &mut [u8], report: &mut Report) {
 }
 
 enum Job {
-    Tiff(usize, usize), // (start, end) of a TIFF block
-    Jpeg(usize),        // start of a JPEG
+    Tiff(usize, usize, Role), // (start, end, role) of a TIFF block
+    Jpeg(usize),              // start of a JPEG
 }
 
-fn collect_bmff(buf: &[u8], start: usize, end: usize, depth: u8, jobs: &mut Vec<Job>, budget: &mut u32) {
+fn collect_bmff(
+    buf: &[u8],
+    start: usize,
+    end: usize,
+    depth: u8,
+    jobs: &mut Vec<Job>,
+    budget: &mut u32,
+) {
     if depth >= MAX_DEPTH {
         return;
     }
@@ -703,7 +720,7 @@ fn collect_bmff(buf: &[u8], start: usize, end: usize, depth: u8, jobs: &mut Vec<
         let size32 = u32::from_be_bytes([buf[i], buf[i + 1], buf[i + 2], buf[i + 3]]) as usize;
         let kind = &buf[i + 4..i + 8];
         let (header, box_size) = match size32 {
-            0 => (8usize, end - i),           // extends to the end
+            0 => (8usize, end - i), // extends to the end
             1 => {
                 // 64-bit size in the next 8 bytes.
                 if i + 16 > end {
@@ -747,7 +764,17 @@ fn collect_bmff(buf: &[u8], start: usize, end: usize, depth: u8, jobs: &mut Vec<
                 if body + 4 <= body_end {
                     let head = &buf[body..body_end.min(body + 4)];
                     if head == b"II\x2a\x00" || head == b"MM\x00\x2a" {
-                        jobs.push(Job::Tiff(body, body_end));
+                        // CR3 keeps its GPS as a standalone TIFF block named
+                        // `CMT4` whose IFD0 *is* the GPS directory, with no
+                        // 0x8825 pointer to mark it (that pointer only exists
+                        // inside a normal EXIF IFD). Walk CMT4 as a GPS role so
+                        // every coordinate is zeroed and the location is
+                        // reported; CMT1/CMT2 (image/EXIF) and any other TIFF
+                        // block stay Normal. CMT3 (the Canon maker note, also a
+                        // low-tag TIFF) is deliberately left Normal so its decode
+                        // parameters survive, matching the maker-note policy.
+                        let role = if kind == b"CMT4" { Role::Gps } else { Role::Normal };
+                        jobs.push(Job::Tiff(body, body_end, role));
                     } else if buf.get(body..body + 3) == Some(&[0xFF, 0xD8, 0xFF]) {
                         jobs.push(Job::Jpeg(body));
                     }
@@ -769,7 +796,7 @@ fn run_jobs(buf: &mut [u8], jobs: Vec<Job>, report: &mut Report) {
             Job::Jpeg(at) => {
                 scrub_jpeg_in_place(buf, at, report, "CR3 preview");
             }
-            Job::Tiff(start, end) => {
+            Job::Tiff(start, end, role) => {
                 // Scrub the embedded TIFF block relative to its own start.
                 let mut sub = buf[start..end].to_vec();
                 let big = sub.starts_with(b"MM");
@@ -777,7 +804,7 @@ fn run_jobs(buf: &mut [u8], jobs: Vec<Job>, report: &mut Report) {
                     let mut plan = Plan::default();
                     plan.protect.push((0, 8));
                     let mut visited = std::collections::BTreeSet::new();
-                    walk_ifd(&sub, ifd0, big, Role::Normal, 0, &mut plan, &mut visited, true);
+                    walk_ifd(&sub, ifd0, big, role, 0, &mut plan, &mut visited, true);
                     apply(&mut sub, &plan, report);
                 }
                 buf[start..end].copy_from_slice(&sub);
@@ -793,7 +820,8 @@ fn run_jobs(buf: &mut [u8], jobs: Vec<Job>, report: &mut Report) {
 /// stored as big-endian u32s at fixed positions in the header.
 fn scrub_raf(buf: &mut [u8], report: &mut Report) {
     // Offsets per the RAF layout: JPEG image offset at 0x54, length at 0x58.
-    let (Some(jpeg_off), Some(jpeg_len)) = (read_u32(buf, 0x54, true), read_u32(buf, 0x58, true)) else {
+    let (Some(jpeg_off), Some(jpeg_len)) = (read_u32(buf, 0x54, true), read_u32(buf, 0x58, true))
+    else {
         report.warn("this RAF's header was too short to locate its preview; nothing was changed");
         return;
     };
@@ -803,7 +831,8 @@ fn scrub_raf(buf: &mut [u8], report: &mut Report) {
     {
         scrub_jpeg_in_place(buf, o, report, "RAF preview");
     } else {
-        report.warn("this RAF's preview image was not where its header pointed; nothing was changed");
+        report
+            .warn("this RAF's preview image was not where its header pointed; nothing was changed");
     }
 }
 
@@ -891,11 +920,7 @@ fn read_ascii(buf: &[u8], p: usize, ty: u16, cnt: u32, big: bool) -> Option<Stri
         return None;
     }
     let n = cnt as usize;
-    let base = if n <= 4 {
-        p + 8
-    } else {
-        read_u32(buf, p + 8, big)? as usize
-    };
+    let base = if n <= 4 { p + 8 } else { read_u32(buf, p + 8, big)? as usize };
     let raw = buf.get(base..base + n)?;
     let s: String = raw.iter().take_while(|&&b| b != 0).map(|&b| b as char).collect();
     Some(s)
@@ -987,7 +1012,7 @@ mod tests {
                 out.extend_from_slice(value);
             }
             out.extend_from_slice(&0u32.to_le_bytes()); // no next IFD
-            // Now append ool values and the sensor strip at their reserved spots.
+                                                        // Now append ool values and the sensor strip at their reserved spots.
             out.resize(data_off, 0);
             for (at, bytes) in &ool {
                 out[*at..*at + bytes.len()].copy_from_slice(bytes);
@@ -1030,7 +1055,7 @@ mod tests {
         // sensor data and camera make are untouched.
         let raw = RawBuilder::new()
             .ascii(0x9003, "2026:01:02 03:04:05") // DateTimeOriginal
-            .ascii(0xA431, "SERIAL-BODY-987654")  // BodySerialNumber (standard)
+            .ascii(0xA431, "SERIAL-BODY-987654") // BodySerialNumber (standard)
             .ascii(0x013B, "Jane Q. Photographer") // Artist
             .undefined(0x927C, b"MAKERNOTE-serial=XYZ-shuttercount=4200".to_vec())
             .build();
@@ -1061,8 +1086,11 @@ mod tests {
         // The kept maker note must be DISCLOSED, with what it reveals, so the
         // partial clean is never mistaken for a full one.
         assert!(
-            report.retained.iter().any(|r| r.what.contains("maker note")
-                && r.reveals.to_lowercase().contains("serial")),
+            report
+                .retained
+                .iter()
+                .any(|r| r.what.contains("maker note")
+                    && r.reveals.to_lowercase().contains("serial")),
             "a kept maker note was not disclosed to the user"
         );
     }
@@ -1158,7 +1186,10 @@ mod tests {
         // still present in the table even though its value is gone.
         assert_eq!(&buf[0..2], &[0xFF, 0xD8]);
         assert_eq!(&buf[buf.len() - 2..], &[0xFF, 0xD9]);
-        assert!(buf.windows(2).any(|w| w == 0x013Bu16.to_be_bytes()), "the IFD structure was destroyed");
+        assert!(
+            buf.windows(2).any(|w| w == 0x013Bu16.to_be_bytes()),
+            "the IFD structure was destroyed"
+        );
     }
 
     #[test]
@@ -1171,12 +1202,9 @@ mod tests {
             let mut report = Report::new(Format::Raw, n);
             let _ = sanitize(&raw[..n], &crate::Policy::default(), &mut report);
         }
-        for junk in [
-            b"II\x2a\x00".as_slice(),
-            b"FUJIFILMCCD-RAW",
-            b"FOVb",
-            b"\x00\x00\x00\x18ftypcrx ",
-        ] {
+        for junk in
+            [b"II\x2a\x00".as_slice(), b"FUJIFILMCCD-RAW", b"FOVb", b"\x00\x00\x00\x18ftypcrx "]
+        {
             let mut report = Report::new(Format::Raw, junk.len());
             let _ = sanitize(junk, &crate::Policy::default(), &mut report);
         }

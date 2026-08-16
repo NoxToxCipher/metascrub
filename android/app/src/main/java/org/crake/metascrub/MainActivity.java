@@ -93,6 +93,12 @@ public class MainActivity extends Activity {
     // trace on disk; it resets to the default on a cold start. null = English.
     private static String appLangCode = null;
 
+    // Changing language recreates the Activity to reload every resource, which
+    // would otherwise discard the queue. The file list is stashed here (in memory
+    // only, like the language) across that single recreate and re-added in
+    // onCreate. Scrub results are not carried; the files simply return unscrubbed.
+    private static List<Uri> restoreUris = null;
+
     private LinearLayout findings;
     private LinearLayout handbookContainer;
     private LinearLayout scrubTab;
@@ -122,8 +128,18 @@ public class MainActivity extends Activity {
     private static Context localized(Context base) {
         if (appLangCode == null || "en".equals(appLangCode)) return base;
         Configuration cfg = new Configuration(base.getResources().getConfiguration());
-        cfg.setLocale(new Locale(appLangCode));
+        cfg.setLocale(toLocale(appLangCode));
         return base.createConfigurationContext(cfg);
+    }
+
+    private static Locale toLocale(String code) {
+        // Central Kurdish (Sorani) is written in the Arabic script and is
+        // right-to-left; naming the script makes the layout mirror even where
+        // the system would not infer direction from the language code alone.
+        if ("ckb".equals(code)) {
+            return new Locale.Builder().setLanguage("ckb").setScript("Arab").build();
+        }
+        return new Locale(code);
     }
 
     @Override
@@ -170,6 +186,12 @@ public class MainActivity extends Activity {
         langChip.setOnClickListener(v -> showLanguageDialog());
 
         addUris(incomingUris(getIntent()));
+        // Re-add anything the queue held before a language recreate. addUris
+        // dedups, so a file the app was launched with is not added twice.
+        if (restoreUris != null) {
+            addUris(restoreUris);
+            restoreUris = null;
+        }
         render();
     }
 
@@ -193,7 +215,7 @@ public class MainActivity extends Activity {
 
     // Same order as the R.array.languages endonyms. A null code means a language
     // that is listed but not loaded yet (its resources are not bundled).
-    private static final String[] LANG_CODES = {"en", "ru", "my", "la", "eo", "uk", "be"};
+    private static final String[] LANG_CODES = {"en", "ru", "my", "la", "eo", "uk", "be", "fa", "ar", "ckb", "kmr"};
 
     private void showLanguageDialog() {
         final String[] langs = getResources().getStringArray(R.array.languages);
@@ -208,6 +230,10 @@ public class MainActivity extends Activity {
                     String current = appLangCode == null ? "en" : appLangCode;
                     if (!code.equals(current)) {
                         appLangCode = "en".equals(code) ? null : code;
+                        // Carry the queued files across the recreate so switching
+                        // language does not silently empty the queue.
+                        restoreUris = new ArrayList<>();
+                        for (Item it : queue) restoreUris.add(it.uri);
                         recreate(); // reload every string and the Handbook in the new language
                     }
                 })
@@ -242,7 +268,7 @@ public class MainActivity extends Activity {
                 if (it.uri.equals(uri)) { dup = true; break; }
             }
             if (dup) continue;
-            queue.add(new Item(uri, displayName(uri), fileSize(uri), getContentResolver().getType(uri)));
+            queue.add(new Item(uri, displayName(uri), fileSize(uri), safeMime(uri)));
             added = true;
         }
         if (added) {
@@ -257,6 +283,15 @@ public class MainActivity extends Activity {
         queue.remove(it);
         if (queue.isEmpty()) scrubbed = false;
         render();
+    }
+
+    /** The content type, or null if a hostile or broken provider throws. */
+    private String safeMime(Uri uri) {
+        try {
+            return getContentResolver().getType(uri);
+        } catch (Throwable t) {
+            return null;
+        }
     }
 
     /** A metadata-policy change invalidates an existing scrub; go back to the queue. */
@@ -307,11 +342,19 @@ public class MainActivity extends Activity {
         // policy the eventual save uses.
         final boolean keepColour = optKeepColour.isChecked();
         final boolean keepOrientation = optKeepOrientation.isChecked();
+        // Freeze the metadata toggles while the scrub runs. They change what the
+        // report says, but the invalidate-on-change guard only fires once a scrub
+        // has finished (scrubbed == true); a toggle flipped mid-scrub would
+        // otherwise leave the shown result out of step with what a save writes.
+        optKeepColour.setEnabled(false);
+        optKeepOrientation.setEnabled(false);
         new Thread(() -> {
             for (Item it : queue) inspect(it, keepColour, keepOrientation);
             runOnUiThread(() -> {
                 scrubbed = true;
                 btnSecondary.setEnabled(true);
+                optKeepColour.setEnabled(true);
+                optKeepOrientation.setEnabled(true);
                 render();
             });
         }).start();
@@ -797,6 +840,17 @@ public class MainActivity extends Activity {
         if (fingerprint && isWashable(item)) {
             byte[] washed = Native.reduceFingerprint(bytes, strength);
             return Native.sanitize(washed, keepColour, keepOrientation);
+        }
+        // Save re-reads the file, so the bytes here may differ from the ones
+        // inspect() judged writable (a racing or hostile content provider can
+        // swap them). A format the core cannot take apart comes back unchanged
+        // from sanitize, which would write the untouched original as a "cleaned
+        // copy". Re-inspect these exact bytes and refuse if they are not clean.
+        String report = Native.reportJson(bytes, keepColour, keepOrientation);
+        JSONObject r = new JSONObject(report);
+        String assurance = r.has("error") ? "none" : r.optString("assurance", "none");
+        if (!("complete".equals(assurance) || "best_effort".equals(assurance))) {
+            throw new Exception(getString(R.string.save_changed));
         }
         return Native.sanitize(bytes, keepColour, keepOrientation);
     }

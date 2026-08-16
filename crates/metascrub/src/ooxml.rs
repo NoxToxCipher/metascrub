@@ -30,8 +30,29 @@
 
 use crate::policy::Policy;
 use crate::report::{Assurance, Kind, Report};
-use crate::xmlscrub::{self, DOCUMENT_RULES};
+use crate::xmlscrub::{self, Action, Rule, DOCUMENT_RULES};
 use crate::zip::Archive;
+
+/// Attribute rules for the parts whose entire purpose is to list authors by
+/// name: PowerPoint `ppt/authors.xml` (modern comments) and
+/// `ppt/commentAuthors.xml` (legacy comments), and Excel `xl/persons/personN.xml`
+/// (threaded-comment persons). `name`/`displayName` is the human identity there.
+///
+/// These are deliberately kept out of [`DOCUMENT_RULES`]: `name` is a common
+/// structural attribute elsewhere (DrawingML shape names, Excel defined names,
+/// `docPr`), and blanking it document-wide would corrupt files. Scoping it to the
+/// author-list parts keeps the blast radius to parts whose `name` *is* an author.
+const AUTHOR_NAME_RULES: &[Rule] = &[
+    Rule { name: "name", prefix_match: false, action: Action::Blank("author") },
+    Rule { name: "displayName", prefix_match: false, action: Action::Blank("author") },
+];
+
+/// Whether `path` is one of those author-list parts.
+fn is_author_list_part(path: &str) -> bool {
+    path.ends_with("commentAuthors.xml") // PowerPoint legacy comment authors
+        || path.ends_with("authors.xml") // PowerPoint modern comment authors (ppt/authors.xml)
+        || path.contains("/persons/") // Excel threaded-comment persons (xl/persons/personN.xml)
+}
 
 /// Property parts replaced with a canonical empty document.
 ///
@@ -138,9 +159,8 @@ pub(crate) fn sanitize(
                     return Err(e);
                 }
                 if path == THUMBNAIL {
-                    report.warn(format!(
-                        "{path} could not be decompressed, so it was left as it is"
-                    ));
+                    report
+                        .warn(format!("{path} could not be decompressed, so it was left as it is"));
                 }
                 continue;
             }
@@ -285,7 +305,7 @@ fn root_element_start(content: &[u8]) -> Option<usize> {
                 i = find_from(i + 4, b"-->")? + 3; // comment
             }
             Some(b'!') => i = find_from(i + 2, b">")? + 1, // DOCTYPE / declaration
-            _ => return Some(i),                            // the root element
+            _ => return Some(i),                           // the root element
         }
     }
 }
@@ -326,13 +346,49 @@ fn scrub_xml_part(
     } else {
         (content, 0)
     };
-    let (content, counts) = xmlscrub::scrub_attributes(&content, DOCUMENT_RULES);
+
+    // Base attribute rules on every part.
+    let (mut content, mut counts) = xmlscrub::scrub_attributes(&content, DOCUMENT_RULES);
+
+    // Author-list parts additionally carry the human name in a `name`/
+    // `displayName` attribute, scrubbed only here so the same attribute name is
+    // left untouched everywhere it is structural.
+    if is_author_list_part(path) {
+        let (c, extra) = xmlscrub::scrub_attributes(&content, AUTHOR_NAME_RULES);
+        content = c;
+        counts.blanked += extra.blanked;
+        counts.removed += extra.removed;
+    }
+
+    // Some parts carry the author as element *text*, which the attribute passes
+    // cannot reach. Excel legacy comments list authors as `<author>Name</author>`
+    // (referenced by index, so the element must stay); OpenDocument change-info
+    // and annotations name the author in `<dc:creator>`. Scoped by part so a
+    // generic local name ("author"/"creator") cannot match unrelated content.
+    let text_names: &[&str] = if path.starts_with("xl/comments") {
+        &["author"]
+    } else if path == "content.xml" || path == "styles.xml" {
+        &["creator"]
+    } else {
+        &[]
+    };
+    let text_blanked = if text_names.is_empty() {
+        0
+    } else {
+        let (c, n) = xmlscrub::blank_element_text(&content, text_names);
+        content = c;
+        n
+    };
 
     if dropped_elements > 0 {
         report.removed(Kind::RevisionIds, format!("{path} (rsids block)"), 0);
     }
-    if counts.blanked > 0 {
-        report.removed(Kind::Author, format!("{path} ({} names)", counts.blanked), 0);
+    if counts.blanked > 0 || text_blanked > 0 {
+        report.removed(
+            Kind::Author,
+            format!("{path} ({} names)", counts.blanked + text_blanked),
+            0,
+        );
     }
     if counts.removed > 0 {
         // Both categories come out of the same pass; naming the part is enough
@@ -343,7 +399,7 @@ fn scrub_xml_part(
             0,
         );
     }
-    if dropped_elements > 0 || counts.any() {
+    if dropped_elements > 0 || counts.any() || text_blanked > 0 {
         entry.write(&content);
     }
     Ok(())
@@ -455,6 +511,53 @@ mod tests {
         let kinds: Vec<_> = report.removed.iter().map(|r| r.kind).collect();
         assert!(kinds.contains(&Kind::Author));
         assert!(kinds.contains(&Kind::RevisionIds));
+    }
+
+    #[test]
+    fn powerpoint_comment_author_names_in_attributes_are_blanked() {
+        // PowerPoint carries the human name in a `name`/`displayName` attribute,
+        // which must not be blanked document-wide (it collides with shape names,
+        // Excel defined names) — only in these author-list parts.
+        let legacy =
+            br#"<p:cmAuthorLst><p:cmAuthor id="0" name="Jane Q. Author" initials="JQA"/></p:cmAuthorLst>"#;
+        let modern = br#"<pc:authors><pc:author id="1" name="Bob Reviewer" userId="S::bob@x::1" providerId="AD"/></pc:authors>"#;
+        let (out, report) =
+            run(&docx(&[("ppt/commentAuthors.xml", legacy), ("ppt/authors.xml", modern)]));
+
+        for needle in ["Jane Q. Author", "Bob Reviewer", "bob@x"] {
+            assert!(
+                !out.windows(needle.len()).any(|w| w == needle.as_bytes()),
+                "{needle} survived"
+            );
+        }
+        // The author list itself (ids) stays so comments still resolve.
+        assert!(part(&out, "ppt/commentAuthors.xml").contains("id=\"0\""));
+        assert!(report.removed.iter().any(|r| r.kind == Kind::Author));
+    }
+
+    #[test]
+    fn a_shape_name_attribute_elsewhere_is_left_alone() {
+        // The same `name` attribute is structural in a slide; blanking it would
+        // corrupt the document, so it must survive outside the author-list parts.
+        let slide =
+            br#"<p:sld><p:nvSpPr><p:cNvPr id="2" name="Title Placeholder 1"/></p:nvSpPr></p:sld>"#;
+        let (out, _) = run(&docx(&[("ppt/slides/slide1.xml", slide)]));
+        assert!(part(&out, "ppt/slides/slide1.xml").contains("Title Placeholder 1"));
+    }
+
+    #[test]
+    fn excel_comment_author_names_in_element_text_are_blanked() {
+        // Excel legacy comments list authors as element text, referenced by
+        // index, so the element stays but its name goes.
+        let comments = br#"<comments><authors><author>Jane Q. Author</author><author>Bob Reviewer</author></authors><commentList><comment ref="A1" authorId="0"><text><t>see note</t></text></comment></commentList></comments>"#;
+        let (out, report) = run(&docx(&[("xl/comments1.xml", comments)]));
+
+        assert!(!out.windows(14).any(|w| w == b"Jane Q. Author"), "element-text author survived");
+        assert!(!out.windows(12).any(|w| w == b"Bob Reviewer"));
+        let scrubbed = part(&out, "xl/comments1.xml");
+        assert!(scrubbed.contains("authorId=\"0\""), "the index reference must still resolve");
+        assert!(scrubbed.contains("see note"), "the comment text is content and must survive");
+        assert!(report.removed.iter().any(|r| r.kind == Kind::Author));
     }
 
     #[test]

@@ -219,6 +219,14 @@ impl Report {
             self.retain(r.what, r.reveals);
         }
         self.found_location |= other.found_location;
+        // A nested item can only ever make the guarantee weaker: an embedded file
+        // the crate could not fully rebuild (BestEffort/None) must drag the
+        // container down with it, never be hidden behind a Complete parent. The
+        // ordering is Complete < BestEffort < None, so max() keeps the worse of
+        // the two. Today the only nester (OOXML) is already BestEffort, so this
+        // changes nothing yet; it makes the property hold by construction if a
+        // Complete-rebuild container ever gains embedded children.
+        self.assurance = self.assurance.max(other.assurance);
     }
 
     /// True when nothing was found to remove.

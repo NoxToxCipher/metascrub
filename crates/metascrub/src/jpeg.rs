@@ -553,7 +553,10 @@ mod tests {
             report.removed.iter().any(|r| r.location.contains("Motion Photo")),
             "an embedded video was not called out specifically"
         );
-        assert!(report.warnings.iter().any(|w| w.contains("Motion Photo") || w.contains("Live Photo")));
+        assert!(report
+            .warnings
+            .iter()
+            .any(|w| w.contains("Motion Photo") || w.contains("Live Photo")));
     }
 
     #[test]

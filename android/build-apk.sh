@@ -53,6 +53,25 @@ echo "==> native library ($ABI)"
 # A target directory of its own, so an Android build and a desktop build do not
 # block each other on cargo's lock of target/.
 export CARGO_TARGET_DIR="$root/target-android"
+
+# Strip the build machine out of the binary.
+#
+# `strip = true` in Cargo.toml removes symbols, but panic locations are static
+# strings in .rodata and survive it. Shipped APKs carried the absolute path of
+# every panicking source file, so the author's home directory -- and username --
+# appeared about ninety times inside a tool built to remove exactly that kind of
+# trace from other people's files. Anyone could read it with `strings`.
+#
+# It also defeated rust-toolchain.toml: pinning the compiler is only half of a
+# reproducible build, because two people with the same compiler still emit
+# different bytes when their home directories have different names. Remapping
+# gives every machine the same strings, so the hashes can actually match.
+#
+# `trim-paths` in [profile.release] is the tidy form of this, but it is not
+# stable in Cargo 1.97.1 and this workspace pins stable on purpose.
+: "${CARGO_HOME:=$HOME/.cargo}"
+export RUSTFLAGS="${RUSTFLAGS:-} --remap-path-prefix=$(win "$CARGO_HOME")=/cargo --remap-path-prefix=$(win "$root")=/src"
+
 # cargo-ndk writes the stripped .so straight into the staging tree.
 (cd "$root" && cargo ndk -t "$ABI" -o "$(win "$out/apk/lib")" build --release -p metascrub-android)
 
@@ -103,6 +122,19 @@ cp "$out/dex/classes.dex" "$out/apk/classes.dex"
 
 echo "==> align"
 "$BT/zipalign" -p -f 4 "$out/unaligned.apk" "$out/aligned.apk"
+
+echo "==> flatten timestamps"
+# ZIP records modification times as MS-DOS date/time, which has no timezone
+# field: every entry carried this machine's LOCAL clock. That does not just say
+# when the APK was built, it says when it was built *where the builder is* --
+# subtract it from any UTC reference and you have the build machine's offset,
+# which for a pseudonymous project is a rough location given away by a field
+# nobody reads. It was also the last thing stopping the APK being reproducible.
+#
+# Between align and sign, and in that order for two reasons: the v2/v3
+# signature covers these bytes, and the patcher edits them in place so
+# `zipalign -p`'s page alignment of the .so survives untouched.
+python "$here/zip-time.py" "$out/aligned.apk"
 
 echo "==> sign"
 # A local debug key, generated on first run and never committed. A public

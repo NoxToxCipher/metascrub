@@ -1,8 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Adaptive-icon foreground: the Crake bird alone, scaled and centred into the
-     inner safe zone so a round or squircle launcher mask never clips the beak.
-     The dark eye reads against the teal head; the background is a flat colour
-     supplied by the adaptive icon, not drawn here. -->
+<!-- Adaptive-icon foreground: metascrub's own mark, a sandpiper on a sandbar,
+     in Crake's construction (one flat teal fill, negative-space eye). Same teal
+     as the suite, a different water bird. Scaled and centred into the safe zone
+     so a round or squircle launcher mask never clips it. Also used as the in-app
+     header logo. -->
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
     android:width="108dp"
     android:height="108dp"
@@ -10,27 +11,46 @@
     android:viewportHeight="108">
 
     <group
-        android:pivotX="48"
-        android:pivotY="50.5"
-        android:scaleX="0.8"
-        android:scaleY="0.8"
-        android:translateX="6"
-        android:translateY="3.5">
+        android:pivotX="49.5"
+        android:pivotY="52.5"
+        android:scaleX="0.85"
+        android:scaleY="0.85"
+        android:translateX="4.5"
+        android:translateY="1.5">
         <!-- body -->
         <path
             android:fillColor="#FF5FB0BA"
-            android:pathData="M28,56 a24,24 0 1,0 48,0 a24,24 0 1,0 -48,0 Z" />
+            android:pathData="M35,54 a19,19 0 1,0 38,0 a19,19 0 1,0 -38,0 Z" />
+        <!-- tail -->
+        <path
+            android:fillColor="#FF5FB0BA"
+            android:pathData="M70,49 L80,46 L72,58 Z" />
         <!-- head -->
         <path
             android:fillColor="#FF5FB0BA"
-            android:pathData="M37,34 a13,13 0 1,0 26,0 a13,13 0 1,0 -26,0 Z" />
-        <!-- beak -->
+            android:pathData="M34,33 a13,13 0 1,0 26,0 a13,13 0 1,0 -26,0 Z" />
+        <!-- bill (a soft downward curve) -->
         <path
             android:fillColor="#FF5FB0BA"
-            android:pathData="M38,29 L38,43 L20,35 Z" />
-        <!-- eye -->
+            android:pathData="M37,30 C29,31 23,34 19,37 C21,38 29,35 38,34 Z" />
+        <!-- legs -->
+        <path
+            android:strokeColor="#FF5FB0BA"
+            android:strokeWidth="2.6"
+            android:strokeLineCap="round"
+            android:pathData="M49,70 L49,80" />
+        <path
+            android:strokeColor="#FF5FB0BA"
+            android:strokeWidth="2.6"
+            android:strokeLineCap="round"
+            android:pathData="M58,70 L58,80" />
+        <!-- sandbar -->
+        <path
+            android:fillColor="#FF5FB0BA"
+            android:pathData="M32,83 a22,3.2 0 1,0 44,0 a22,3.2 0 1,0 -44,0 Z" />
+        <!-- eye (knocked out in the icon background colour) -->
         <path
             android:fillColor="#FF0F1418"
-            android:pathData="M49.4,31 a3.6,3.6 0 1,0 7.2,0 a3.6,3.6 0 1,0 -7.2,0 Z" />
+            android:pathData="M46.4,30 a3.6,3.6 0 1,0 7.2,0 a3.6,3.6 0 1,0 -7.2,0 Z" />
     </group>
 </vector>

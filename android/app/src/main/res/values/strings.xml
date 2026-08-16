@@ -39,6 +39,7 @@
     <string name="too_large">Larger than 100 MB — skipped. metascrub cleans a file in memory on the phone, so very large files are not supported yet.</string>
     <string name="read_failed">Could not read: %1$s</string>
     <string name="save_failed">Could not save: %1$s</string>
+    <string name="save_changed">The file changed since it was checked, so it was not saved. Add it again and re-scrub.</string>
     <string name="nothing_to_save">Nothing to save — none of these files could be cleaned.</string>
     <string name="remove">Remove</string>
 
@@ -70,5 +71,9 @@
         <item>Esperanto</item>
         <item>Українська</item>
         <item>Беларуская</item>
+        <item>فارسی</item>
+        <item>العربية</item>
+        <item>کوردیی سۆرانی</item>
+        <item>Kurdî (Kurmancî)</item>
     </string-array>
 </resources>

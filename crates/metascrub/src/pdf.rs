@@ -61,6 +61,21 @@ const INFO_KEYS: &[&[u8]] = &[
 /// paths. `LastModified` accompanies it.
 const SWEEP_KEYS: &[&[u8]] = &[b"Metadata", b"PieceInfo", b"LastModified"];
 
+/// Document-information keys that are unambiguous metadata wherever they appear,
+/// so they are safe to remove from any dictionary — which is how an *orphaned*
+/// information dictionary (one an incremental update left behind at an object id
+/// the trailer no longer points at) gets cleaned. lopdf writes every live object
+/// back regardless of reachability, so without this its author and dates survive
+/// the "rebuild". None of these are ever legitimate page or content data.
+const INFO_ALWAYS: &[&[u8]] =
+    &[b"Author", b"Creator", b"Producer", b"CreationDate", b"ModDate", b"Trapped"];
+
+/// The remaining information-dictionary keys. Elsewhere these are legitimate
+/// content — a bookmark's `/Title`, an outline or structure element's `/Subject`
+/// — so they are only taken from a dictionary that is clearly information-shaped
+/// (one that also carries a `/Producer` or `/Creator`).
+const INFO_TITLED: &[&[u8]] = &[b"Title", b"Subject", b"Keywords"];
+
 /// Annotation keys that name a person or a moment: the author of a comment,
 /// when it was made and last changed, and its unique name, which some
 /// producers derive from the machine.
@@ -147,6 +162,7 @@ fn sweep_objects(doc: &mut Document, report: &mut Report) {
     let mut swept = 0usize;
     let mut annots = 0usize;
     let mut embedded_files = 0usize;
+    let mut info_orphans = 0usize;
 
     let ids: Vec<_> = doc.objects.keys().copied().collect();
     for id in ids {
@@ -197,6 +213,25 @@ fn sweep_objects(doc: &mut Document, report: &mut Report) {
                 swept += 1;
             }
         }
+
+        // Clean an orphaned / earlier information dictionary (strip_info handled
+        // only the one the trailer currently points at). The always-safe keys go
+        // from any dictionary; the content-colliding ones (Title/Subject/
+        // Keywords) only from a dictionary that is clearly information-shaped, so
+        // a bookmark's /Title or a structure element's /Subject is never touched.
+        let info_shaped = dict.has(b"Producer") || dict.has(b"Creator");
+        for key in INFO_ALWAYS {
+            if dict.remove(key).is_some() {
+                info_orphans += 1;
+            }
+        }
+        if info_shaped {
+            for key in INFO_TITLED {
+                if dict.remove(key).is_some() {
+                    info_orphans += 1;
+                }
+            }
+        }
     }
 
     for id in &xmp_streams {
@@ -215,6 +250,13 @@ fn sweep_objects(doc: &mut Document, report: &mut Report) {
     }
     if annots > 0 {
         report.removed(Kind::Author, format!("author and dates on {annots} annotation(s)"), 0);
+    }
+    if info_orphans > 0 {
+        report.removed(
+            Kind::DocumentInfo,
+            format!("{info_orphans} field(s) from an earlier or orphaned document-info dictionary"),
+            0,
+        );
     }
     if embedded_files > 0 {
         report.warn(format!(
@@ -308,6 +350,51 @@ mod tests {
 
     fn holds(haystack: &[u8], needle: &str) -> bool {
         haystack.windows(needle.len()).any(|w| w == needle.as_bytes())
+    }
+
+    #[test]
+    fn an_orphaned_information_dictionary_does_not_survive() {
+        use lopdf::{dictionary, Object, StringFormat};
+        // A normal file, plus an Info-shaped dictionary at its own object id that
+        // the trailer does NOT reference — exactly what an incremental update
+        // that "changed the author" leaves behind. lopdf writes every live
+        // object back, so strip_info (which only follows the trailer's /Info)
+        // would miss it.
+        let base = pdf(true, false, false);
+        let mut doc = Document::load_mem(&base).unwrap();
+        doc.add_object(dictionary! {
+            "Author" => Object::String(b"Orphan Ghostwriter".to_vec(), StringFormat::Literal),
+            "Producer" => Object::String(b"Old Engine 1.0".to_vec(), StringFormat::Literal),
+            "Title" => Object::String(b"Superseded draft".to_vec(), StringFormat::Literal),
+            "CreationDate" => Object::String(b"D:20200101000000Z".to_vec(), StringFormat::Literal),
+        });
+        let mut input = Vec::new();
+        doc.save_to(&mut input).unwrap();
+        assert!(holds(&input, "Orphan Ghostwriter"), "the orphan must be present to test against");
+
+        let (out, report) = run(&input);
+        for needle in ["Orphan Ghostwriter", "Old Engine 1.0", "Superseded draft", "D:2020"] {
+            assert!(!holds(&out, needle), "{needle} survived from the orphaned info dict");
+        }
+        assert!(report.removed.iter().any(|r| r.kind == Kind::DocumentInfo));
+    }
+
+    #[test]
+    fn a_bookmark_title_is_not_mistaken_for_document_info() {
+        use lopdf::{dictionary, Object, StringFormat};
+        // /Title on an outline item is content, not metadata: it must survive.
+        // Only an information-shaped dict (one with Producer/Creator) loses it.
+        let base = pdf(false, false, false);
+        let mut doc = Document::load_mem(&base).unwrap();
+        doc.add_object(dictionary! {
+            "Title" => Object::String(b"Chapter One".to_vec(), StringFormat::Literal),
+            "Dest" => Object::String(b"page1".to_vec(), StringFormat::Literal),
+        });
+        let mut input = Vec::new();
+        doc.save_to(&mut input).unwrap();
+
+        let (out, _) = run(&input);
+        assert!(holds(&out, "Chapter One"), "a bookmark title was wrongly stripped as metadata");
     }
 
     #[test]

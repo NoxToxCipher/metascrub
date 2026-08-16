@@ -219,29 +219,48 @@ pub fn wash(input: &[u8], settings: &Settings) -> Result<Washed, Error> {
     // feature unification (via eframe/arboard) enables more decoders than this
     // crate declares, so a file guessing to BMP/ICO/TGA/etc. would otherwise be
     // handed to a decoder outside this crate's audited surface. Refuse it.
+    // Only the formats this crate is actually compiled to decode (see
+    // Cargo.toml: jpeg, png, webp). Format *guessing* is independent of the
+    // enabled decoders, so a real TIFF/GIF/BMP/ICO — which feature unification in
+    // the GUI binary can pull a decoder in for — would otherwise be handed to a
+    // decoder outside this crate's audited surface, or guess-then-fail with a
+    // misleading error. Refuse anything else up front.
     if !matches!(
         reader.format(),
-        Some(
-            image::ImageFormat::Jpeg
-                | image::ImageFormat::Png
-                | image::ImageFormat::WebP
-                | image::ImageFormat::Tiff
-                | image::ImageFormat::Gif
-        )
+        Some(image::ImageFormat::Jpeg | image::ImageFormat::Png | image::ImageFormat::WebP)
     ) {
-        return Err(Error::Decode(
-            "pixel washing only handles JPEG, PNG, WebP, TIFF and GIF".to_string(),
-        ));
+        return Err(Error::Decode("pixel washing only handles JPEG, PNG and WebP".to_string()));
     }
 
     if let Some(mp) = settings.max_megapixels {
-        let mut limits = image::Limits::default();
-        // Pixel ceiling as a width/height product, plus a hard allocation cap so
-        // an intermediate buffer cannot balloon past what the pixels imply.
         let max_px = mp as u64 * 1_000_000;
+
+        // Decoder-agnostic ceiling on the *total* pixel count, read from the
+        // header before any pixel buffer is allocated. `image::Limits` only caps
+        // each axis and the single largest allocation independently, so a crafted
+        // header with modest per-axis sizes but an enormous product (e.g.
+        // 200000x200000 = 40000 MP, each axis under the cap) would otherwise slip
+        // past the axis checks and lean entirely on whichever decoder is compiled
+        // in honouring `max_alloc`. Reading the header dimensions ourselves and
+        // rejecting on the product does not depend on the decoder at all.
+        let (dw, dh) = image::ImageReader::new(std::io::Cursor::new(input))
+            .with_guessed_format()
+            .map_err(|e| Error::Decode(e.to_string()))?
+            .into_dimensions()
+            .map_err(|e| Error::Decode(e.to_string()))?;
+        if dw == 0 || dh == 0 {
+            return Err(Error::Decode("image reports a zero dimension".to_string()));
+        }
+        if (dw as u64) * (dh as u64) > max_px {
+            return Err(Error::TooLarge { width: dw, height: dh, limit: mp });
+        }
+
+        // Belt and braces on top of the product check: bound each axis and the
+        // single largest allocation so the decode also self-limits.
+        let mut limits = image::Limits::default();
         limits.max_image_width = Some(max_px.min(u32::MAX as u64) as u32);
         limits.max_image_height = Some(max_px.min(u32::MAX as u64) as u32);
-        // 4 bytes per pixel (RGBA), plus generous slack for the decoder's own
+        // ~6 bytes per pixel: the RGBA decode buffer plus slack for decoder
         // scratch. Still far below a bomb.
         limits.max_alloc = Some(max_px.saturating_mul(6));
         reader.limits(limits);
@@ -249,6 +268,12 @@ pub fn wash(input: &[u8], settings: &Settings) -> Result<Washed, Error> {
 
     let decoded = reader.decode().map_err(|e| Error::Decode(e.to_string()))?;
     let (w, h) = decoded.dimensions();
+    if w == 0 || h == 0 {
+        // Defends the resize/denoise math below, which is not written for an
+        // empty raster. Real decoders reject zero-dimension images, so this is
+        // belt-and-braces against a future/lenient decoder.
+        return Err(Error::Decode("decoded image is empty".to_string()));
+    }
 
     // Belt and braces: the reader limits should have caught an oversize image,
     // but check the decoded dimensions too so the reported error is precise.

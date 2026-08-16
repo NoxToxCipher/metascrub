@@ -7,10 +7,13 @@
 //! exist. Removing the chunk without clearing the flag leaves a file that
 //! promises metadata it no longer has, and some decoders will reject it.
 //!
-//! Animated WebP nests its frames inside `ANMF` chunks. Those are copied whole
-//! rather than descended into, because the sub-chunks a frame may contain
-//! (`ALPH`, `VP8 `, `VP8L`) are all image data, and the format gives metadata
-//! no place to live there.
+//! Animated WebP nests its frames inside `ANMF` chunks. Each frame is a fixed
+//! 16-byte header followed by its own RIFF sub-chunks (`ALPH`, then `VP8 ` or
+//! `VP8L`). The frame is rebuilt from those known sub-chunks rather than copied
+//! whole: a crafted `ANMF` can declare a length past its real image data and
+//! hide a payload — trailing bytes or a smuggled `EXIF`/`XMP `/vendor sub-chunk —
+//! in the gap, which a decoder ignores but which would otherwise ride through a
+//! file reported as a complete rebuild.
 
 use crate::error::Error;
 use crate::policy::Policy;
@@ -126,6 +129,16 @@ pub(crate) fn sanitize(
             if fixed.len() % 2 == 1 {
                 out.push(0);
             }
+        } else if &ty == b"ANMF" {
+            // Rebuild the frame from its known sub-chunks so nothing can hide in
+            // the gap between the last real one and the declared frame length.
+            let rebuilt = rebuild_anmf(data, report);
+            out.extend_from_slice(&ty);
+            out.extend_from_slice(&(rebuilt.len() as u32).to_le_bytes());
+            out.extend_from_slice(&rebuilt);
+            if rebuilt.len() % 2 == 1 {
+                out.push(0);
+            }
         } else {
             out.extend_from_slice(&ty);
             out.extend_from_slice(&(data.len() as u32).to_le_bytes());
@@ -140,6 +153,58 @@ pub(crate) fn sanitize(
     let riff_len = (out.len() - 8) as u32;
     out[4..8].copy_from_slice(&riff_len.to_le_bytes());
     Ok(out)
+}
+
+/// Rebuild an `ANMF` frame body from its known sub-chunks, dropping anything
+/// else inside the declared frame length. A conformant frame is reproduced
+/// byte-for-byte; a crafted one loses whatever it tried to smuggle.
+fn rebuild_anmf(body: &[u8], report: &mut Report) -> Vec<u8> {
+    // Frame header: X/Y/W-1/H-1/duration (3 bytes each) + one flags byte = 16.
+    const HEADER: usize = 16;
+    if body.len() < HEADER {
+        // Too short to be a real frame; leave it exactly as it arrived rather
+        // than invent bytes. It carries no room for a payload anyway.
+        return body.to_vec();
+    }
+    let mut out = body[..HEADER].to_vec();
+    let sub = &body[HEADER..];
+    let mut r = Reader::new(sub);
+    while r.pos() < sub.len() {
+        let start = r.pos();
+        let Some(ty) = r.take(4).and_then(|t| <[u8; 4]>::try_from(t).ok()) else {
+            break;
+        };
+        let Some(len) = r.u32_le() else {
+            r.seek(start);
+            break;
+        };
+        let Some(chunk) = r.take(len as usize) else {
+            r.seek(start);
+            break;
+        };
+        let padded = len % 2 == 1;
+        if padded {
+            let _ = r.u8();
+        }
+        if matches!(&ty, b"ALPH" | b"VP8 " | b"VP8L") {
+            out.extend_from_slice(&ty);
+            out.extend_from_slice(&len.to_le_bytes());
+            out.extend_from_slice(chunk);
+            if padded {
+                out.push(0);
+            }
+        } else {
+            // A metadata or vendor sub-chunk has no business inside a frame.
+            report.removed(Kind::UnknownStructure, format!("ANMF/{}", name(&ty)), chunk.len());
+        }
+    }
+    // Anything the walk could not account for — a truncated or garbage tail
+    // inside the frame — is dropped by not copying it.
+    let accounted = HEADER + r.pos();
+    if accounted < body.len() {
+        report.removed(Kind::UnknownStructure, "ANMF trailing bytes", body.len() - accounted);
+    }
+    out
 }
 
 /// Clear the feature bits for metadata we removed, so the header stops
@@ -247,17 +312,53 @@ mod tests {
         assert_eq!(declared, out.len() - 8);
     }
 
+    /// A conformant animation frame: the 16-byte header, then one VP8 sub-chunk.
+    fn anmf(image: &[u8]) -> Vec<u8> {
+        let mut body = vec![0u8; 16];
+        body.extend_from_slice(b"VP8 ");
+        body.extend_from_slice(&(image.len() as u32).to_le_bytes());
+        body.extend_from_slice(image);
+        if image.len() % 2 == 1 {
+            body.push(0);
+        }
+        body
+    }
+
     #[test]
-    fn animation_chunks_are_preserved() {
+    fn animation_frames_are_rebuilt_and_their_image_data_survives() {
         let input = webp(&[
             vp8x(0x02),
             chunk(b"ANIM", &[0, 0, 0, 0, 0, 0]),
-            chunk(b"ANMF", b"frame one payload"),
-            chunk(b"ANMF", b"frame two payload"),
+            chunk(b"ANMF", &anmf(b"frame-one-data")),
+            chunk(b"ANMF", &anmf(b"frame-two-data")),
         ]);
         let (out, report) = run(&input, &Policy::default());
-        assert!(report.is_clean());
+        assert!(report.is_clean(), "a conformant animation has nothing to remove");
         assert_eq!(out.windows(4).filter(|w| *w == b"ANMF").count(), 2);
+        assert!(out.windows(14).any(|w| w == b"frame-one-data"));
+        assert!(out.windows(14).any(|w| w == b"frame-two-data"));
+    }
+
+    #[test]
+    fn a_payload_smuggled_inside_an_animation_frame_is_dropped() {
+        // A frame that hides an XMP-shaped sub-chunk after its real VP8 data,
+        // inside the declared ANMF length. The image data survives; the smuggled
+        // bytes do not, and the removal is reported.
+        let mut body = vec![0u8; 16];
+        body.extend_from_slice(b"VP8 ");
+        body.extend_from_slice(&8u32.to_le_bytes());
+        body.extend_from_slice(b"realdata");
+        body.extend_from_slice(b"XMP ");
+        body.extend_from_slice(&11u32.to_le_bytes());
+        body.extend_from_slice(b"secret-gps!");
+        body.push(0); // pad the odd-length sub-chunk
+
+        let input = webp(&[vp8x(0x02), chunk(b"ANMF", &body)]);
+        let (out, report) = run(&input, &Policy::default());
+
+        assert!(out.windows(8).any(|w| w == b"realdata"), "frame image data must survive");
+        assert!(!out.windows(6).any(|w| w == b"secret"), "smuggled bytes must be gone");
+        assert!(!report.is_clean(), "the smuggled sub-chunk must be reported");
     }
 
     #[test]

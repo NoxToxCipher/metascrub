@@ -138,7 +138,14 @@ pub extern "system" fn Java_org_crake_metascrub_Native_reduceFingerprint<'local>
             2 => Strength::Thorough,
             _ => Strength::Balanced,
         },
-        ..Settings::default()
+        // On a phone the whole wash pipeline (full-resolution denoise, then a
+        // Lanczos resize, then the noise pass) peaks at several times the decoded
+        // RGBA buffer, so the desktop default of 120 MP can drive well over a
+        // gigabyte of transient allocation and OOM the process. Cap well below
+        // that: an image past this is refused cleanly (TooLarge) instead of
+        // crashing. 50 MP still covers the full-resolution output of essentially
+        // every phone camera (high-count sensors bin down to far less by default).
+        max_megapixels: Some(50),
     };
     let result = match pixelwash::wash(&bytes, &settings) {
         Ok(washed) => env
