@@ -5,6 +5,7 @@ members = [
     "crates/pixelwash",
     "crates/metascrub-gui",
     "crates/metascrub-android",
+    "crates/metascrub-ffi",
 ]
 
 # The fuzz crate needs a nightly toolchain and a sanitizer runtime, so it is
@@ -43,3 +44,19 @@ codegen-units = 1
 panic = "abort"
 overflow-checks = true
 strip = true
+# `strip` removes symbols, not data. Panic locations are `&'static str` literals
+# in .rodata, so a stripped binary still carries the absolute path of every
+# source file that can panic -- including the build machine's home directory.
+# The shipped APKs contained "C:\Users\<name>\.cargo\registry\..." about ninety
+# times each: the author's username, embedded in a tool whose whole job is
+# removing that kind of thing from other people's files.
+#
+# It also broke the reproducibility claim that rust-toolchain.toml exists to
+# support. Pinning the compiler is necessary but not sufficient: two people with
+# the same compiler and the same source still get different bytes if the path to
+# their home directory differs.
+#
+# The fix belongs here as `trim-paths = "all"`, but that is still unstable in
+# Cargo 1.97.1 and this workspace pins stable deliberately. The equivalent is
+# applied as --remap-path-prefix in android/build-apk.sh, which needs a shell to
+# expand the real paths before rustc sees them.

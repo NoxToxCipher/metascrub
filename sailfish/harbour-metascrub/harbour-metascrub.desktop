@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+X-Nemo-Application-Type=silica-qt5
+Icon=harbour-metascrub
+Exec=harbour-metascrub
+Name=metascrub
+Comment=Remove metadata from your files, on your device
+
+[X-Sailjail]
+Permissions=Pictures;Documents;Downloads;RemovableMedia;UserDirs
+OrganizationName=org.crake
+ApplicationName=harbour-metascrub

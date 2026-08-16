@@ -1414,6 +1414,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "metascrub-ffi"
+version = "0.1.0"
+dependencies = [
+ "metascrub",
+ "pixelwash",
+]
+
+[[package]]
 name = "metascrub-gui"
 version = "0.1.0"
 dependencies = [

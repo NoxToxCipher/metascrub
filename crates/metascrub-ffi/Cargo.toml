@@ -1,0 +1,19 @@
+[package]
+name = "metascrub-ffi"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+repository.workspace = true
+description = "A plain C ABI over the metascrub core, for native GUI hosts that link C (Sailfish/Silica, GTK, Qt)."
+
+[lib]
+# `staticlib` so a native app can link the core straight into its binary, and
+# `cdylib` so it can ship as a bundled `.so` in the app's private lib dir (which
+# is what the Sailfish RPM does). The name gives `libmetascrub_ffi.{a,so}`.
+name = "metascrub_ffi"
+crate-type = ["staticlib", "cdylib"]
+
+[dependencies]
+metascrub.workspace = true
+pixelwash.workspace = true

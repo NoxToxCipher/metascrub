@@ -1,0 +1,233 @@
+{
+  "chapters": [
+    {
+      "title": "How metascrub cleans",
+      "intro": "metascrub never gives a green tick it has not earned. Every file comes back with one of three honest results.",
+      "entries": [
+        {
+          "heading": "COMPLETE",
+          "body": "The file was taken apart and rebuilt from a list of the parts worth keeping. Anything not on that list — including private, vendor-specific or hidden blocks the tool has never seen — is left behind by construction. Photos and documents (JPEG, PNG, WebP, HEIC, AVIF, GIF, TIFF, PDF and Office files) are cleaned this way."
+        },
+        {
+          "heading": "BEST EFFORT",
+          "body": "The file was edited in place rather than rebuilt, because rebuilding it would risk making it unopenable. Identifying fields are overwritten, but some structure the tool cannot safely touch may remain. Camera raw files are cleaned this way."
+        },
+        {
+          "heading": "NOT CLEANED",
+          "body": "metascrub could not take this format apart, so it was left untouched and you should assume it still carries everything. A result you can trust is worth more than a tick that was not earned, so the tool tells you plainly rather than pretending."
+        },
+        {
+          "heading": "Why it rebuilds files rather than editing them",
+          "body": "A tool that only deletes the metadata it recognises will silently pass through anything new, private, or deliberately hidden. Rebuilding from a list of what to keep means the default for anything unknown is to drop it."
+        }
+      ]
+    },
+    {
+      "title": "What it can clean, and how well",
+      "intro": "metascrub detects the format from the file's own contents, never its name. Here is what it does with each.",
+      "entries": [
+        {
+          "heading": "Rebuilt completely (COMPLETE)",
+          "body": "Taken apart and rebuilt from an allowlist, so nothing unknown survives. Photos: JPEG, PNG, WebP, HEIC and HEIF, AVIF, GIF, TIFF. Vector: SVG. Documents: PDF, Word, Excel, PowerPoint, and OpenDocument. Photos pasted inside a document are cleaned too."
+        },
+        {
+          "heading": "Cleaned in place (BEST EFFORT)",
+          "body": "Edited, not rebuilt, because rebuilding would risk a file you cannot reshoot. Camera raw files: Canon CR2 and CR3, Nikon NEF and NRW, Sony ARW and SR2, Fujifilm RAF, Olympus and OM System ORF, Panasonic RW2, Pentax PEF, Samsung SRW, Adobe DNG, Epson ERF, GoPro GPR, and the medium-format backs. The make, model and maker note are kept so the file still opens, so a serial number inside the maker note can remain. See Camera raw files."
+        },
+        {
+          "heading": "Left untouched (NOT CLEANED)",
+          "body": "If metascrub cannot take a format apart, it does not guess. It leaves the file exactly as it is and marks it NOT CLEANED, so an untouched file is never mistaken for a cleaned one. This includes video and audio, and the occasional raw layout it does not yet parse, such as Sigma's X3F."
+        }
+      ]
+    },
+    {
+      "title": "What it removes, and why",
+      "entries": [
+        {
+          "heading": "EXIF",
+          "body": "A block of tags written by the camera: model, lens, serial number, shutter count, exposure settings, the date and time to the second, and often GPS coordinates.\n\nGPS is the obvious one, and it is accurate to a few metres, so a single holiday photo can give away a home address. The rest is quieter but adds up: the same camera body and lens across a set of photographs ties them to one person even when nothing else does."
+        },
+        {
+          "heading": "Maker note",
+          "body": "A vendor's private area inside EXIF, in an undocumented format that differs between manufacturers and firmware versions.\n\nThis is where the sensor serial number usually lives, along with shutter actuation counts and internal settings. It is the single most identifying field in a typical photograph, and because the format is private, tools that only understand standard tags often leave it in place."
+        },
+        {
+          "heading": "Thumbnail",
+          "body": "A small copy of the picture, stored inside the file so that viewers can show a preview without decoding the whole image.\n\nThumbnails are generated once and frequently not regenerated after an edit. A photograph cropped to remove someone from the frame can still carry the uncropped original inside it. The same applies to blurred faces and painted-over details."
+        },
+        {
+          "heading": "XMP",
+          "body": "Adobe's metadata format, stored as XML. Written by editing software and by some cameras.\n\nCarries the editing history, the software and version used, ratings, keywords, and often the author's name or the licence holder. It is also where catalogue identifiers live, which can link a published image back to a specific library on a specific machine."
+        },
+        {
+          "heading": "IPTC",
+          "body": "A press and publishing metadata block, often written by photo management software.\n\nMeant to carry a byline, a copyright notice, contact details and caption text. All useful for a wire service, all identifying for anyone who did not intend to publish under their name."
+        },
+        {
+          "heading": "Colour profile",
+          "body": "An ICC profile describing how the file's colour numbers should be interpreted.\n\nMostly harmless, and kept if you ask for it. Removed by default for two reasons: a profile carries a free-text description and a device model, and a custom profile from a calibrated monitor can be distinctive enough to link files. If your images are wide-gamut and colour accuracy matters, turn it back on."
+        },
+        {
+          "heading": "Trailing data",
+          "body": "Anything appended after the point where the image format says the file ends.\n\nMost tools stop reading at the end marker, which makes the space after it a good hiding place. Some phone cameras store a second, full-resolution photograph there. Whatever is in it, it is not part of the picture and it travels with the file."
+        },
+        {
+          "heading": "Document info",
+          "body": "In PDFs and Office documents: title, subject, author, the software that produced it, and creation and modification times.\n\nThe author field is often a real name or a corporate username, filled in automatically from the account the software was installed under, without ever being shown to the person typing."
+        },
+        {
+          "heading": "Revision identifiers",
+          "body": "Random identifiers that word processors write into a document and update as it is edited.\n\nTwo documents sharing a revision identifier were edited in the same session on the same machine. This links files that have nothing else in common, and almost nobody knows the field exists."
+        },
+        {
+          "heading": "Unrecognised structures",
+          "body": "Any block in the container that is not on the keep-list, including vendor-private sections this tool has never seen.\n\nThe reason the tool rebuilds files rather than editing them. A tool that deletes the metadata it recognises will silently pass through anything new, private, or deliberately hidden. Rebuilding from a list of what to keep means the default for anything unknown is to drop it."
+        }
+      ]
+    },
+    {
+      "title": "Your files, and what they carry",
+      "entries": [
+        {
+          "heading": "JPEG photo (.jpg)",
+          "body": "An EXIF block written by the camera or phone: GPS coordinates, the camera make, model and serial number, the lens, the exact date and time to the second, and a small thumbnail. Often an XMP block from editing software as well.\n\nThe GPS is accurate to a few metres, so one holiday photo can give away a home. The serial number is the strong one: it is the same across every photo that camera has ever taken, so it ties an anonymous picture to the set you posted under your own name. The thumbnail is generated once and often not updated, so a photo cropped to remove someone can still carry the uncropped original inside it."
+        },
+        {
+          "heading": "Phone photo (HEIC, HEIF, AVIF)",
+          "body": "The same EXIF and XMP as a JPEG, and modern phones are thorough: precise GPS, the device model, capture settings, and sometimes a depth map or a burst of frames.\n\nEverything the JPEG case describes, and because it came straight off a phone with location on, the GPS is usually present and precise. The device model plus operating-system details narrow down whose phone it was."
+        },
+        {
+          "heading": "PNG image (.png)",
+          "body": "Text chunks that hold free-form comments, the software that wrote the file, a creation time, and sometimes a full EXIF block copied across from an original photo.\n\nPeople assume PNG is 'clean' because it is often used for screenshots, but converters frequently carry the original photo's EXIF, GPS and all, into the PNG. The software field fingerprints the tool and version you used."
+        },
+        {
+          "heading": "WebP and GIF",
+          "body": "WebP carries EXIF and XMP like a JPEG. GIF carries comment and application blocks, which have been used for author names, software strings and XMP.\n\nThe same location and device story for WebP. For GIF it is usually the author or software string rather than GPS, but that still names a tool, an account, or a person."
+        },
+        {
+          "heading": "TIFF (.tif)",
+          "body": "TIFF is the container EXIF itself is built on, so it holds the full set: GPS, camera make, model and serial, timestamps, and an embedded thumbnail.\n\nThe same as a JPEG, and TIFF is common for scans and professional work, where a scanner or camera serial and a precise timestamp can tie a document back to one machine."
+        },
+        {
+          "heading": "Camera raw (CR2, CR3, NEF, ARW, RAF, DNG, ...)",
+          "body": "Everything a JPEG carries, and more. A larger maker note holds the internal serial number and the shutter count. A full-size JPEG preview is embedded inside, with its own EXIF and GPS.\n\nA raw is a worse leak than the JPEG of the same shot, not a better one. The shutter count effectively numbers your photos in the order you took them. The maker note holds data a converter needs to develop the file, so this tool keeps it and the serial in it usually stays, which is why a raw can never be fully cleaned in place. To remove the serial, develop the raw to a JPEG and clean that."
+        },
+        {
+          "heading": "SVG vector image (.svg)",
+          "body": "SVG is XML, so it carries editor bookkeeping: the drawing program and its version, layer and window layout, sometimes a document path, a metadata block with author and licence, and references to external files.\n\nThe editor fields and any embedded document path can carry a username or a folder structure that names you. An external reference makes the image fetch a resource from a server when someone opens it, which reports back to that server that it was viewed. Scripts in an SVG can run when it is opened in a browser."
+        },
+        {
+          "heading": "XMP sidecar (.xmp)",
+          "body": "A file that is nothing but metadata, written beside a photo by editing software: the author, copyright, GPS, the dates the photo was taken and edited, the full editing history, catalogue identifiers, and the camera serial number.\n\nPeople forget the sidecar exists and share it alongside the photo. It carries the identity the photo was cleaned of. The editing history links the file to a specific session on a specific machine, and the catalogue IDs link it to one photo library."
+        },
+        {
+          "heading": "PDF document (.pdf)",
+          "body": "A document-information block with the author, the software that produced it, and creation and modification times. Often an XMP block too, and a history of incremental edits.\n\nThe author field is usually filled in automatically from the account the software was installed under, so it is often a real name or a corporate username the writer never typed or saw. The edit history can hold earlier versions of the file, which is how 'redacted' PDFs have leaked the text underneath the black boxes."
+        },
+        {
+          "heading": "Word, Excel, PowerPoint, OpenDocument",
+          "body": "Author and last-modified-by names, the company, total editing time, revision-save identifiers, tracked changes with the names of everyone who edited, template paths, and any images pasted in, which keep their own EXIF.\n\nThe author and last-edited-by fields name real people or account usernames. Revision-save identifiers are random numbers that match between documents edited in the same session on the same machine, which links files that have nothing else in common. Tracked changes can expose who wrote what, and a pasted photo brings its own GPS along."
+        }
+      ]
+    },
+    {
+      "title": "Camera raw files",
+      "intro": "Raws are the one format cleaned in place rather than rebuilt, and the word 'raw' is widely misunderstood. This is what a raw is, and exactly where the tool is limited on one.",
+      "entries": [
+        {
+          "heading": "What a raw file actually is",
+          "body": "A raw file is the near-unprocessed readout of the camera's image sensor, before the camera has turned it into a picture. It is not a viewable image in the ordinary sense. It has no fixed colours, no contrast curve and no sharpening applied; it is closer to a photographic negative than to a finished print, and it has to be 'developed' by software before it looks like anything.\n\nBecause it holds the full sensor data with almost nothing thrown away, a raw is large, and it can only be opened by software that understands that particular camera's format. That is the whole point of shooting raw: nothing has been decided or discarded yet, so the photographer can make those choices later."
+        },
+        {
+          "heading": "An unedited JPEG is not a raw",
+          "body": "This is the most common and most costly misunderstanding, so it is worth being blunt. A JPEG straight off a phone or camera, that you have never opened in an editor, is not a raw file. It has already been developed inside the camera: the sensor data was turned into colours, a contrast curve and sharpening were applied, and the result was compressed and thrown away down to a fraction of its original size. 'Unedited by you' is not the same as 'raw'.\n\nThe reliable way to tell them apart is the file type, not how the picture looks. Raws have maker-specific extensions: Canon CR2 and CR3, Nikon NEF and NRW, Sony ARW, Panasonic RW2, Olympus ORF, Fujifilm RAF, Pentax PEF, the universal Adobe DNG, and a dozen more. If the file ends in .jpg or .jpeg, it is a JPEG whatever else is true of it. If in doubt, this tool tells you which format it detected from the file's own contents, ignoring the name."
+        },
+        {
+          "heading": "Why raws carry more to remove, not less",
+          "body": "A raw is a worse privacy risk than the JPEG of the same photo, not a better one. It carries the full EXIF block, and its maker note, where the sensor serial number and shutter count live, is usually larger and more detailed than in a processed file.\n\nA raw also almost always contains a complete JPEG preview of the developed photograph, embedded inside it so that software can show the shot without decoding the sensor data. That preview has its own EXIF, its own GPS, and can even show a version of the scene from before an edit. It is a file within the file, and it has to be cleaned too. This tool finds and blanks the metadata inside those embedded previews as well as in the raw's own tags."
+        },
+        {
+          "heading": "Two levels of cleaning, and why raws are the lower one",
+          "body": "Ordinary images and documents are rebuilt from scratch: the tool keeps a list of the parts worth keeping, copies only those into a new file, and by construction nothing else survives. JPEG, PNG, WebP, HEIC, AVIF, GIF, TIFF, PDF and Office files are cleaned this way, to a 'Complete' result.\n\nA raw cannot be treated that way. Its sensor image lives in vendor-specific sub-sections whose layout is undocumented and different for every manufacturer, and testing on real files from many brands showed that rebuilding one hands back a file that no longer opens. A raw is not something you can reshoot, so the tool will not take that risk. Raws are cleaned in place instead: the file is edited, not rebuilt, nothing is moved, and the length does not change. This is always a 'Best effort' result."
+        },
+        {
+          "heading": "Exactly what changes in a raw, and what does not",
+          "body": "REMOVED, overwritten with zeros: the GPS location; the date and time the photo was taken and last changed; the owner and artist names; any XMP or IPTC block; the standard serial-number and image-ID fields; and the metadata inside the embedded preview image. The report lists exactly which of these were found in your file.\n\nKEPT on purpose: the camera make and model, and the manufacturer's maker note.\n\nNOT TOUCHED: the sensor image data itself, and the file's ability to be developed. The picture is bit-for-bit the same; only the information around it changed."
+        },
+        {
+          "heading": "Why the maker note is kept, and what that leaks",
+          "body": "The maker note is the manufacturer's private block. It does hold the camera's internal serial number and its shutter count, which are identifying. It would be good to remove.\n\nBut manufacturers also store the settings a raw converter needs to develop the file in that same block: black and white levels, the sensor's colour-filter layout, white balance, lens corrections. On real files from Canon, Nikon, Olympus, Pentax and others, removing the maker note either stopped the raw opening or changed how it decoded. Corrupting the file is the one outcome this tool refuses, so the maker note stays.\n\nThe honest consequence: on a raw, the internal serial number in the maker note usually survives. How much identifying data remains therefore depends on your camera, because some brands also write the serial into a standard field, which is removed, while others keep it only in the maker note, which is not. If that serial matters to you, use the safe path below."
+        },
+        {
+          "heading": "The safest path, and which cameras are covered",
+          "body": "If what you need is to share a picture rather than the raw negative, develop the raw into a JPEG or PNG first and clean that. A JPEG is rebuilt to a 'Complete' result and carries none of the maker note, embedded preview, or vendor sub-sections a raw does. That is the way to remove the serial the raw keeps.\n\nThe tool recognises raws from Canon (CR2, CR3), Nikon (NEF, NRW), Sony (ARW, SR2), Fujifilm (RAF), Olympus and OM System (ORF), Panasonic (RW2), Pentax (PEF), Leica, Samsung (SRW), Adobe (DNG), Epson (ERF), GoPro (GPR), and the medium-format backs from Hasselblad, Phase One and Leaf, among others. Each is identified from its contents, never its file name. Sigma's X3F uses a layout the tool does not yet parse, so it is left untouched and reported as not cleaned, rather than cleaned badly."
+        }
+      ]
+    },
+    {
+      "title": "Reducing the camera fingerprint",
+      "intro": "A separate, optional step, off by default because it softens the photo. Every camera sensor leaves a faint fixed pattern in the pixels of every photo it takes. Removing metadata does nothing to it.",
+      "entries": [
+        {
+          "heading": "What a sensor fingerprint is",
+          "body": "A camera sensor is a grid of millions of light-sensitive wells etched into silicon. Manufacturing cannot make them perfectly identical, so each responds to light a fraction differently from its neighbours. That variation is fixed for the life of the camera and is imprinted, faintly, on every photograph it takes. It is called Photo Response Non-Uniformity, or PRNU — a serial number written into the picture itself rather than into the file's information fields. Removing EXIF does not touch it, and neither does renaming the file, screenshotting it, or sending it through an app that strips metadata."
+        },
+        {
+          "heading": "How it is used against someone",
+          "body": "It is a linking attack, not an identifying one. An analyst correlates a photo's fine detail against a reference pattern for a camera, built either from the physical camera or from photographs already known to come from it. Nobody derives a name from the pixels of an anonymous photo. The realistic scenario: someone publishes work under their own name, then publishes something anonymously, both taken with the same camera, and the analyst shows the two came from one sensor."
+        },
+        {
+          "heading": "What this option does",
+          "body": "Reduce camera fingerprint denoises the photo at full resolution (the pattern lives in the fine detail, so this is the reverse of how detectors find it), downscales it (mixing each output pixel from several input pixels, which breaks the pixel-for-pixel match correlation depends on — the single most effective step), adds a little fresh noise, and re-encodes as JPEG. Gentle keeps 90% of the size, Balanced 70%, Thorough 50%. The stronger the setting, the softer and smaller the photo."
+        },
+        {
+          "heading": "What does not work",
+          "body": "Shifting the colours or white balance does nothing at all. Detectors use normalised correlation, which divides out any uniform per-channel scaling or offset before comparing. A global colour change is exactly that, so it is removed by the maths before the comparison happens. It costs colour accuracy and buys no protection. This is written down because it is an intuitive idea that happens to be wrong."
+        },
+        {
+          "heading": "The honest limit",
+          "body": "This reduces correlation. It does not remove the fingerprint, and nothing here will tell you that it has. A forensic analyst with a strong reference pattern, many samples and time can still succeed. Every setting also degrades the photo — softer detail, fewer pixels, more compression. If your safety depends on being unlinkable, the stronger measure is not to publish from the same camera under two identities in the first place."
+        }
+      ]
+    },
+    {
+      "title": "Common misconceptions",
+      "intro": "Bad advice here is worse than none: someone who believes a file is clean behaves as though it is.",
+      "entries": [
+        {
+          "heading": "Sending a photo through a messaging app removes everything.",
+          "body": "Most large platforms do strip EXIF when you send a picture as a photo, so the location usually goes. Two catches. Sending the same file as a document or a file attachment uploads the original untouched, metadata and all, and people choose that option for better quality without realising what else rides along. WhatsApp and Telegram both behave this way; Signal strips metadata in document mode too, which is a real difference between them."
+        },
+        {
+          "heading": "Taking a screenshot removes the metadata.",
+          "body": "Largely true. But the screenshot carries its own new metadata, the quality is much worse than a proper clean copy, and the common mistake is to screenshot for safety and then send the original by accident."
+        },
+        {
+          "heading": "Renaming the file, or putting it in a zip, removes metadata.",
+          "body": "Neither does anything at all. A filename is not part of the file's contents, and an archive preserves the file exactly so that it comes out the other side unchanged. That is the whole purpose of an archive."
+        },
+        {
+          "heading": "My photo is a raw file because I haven't edited it.",
+          "body": "A photo you have not touched is still not a raw file. A JPEG straight from a phone or camera was already developed inside the camera: colours, contrast and sharpening applied, then compressed. A raw is the sensor data before any of that, in a maker-specific format (CR2, CR3, NEF, ARW, DNG, RW2, ORF, RAF and others) that needs special software to open. The file type decides it, not whether you have edited the picture."
+        },
+        {
+          "heading": "Converting to PNG strips the metadata.",
+          "body": "PNG has its own metadata chunks, including a full EXIF chunk and free-text fields, and many converters copy the tags across rather than dropping them. Changing format is not the same as removing information."
+        },
+        {
+          "heading": "I turned location services off, so my photos are fine.",
+          "body": "That removes GPS coordinates, which is the biggest single item, and it is worth doing. Everything else remains: camera model, lens, serial number in the maker note, exact timestamp, the embedded thumbnail, and editing history."
+        }
+      ]
+    },
+    {
+      "title": "Letter from a survivor",
+      "entries": [
+        {
+          "heading": "",
+          "body": "Hello.\n\nI'm a photographer, and I've learned how much a single photo can reveal about the person who took it: where they stood, the camera in their hands, a name they never chose to attach. Around the world, that hidden data has been used to take people's privacy, and sometimes their safety, away from them.\n\nI built metascrub to hand that back. It's for anyone who wants it, and above all for people living under censorship or surveillance, for people getting free of someone dangerous, and for anyone who simply wants to be harder to follow.\n\nEverything happens on your phone. Nothing is ever uploaded.\n\nKeep going.\n— Cipher"
+        }
+      ]
+    }
+  ]
+}
