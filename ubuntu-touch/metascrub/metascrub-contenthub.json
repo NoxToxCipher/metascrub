@@ -1,0 +1,5 @@
+{
+    "destination": ["pictures", "documents"],
+    "share": ["pictures", "documents"],
+    "source": ["pictures", "documents"]
+}

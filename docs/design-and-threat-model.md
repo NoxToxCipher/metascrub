@@ -201,7 +201,11 @@ effect and must not be told it is pixelwash.
 - **No network capability.** metascrub makes zero network connections. There are
   no sockets, no HTTP client, nothing. A continuous-integration job runs the
   suite with networking removed to prove it. Verifiable, and the strongest
-  privacy property the tool has.
+  privacy property the tool has. On Ubuntu Touch it stops being self-reported at
+  all: the app ships an AppArmor profile that omits the `networking` policy
+  group, so the system refuses it a socket whatever the code asks for. The
+  profile is four lines inside the installed package, and CI fails if the group
+  ever appears in it.
 - **No `unsafe` code** (`#![forbid(unsafe_code)]`), so the tool's own logic
   cannot corrupt memory. Parsing is done with a bounds-checked reader that
   returns an error rather than indexing out of range.
@@ -227,6 +231,11 @@ effect and must not be told it is pixelwash.
   crash the zeroizing buffers do not run. Freed pages can linger. This matters
   on a compromised or forensically examined machine.
 - The original file persists on disk, and the tool cannot securely delete it.
+- On a confined phone the app is handed *copies*. On Ubuntu Touch those copies,
+  and the cleaned files written beside them, sit in the app's own storage until
+  the user clears them, and clearing is an ordinary delete: on flash storage the
+  blocks may survive until they are reused. The app says this on its About
+  screen rather than leaving it to be discovered.
 - While processing, data can be paged to unencrypted swap. Use full-disk
   encryption for high-threat work.
 

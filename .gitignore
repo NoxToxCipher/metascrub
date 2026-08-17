@@ -17,3 +17,9 @@
 
 # Built native libraries (produced by build-apk.sh)
 android/app/src/main/jniLibs/
+
+# Built Rust core for the Ubuntu Touch click (produced by ubuntu-touch/build-ffi.sh)
+ubuntu-touch/metascrub/rustlib/
+
+# Clickable build output
+ubuntu-touch/metascrub/build/

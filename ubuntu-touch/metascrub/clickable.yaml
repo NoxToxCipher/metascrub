@@ -1,0 +1,19 @@
+# metascrub for Ubuntu Touch.
+#
+# Deliberately minimal. The one thing that has to happen before this runs is the
+# Rust core being built for the target architecture:
+#
+#   clickable script ffi --arch arm64     # or: ../build-ffi.sh arm64
+#   clickable build --arch arm64
+#
+# The cmake build refuses to start without it and says exactly that, rather than
+# producing an app with no core in it.
+clickable_minimum_required: "7.0.0"
+
+builder: cmake
+kill: metascrub
+
+scripts:
+  # Build the Rust core for one architecture. $ARCH is set by clickable; the
+  # script falls back to dpkg and then to the host if it is not.
+  ffi: "$ROOT/../build-ffi.sh $ARCH"

@@ -1,0 +1,16 @@
+{
+    "name": "@APP_ID@",
+    "title": "metascrub",
+    "version": "@APP_VERSION@",
+    "description": "Removes what a file says about you, on your device.",
+    "framework": "@CLICK_FRAMEWORK@",
+    "architecture": "@CLICK_ARCH@",
+    "maintainer": "NoxToxCipher <noxtoxcipher@users.noreply.github.com>",
+    "hooks": {
+        "@APP_HOOK@": {
+            "apparmor": "@APP_HOOK@.apparmor",
+            "desktop": "@APP_HOOK@.desktop",
+            "content-hub": "@APP_HOOK@-contenthub.json"
+        }
+    }
+}

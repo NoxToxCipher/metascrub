@@ -9,15 +9,20 @@ TARGET = harbour-metascrub
 CONFIG += sailfishapp
 QT += quick
 
+# The Scrubber backend lives in native/ at the repository root, because the
+# Ubuntu Touch app links the very same file. The guard that re-inspects bytes
+# before writing them out is security-critical, so it exists once, not once per
+# platform.
 SOURCES += \
     src/main.cpp \
-    src/scrubber.cpp
+    ../../native/scrubber.cpp
 
 HEADERS += \
-    src/scrubber.h
+    ../../native/scrubber.h
 
-# The metascrub core, over its C ABI.
+# The metascrub core, over its C ABI, and the shared backend beside it.
 INCLUDEPATH += $$PWD/../../crates/metascrub-ffi/include
+INCLUDEPATH += $$PWD/../../native
 isEmpty(RUST_LIB_DIR): RUST_LIB_DIR = $$PWD/rustlib
 LIBS += -L$$RUST_LIB_DIR -lmetascrub_ffi
 # What the Rust staticlib (with libstd) needs at link time.
