@@ -1,0 +1,319 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR metascrub contributors
+# This file is distributed under the same license as the metascrub.noxtoxcipher package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: metascrub.noxtoxcipher\n"
+"Report-Msgid-Bugs-To: https://github.com/NoxToxCipher/metascrub/issues\n"
+"POT-Creation-Date: 2026-08-17 11:03+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION;\n"
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/AboutPage.qml:16
+msgid "About metascrub"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/AboutPage.qml:20
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ExportPage.qml:24
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/HandbookPage.qml:25
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ImportPage.qml:26
+msgid "Back"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/AboutPage.qml:64
+msgid ""
+"metascrub removes the hidden data a file carries about you — where a photo "
+"was taken, which camera and account made a document, its editing history — "
+"and tells you honestly how much it could remove."
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/AboutPage.qml:71
+msgid "What it will not do"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/AboutPage.qml:82
+msgid ""
+"Every file is cleaned on this phone. Nothing is uploaded, and the app keeps "
+"no accounts. It never shows a result it has not earned: a file it cannot "
+"fully take apart is marked so, never presented as clean."
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/AboutPage.qml:90
+msgid "You do not have to take our word for it"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/AboutPage.qml:101
+msgid ""
+"On Ubuntu Touch every app runs under an AppArmor profile that lists what it "
+"is allowed to touch. metascrub asks for two things: to receive files from "
+"other apps, and to give files back. It does not ask for network access, so "
+"the system itself refuses to let it reach one. The profile is a short file "
+"inside the app package (metascrub.apparmor) and anyone can read it."
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/AboutPage.qml:111
+msgid "What it cannot promise"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/AboutPage.qml:122
+msgid ""
+"Files handed to metascrub, and the cleaned copies it writes, sit in this "
+"app's own storage until you clear them. Clearing deletes them the ordinary "
+"way: on flash storage the data may survive until those blocks are reused, "
+"and no application can change that. Nothing here protects you from a phone "
+"that has already been tampered with."
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/AboutPage.qml:131
+msgid "Source"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/AboutPage.qml:142
+msgid ""
+"Free software, GPL-3.0. The same audited core runs on the desktop, on "
+"Android and on Sailfish OS.\n"
+"github.com/NoxToxCipher/metascrub"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ExportPage.qml:20
+msgid "Save cleaned copies"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/HandbookPage.qml:21
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:26
+msgid "Handbook"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/HandbookPage.qml:80
+msgid "The Handbook could not be loaded."
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ImportPage.qml:22
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:369
+msgid "Choose files"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/Main.qml:147
+msgid "Rebuilt from known-safe parts. Nothing unknown was kept."
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/Main.qml:150
+msgid "Cleaned in place. Some structure may remain."
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/Main.qml:152
+msgid ""
+"Could not take this format apart, so assume it still carries everything."
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/Main.qml:181
+msgid "Removed: %1"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/Main.qml:182
+msgid "Already clean. Nothing to remove."
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/Main.qml:227
+msgid "Nothing to save — none of these files could be cleaned."
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/Main.qml:246
+msgid "Nothing could be saved."
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/Main.qml:267
+msgid "%1 file could not be saved."
+msgid_plural "%1 files could not be saved."
+msgstr[0] ""
+msgstr[1] ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/Main.qml:272
+msgid "Saved %1 cleaned copy. Your original was not changed."
+msgid_plural "Saved %1 cleaned copies. Your originals were not changed."
+msgstr[0] ""
+msgstr[1] ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/Main.qml:290
+msgid "Handed back the cleaned copy. Your original was not sent."
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/Main.qml:300
+msgid "Nothing was left to clear."
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/Main.qml:301
+msgid "Cleared %1 working file from this app's storage."
+msgid_plural "Cleared %1 working files from this app's storage."
+msgstr[0] ""
+msgstr[1] ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:22
+msgid "metascrub"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:31
+msgid "About"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:36
+msgid "Clear working files"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:60
+msgid "COMPLETE"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:63
+msgid "BEST EFFORT"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:65
+msgid "NOT CLEANED"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:81
+msgid "Cleaning %1 of %2…"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:84
+msgid "Scrub %1 file"
+msgid_plural "Scrub %1 files"
+msgstr[0] ""
+msgstr[1] ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:90
+msgid "Hand back %1 cleaned copy"
+msgid_plural "Hand back %1 cleaned copies"
+msgstr[0] ""
+msgstr[1] ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:92
+msgid "Save %1 cleaned copy"
+msgid_plural "Save %1 cleaned copies"
+msgstr[0] ""
+msgstr[1] ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:136
+msgid "removes what a file says about you"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:147
+msgid ""
+"These files were handed to metascrub on this phone. Nothing was sent "
+"anywhere."
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:154
+msgid ""
+"Another app is waiting for a file. Clean it here and metascrub will hand "
+"back the cleaned copy instead of your original."
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:161
+msgid ""
+"Add photos, PDFs or documents to clean them.\n"
+"\n"
+"Everything happens on this phone. Nothing is uploaded, and your files are "
+"only touched when you press Scrub."
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:174
+msgid "Give cleaned files random names"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:176
+msgid "A file name is metadata too"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:193
+msgid "Keep colour profile"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:195
+msgid "Keeps colours accurate, and is itself identifying"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:212
+msgid "Keep image orientation"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:214
+msgid "Stops photos appearing rotated"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:231
+msgid "Reduce camera fingerprint (photos)"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:233
+msgid "Reduces linkability. Does not remove it."
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:246
+msgid ""
+"Softens the pixels to weaken the sensor fingerprint a camera leaves in every "
+"photo. This reduces how easily photos can be linked to one camera. It does "
+"not remove the fingerprint, and it makes the photo softer and a little "
+"smaller. Photos are saved as JPEG."
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:257
+msgid "Strength"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:258
+msgid "Balanced"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:258
+msgid "Gentle"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:258
+msgid "Thorough"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:267
+msgid "Ready to scrub"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:267
+msgid "Results"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:321
+msgid "Recorded where it was taken."
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:349
+msgid "Still in the file"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:355
+msgid "Remove"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:369
+msgid "Add more"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:388
+msgid "Start over"
+msgstr ""
+
+#: /home/user/metascrub/ubuntu-touch/metascrub/qml/ScrubPage.qml:409
+msgid ""
+"Files handed to metascrub, and the cleaned copies it writes, sit in this "
+"app's own storage until you clear them. Clear working files is in the menu "
+"at the top."
+msgstr ""

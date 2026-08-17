@@ -112,6 +112,44 @@ install(FILES
     ${CMAKE_CURRENT_SOURCE_DIR}/${APP_HOOK}-contenthub.json
     DESTINATION ".")
 
+# --- translations -----------------------------------------------------------
+# Each po/<locale>.po becomes share/locale/<locale>/LC_MESSAGES/<id>.mo inside
+# the click, which is where the app binds its text domain at startup. A missing
+# msgfmt is not fatal: the app then ships English, which is the honest fallback
+# and better than refusing to build.
+find_program(MSGFMT_EXECUTABLE msgfmt)
+file(GLOB PO_FILES "${CMAKE_CURRENT_SOURCE_DIR}/po/*.po")
+if(MSGFMT_EXECUTABLE AND PO_FILES)
+    set(MO_FILES)
+    foreach(po ${PO_FILES})
+        get_filename_component(locale ${po} NAME_WE)
+        set(mo "${CMAKE_CURRENT_BINARY_DIR}/locale/${locale}/LC_MESSAGES/${APP_ID}.mo")
+        add_custom_command(
+            OUTPUT ${mo}
+            COMMAND ${CMAKE_COMMAND} -E make_directory
+                    "${CMAKE_CURRENT_BINARY_DIR}/locale/${locale}/LC_MESSAGES"
+            COMMAND ${MSGFMT_EXECUTABLE} -o ${mo} ${po}
+            DEPENDS ${po}
+            COMMENT "translations: ${locale}")
+        list(APPEND MO_FILES ${mo})
+    endforeach()
+    add_custom_target(translations ALL DEPENDS ${MO_FILES})
+    install(DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/locale DESTINATION "share")
+else()
+    message(WARNING "msgfmt not found or no .po files: shipping English only")
+endif()
+
+# The Handbook, in each language the Android app already carries it in. The
+# interface picks one by locale at runtime and falls back to English.
+file(GLOB HANDBOOK_TRANSLATIONS "${REPO_ROOT}/android/app/src/main/res/raw-*/handbook.json")
+foreach(handbook ${HANDBOOK_TRANSLATIONS})
+    get_filename_component(raw_dir ${handbook} DIRECTORY)
+    get_filename_component(raw_name ${raw_dir} NAME)
+    # raw-ru -> ru, raw-b+ckb -> ckb
+    string(REGEX REPLACE "^raw-(b\\+)?" "" locale ${raw_name})
+    install(FILES ${handbook} DESTINATION "qml" RENAME "handbook-${locale}.json")
+endforeach()
+
 # --- tests ------------------------------------------------------------------
 # Off by default so a phone build stays lean; CI turns it on for amd64. It runs
 # a real file through the real Rust library over the real C ABI, which is the

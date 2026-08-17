@@ -1,0 +1,103 @@
+# Translations for metascrub on Ubuntu Touch.
+#
+# Written by from-android.py: every string here was already translated for the
+# Android app and carries the identical English source. Strings new to this
+# platform are absent on purpose and fall back to English.
+msgid ""
+msgstr ""
+"Project-Id-Version: metascrub.noxtoxcipher\n"
+"Report-Msgid-Bugs-To: https://github.com/NoxToxCipher/metascrub/issues\n"
+"Language: la\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Handbook"
+msgstr "Manuale"
+
+msgid "The Handbook could not be loaded."
+msgstr "Manuale onerari non potuit."
+
+msgid "Choose files"
+msgstr "Documenta selige"
+
+msgid "Rebuilt from known-safe parts. Nothing unknown was kept."
+msgstr "Refectum ex partibus notis et tutis. Nihil ignotum servatum est."
+
+msgid "Cleaned in place. Some structure may remain."
+msgstr "In loco purgatum. Aliqua structura manere potest."
+
+msgid "Could not take this format apart, so assume it still carries everything."
+msgstr "Hanc formam dissolvere non potuit, ideo puta eam adhuc omnia ferre."
+
+msgid "Removed: %1"
+msgstr "Remota: %1"
+
+msgid "Already clean. Nothing to remove."
+msgstr "Iam purum. Nihil removendum."
+
+msgid "Nothing to save — none of these files could be cleaned."
+msgstr "Nihil servandum — nullum horum documentorum purgari potuit."
+
+msgid "metascrub"
+msgstr "metascrub"
+
+msgid "COMPLETE"
+msgstr "COMPLETUM"
+
+msgid "BEST EFFORT"
+msgstr "PRO VIRIBUS"
+
+msgid "NOT CLEANED"
+msgstr "NON PURGATUM"
+
+msgid "removes what a file says about you"
+msgstr "removet quod documentum de te dicit"
+
+msgid "Add photos, PDFs or documents to clean them.\n\nEverything happens on this phone. Nothing is uploaded, and your files are only touched when you press Scrub."
+msgstr "Photographias, PDF aut documenta adde ut ea purges.\n\nOmnia in hoc telephono fiunt. Nihil imponitur, et documenta tua solum tanguntur cum «Purga» premis."
+
+msgid "Give cleaned files random names"
+msgstr "Da documentis purgatis nomina fortuita"
+
+msgid "Keep colour profile"
+msgstr "Descriptionem coloris serva"
+
+msgid "Keep image orientation"
+msgstr "Rotationem imaginis serva"
+
+msgid "Reduce camera fingerprint (photos)"
+msgstr "Vestigium photomachinae minue (photographiae)"
+
+msgid "Softens the pixels to weaken the sensor fingerprint a camera leaves in every photo. This reduces how easily photos can be linked to one camera. It does not remove the fingerprint, and it makes the photo softer and a little smaller. Photos are saved as JPEG."
+msgstr "Pixella mollit ut vestigium sensoris quod photomachina in omni photographia relinquit debilius fiat. Hoc minuit quam facile photographiae ad unam photomachinam ligari possint. Vestigium non removet, et photographiam molliorem et paulo minorem facit. Photographiae ut JPEG servantur."
+
+msgid "Balanced"
+msgstr "Aequatus"
+
+msgid "Gentle"
+msgstr "Lenis"
+
+msgid "Thorough"
+msgstr "Accuratus"
+
+msgid "Ready to scrub"
+msgstr "Parata ad purgandum"
+
+msgid "Results"
+msgstr "Exitus"
+
+msgid "Recorded where it was taken."
+msgstr "Ubi captum sit inscripsit."
+
+msgid "Still in the file"
+msgstr "Adhuc in documento"
+
+msgid "Remove"
+msgstr "Aufer"
+
+msgid "Add more"
+msgstr "Plura adde"
+
+msgid "Start over"
+msgstr "Iterum incipe"

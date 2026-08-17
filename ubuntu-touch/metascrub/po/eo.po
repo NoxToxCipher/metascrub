@@ -1,0 +1,103 @@
+# Translations for metascrub on Ubuntu Touch.
+#
+# Written by from-android.py: every string here was already translated for the
+# Android app and carries the identical English source. Strings new to this
+# platform are absent on purpose and fall back to English.
+msgid ""
+msgstr ""
+"Project-Id-Version: metascrub.noxtoxcipher\n"
+"Report-Msgid-Bugs-To: https://github.com/NoxToxCipher/metascrub/issues\n"
+"Language: eo\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Handbook"
+msgstr "Manlibro"
+
+msgid "The Handbook could not be loaded."
+msgstr "La Manlibro ne ŝargeblis."
+
+msgid "Choose files"
+msgstr "Elekti dosierojn"
+
+msgid "Rebuilt from known-safe parts. Nothing unknown was kept."
+msgstr "Rekonstruita el konataj sekuraj partoj. Nenio nekonata estis konservita."
+
+msgid "Cleaned in place. Some structure may remain."
+msgstr "Purigita surloke. Iom da strukturo povas resti."
+
+msgid "Could not take this format apart, so assume it still carries everything."
+msgstr "Ne eblis malmunti ĉi tiun formaton, do supozu ke ĝi ankoraŭ portas ĉion."
+
+msgid "Removed: %1"
+msgstr "Forigita: %1"
+
+msgid "Already clean. Nothing to remove."
+msgstr "Jam pura. Nenio forigenda."
+
+msgid "Nothing to save — none of these files could be cleaned."
+msgstr "Nenio konservenda — neniu el ĉi tiuj dosieroj purigeblis."
+
+msgid "metascrub"
+msgstr "metascrub"
+
+msgid "COMPLETE"
+msgstr "KOMPLETA"
+
+msgid "BEST EFFORT"
+msgstr "LAŬEBLE"
+
+msgid "NOT CLEANED"
+msgstr "NE PURIGITA"
+
+msgid "removes what a file says about you"
+msgstr "forigas tion, kion dosiero diras pri vi"
+
+msgid "Add photos, PDFs or documents to clean them.\n\nEverything happens on this phone. Nothing is uploaded, and your files are only touched when you press Scrub."
+msgstr "Aldonu fotojn, PDF-ojn aŭ dokumentojn por purigi ilin.\n\nĈio okazas sur ĉi tiu telefono. Nenio estas alŝutata, kaj viaj dosieroj estas tuŝataj nur kiam vi premas Purigi."
+
+msgid "Give cleaned files random names"
+msgstr "Doni hazardajn nomojn al purigitaj dosieroj"
+
+msgid "Keep colour profile"
+msgstr "Konservi koloran profilon"
+
+msgid "Keep image orientation"
+msgstr "Konservi orientiĝon de bildo"
+
+msgid "Reduce camera fingerprint (photos)"
+msgstr "Redukti fingrospuron de fotilo (fotoj)"
+
+msgid "Softens the pixels to weaken the sensor fingerprint a camera leaves in every photo. This reduces how easily photos can be linked to one camera. It does not remove the fingerprint, and it makes the photo softer and a little smaller. Photos are saved as JPEG."
+msgstr "Moligas la bilderojn por malfortigi la sensilan fingrospuron, kiun fotilo lasas en ĉiu foto. Tio reduktas kiom facile fotoj povas esti ligitaj al unu fotilo. Ĝi ne forigas la fingrospuron, kaj ĝi igas la foton pli mola kaj iom pli malgranda. Fotoj estas konservataj kiel JPEG."
+
+msgid "Balanced"
+msgstr "Ekvilibra"
+
+msgid "Gentle"
+msgstr "Milda"
+
+msgid "Thorough"
+msgstr "Ĝisfunda"
+
+msgid "Ready to scrub"
+msgstr "Preta por purigi"
+
+msgid "Results"
+msgstr "Rezultoj"
+
+msgid "Recorded where it was taken."
+msgstr "Registris kie ĝi estis farita."
+
+msgid "Still in the file"
+msgstr "Ankoraŭ en la dosiero"
+
+msgid "Remove"
+msgstr "Forigi"
+
+msgid "Add more"
+msgstr "Aldoni pliajn"
+
+msgid "Start over"
+msgstr "Komenci denove"

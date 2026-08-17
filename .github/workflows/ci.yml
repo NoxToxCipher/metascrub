@@ -55,7 +55,8 @@ jobs:
       - name: Install Qt
         run: |
           sudo apt-get update
-          sudo apt-get install -y qtbase5-dev qtdeclarative5-dev qtdeclarative5-dev-tools
+          sudo apt-get install -y qtbase5-dev qtdeclarative5-dev qtdeclarative5-dev-tools \
+                                  gettext
       - name: Build the core for the click
         run: ./ubuntu-touch/build-ffi.sh amd64
       - name: Build the app and run the backend smoke test
@@ -67,6 +68,14 @@ jobs:
           ./ubuntu-touch/metascrub/build/scrubber_smoke
       - name: Check the interface parses
         run: qmllint ubuntu-touch/metascrub/qml/*.qml
+      # A .po that no longer matches the interface silently drops translations,
+      # and a corrupt one fails at msgfmt time rather than on someone's phone.
+      - name: Check the translations compile and still match the interface
+        run: |
+          for po in ubuntu-touch/metascrub/po/*.po; do
+            msgfmt --check-format --statistics -o /dev/null "$po"
+          done
+          ubuntu-touch/metascrub/po/from-android.py --report
       - name: Check the click package lays out
         run: |
           cmake --install ubuntu-touch/metascrub/build

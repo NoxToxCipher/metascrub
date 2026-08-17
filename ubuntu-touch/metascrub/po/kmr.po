@@ -1,0 +1,103 @@
+# Translations for metascrub on Ubuntu Touch.
+#
+# Written by from-android.py: every string here was already translated for the
+# Android app and carries the identical English source. Strings new to this
+# platform are absent on purpose and fall back to English.
+msgid ""
+msgstr ""
+"Project-Id-Version: metascrub.noxtoxcipher\n"
+"Report-Msgid-Bugs-To: https://github.com/NoxToxCipher/metascrub/issues\n"
+"Language: kmr\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Handbook"
+msgstr "Rêbername"
+
+msgid "The Handbook could not be loaded."
+msgstr "Rêbername nehat barkirin."
+
+msgid "Choose files"
+msgstr "Dosyayan hilbijêre"
+
+msgid "Rebuilt from known-safe parts. Nothing unknown was kept."
+msgstr "Ji perçeyên naskirî-ewle ji nû ve hate avakirin. Tiştek nenas nehat parastin."
+
+msgid "Cleaned in place. Some structure may remain."
+msgstr "Li cihê xwe hate paqijkirin. Hin avanî dibe ku bimîne."
+
+msgid "Could not take this format apart, so assume it still carries everything."
+msgstr "Ev format nehat ji hev veçirandin, loma bihesibîne ku hê her tiştî hildigire."
+
+msgid "Removed: %1"
+msgstr "Hat rakirin: %1"
+
+msgid "Already clean. Nothing to remove."
+msgstr "Jixwe paqij e. Tiştek ji bo rakirinê tune."
+
+msgid "Nothing to save — none of these files could be cleaned."
+msgstr "Tiştek ji bo hilanînê tune — tu ji van dosyayan nehat paqijkirin."
+
+msgid "metascrub"
+msgstr "metascrub"
+
+msgid "COMPLETE"
+msgstr "TEMAM"
+
+msgid "BEST EFFORT"
+msgstr "HEWLA ÇÊTIRÎN"
+
+msgid "NOT CLEANED"
+msgstr "NEPAQIJKIRÎ"
+
+msgid "removes what a file says about you"
+msgstr "tiştê ku dosyayek li ser te dibêje jê radike"
+
+msgid "Add photos, PDFs or documents to clean them.\n\nEverything happens on this phone. Nothing is uploaded, and your files are only touched when you press Scrub."
+msgstr "Wêne, PDF an belgeyan lê zêde bike da ku wan paqij bikî.\n\nHer tişt li ser vê têlefonê pêk tê. Tu tişt nayê barkirin, û em dest nadin dosyayên te heta ku tu pêl Paqijkirinê bikî."
+
+msgid "Give cleaned files random names"
+msgstr "Navên rasthatî li dosyayên paqijkirî bike"
+
+msgid "Keep colour profile"
+msgstr "Profîla rengan biparêze"
+
+msgid "Keep image orientation"
+msgstr "Arasteya wêneyê biparêze"
+
+msgid "Reduce camera fingerprint (photos)"
+msgstr "Şopa tiliya kamerayê kêm bike (wêne)"
+
+msgid "Softens the pixels to weaken the sensor fingerprint a camera leaves in every photo. This reduces how easily photos can be linked to one camera. It does not remove the fingerprint, and it makes the photo softer and a little smaller. Photos are saved as JPEG."
+msgstr "Pîkselan nerm dike da ku şopa sensorê ya ku kamerayek di her wêneyî de dihêle qels bike. Ev kêm dike ka çiqas bi hêsanî wêne dikarin bi yek kamerayê ve bêne girêdan. Ew şopê ranake, û wêneyê nermtir û hinekî piçûktir dike. Wêne wek JPEG têne hilanîn."
+
+msgid "Balanced"
+msgstr "Hevseng"
+
+msgid "Gentle"
+msgstr "Nerm"
+
+msgid "Thorough"
+msgstr "Kûr"
+
+msgid "Ready to scrub"
+msgstr "Ji bo paqijkirinê amade"
+
+msgid "Results"
+msgstr "Encam"
+
+msgid "Recorded where it was taken."
+msgstr "Cihê ku lê hate kişandin tomar kiribû."
+
+msgid "Still in the file"
+msgstr "Hê di dosyeyê de"
+
+msgid "Remove"
+msgstr "Rake"
+
+msgid "Add more"
+msgstr "Bêtir lê zêde bike"
+
+msgid "Start over"
+msgstr "Ji nû ve dest pê bike"

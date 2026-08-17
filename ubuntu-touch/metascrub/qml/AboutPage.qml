@@ -13,6 +13,8 @@ Page {
     property var stack
 
     header: PageHeader {
+        LayoutMirroring.enabled: systemRightToLeft
+        LayoutMirroring.childrenInherit: true
         title: i18n.tr("About metascrub")
         leadingActionBar.actions: [
             Action {
@@ -38,6 +40,13 @@ Page {
             bottom: parent.bottom
         }
         clip: true
+        // Read the other way round in Arabic, Farsi, Sorani and Kurmanji. This
+        // sits on the page content rather than on MainView: mirroring the whole
+        // window makes PageStack size every page to twice the window width and
+        // park it at -width, which puts the middle of the page off-screen.
+        LayoutMirroring.enabled: systemRightToLeft
+        LayoutMirroring.childrenInherit: true
+        contentWidth: width
         contentHeight: column.height + units.gu(4)
 
         Column {
@@ -56,7 +65,7 @@ Page {
             }
 
             Label {
-                x: units.gu(2)
+                anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width - units.gu(4)
                 wrapMode: Text.WordWrap
                 fontSize: "small"
@@ -67,14 +76,15 @@ Page {
             }
 
             Label {
-                x: units.gu(2)
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width - units.gu(4)
                 text: i18n.tr("What it will not do")
                 fontSize: "medium"
                 color: Style.teal
             }
 
             Label {
-                x: units.gu(2)
+                anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width - units.gu(4)
                 wrapMode: Text.WordWrap
                 fontSize: "small"
@@ -86,14 +96,15 @@ Page {
             }
 
             Label {
-                x: units.gu(2)
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width - units.gu(4)
                 text: i18n.tr("You do not have to take our word for it")
                 fontSize: "medium"
                 color: Style.teal
             }
 
             Label {
-                x: units.gu(2)
+                anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width - units.gu(4)
                 wrapMode: Text.WordWrap
                 fontSize: "small"
@@ -107,14 +118,15 @@ Page {
             }
 
             Label {
-                x: units.gu(2)
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width - units.gu(4)
                 text: i18n.tr("What it cannot promise")
                 fontSize: "medium"
                 color: Style.warn
             }
 
             Label {
-                x: units.gu(2)
+                anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width - units.gu(4)
                 wrapMode: Text.WordWrap
                 fontSize: "small"
@@ -127,14 +139,15 @@ Page {
             }
 
             Label {
-                x: units.gu(2)
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width - units.gu(4)
                 text: i18n.tr("Source")
                 fontSize: "medium"
                 color: Style.teal
             }
 
             Label {
-                x: units.gu(2)
+                anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width - units.gu(4)
                 wrapMode: Text.WordWrap
                 fontSize: "small"

@@ -19,6 +19,8 @@ Page {
     property var activeTransfer
 
     header: PageHeader {
+        LayoutMirroring.enabled: systemRightToLeft
+        LayoutMirroring.childrenInherit: true
         title: i18n.tr("Choose files")
         leadingActionBar.actions: [
             Action {

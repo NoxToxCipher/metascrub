@@ -14,7 +14,7 @@ Rectangle {
     property alias text: cardLabel.text
     property color accent: Style.stroke
 
-    x: units.gu(2)
+    anchors.horizontalCenter: parent ? parent.horizontalCenter : undefined
     width: parent ? parent.width - units.gu(4) : 0
     height: cardLabel.implicitHeight + units.gu(3)
 

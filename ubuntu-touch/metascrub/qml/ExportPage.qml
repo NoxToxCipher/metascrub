@@ -17,6 +17,8 @@ Page {
     property var activeTransfer
 
     header: PageHeader {
+        LayoutMirroring.enabled: systemRightToLeft
+        LayoutMirroring.childrenInherit: true
         title: i18n.tr("Save cleaned copies")
         leadingActionBar.actions: [
             Action {

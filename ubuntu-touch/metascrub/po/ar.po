@@ -1,0 +1,103 @@
+# Translations for metascrub on Ubuntu Touch.
+#
+# Written by from-android.py: every string here was already translated for the
+# Android app and carries the identical English source. Strings new to this
+# platform are absent on purpose and fall back to English.
+msgid ""
+msgstr ""
+"Project-Id-Version: metascrub.noxtoxcipher\n"
+"Report-Msgid-Bugs-To: https://github.com/NoxToxCipher/metascrub/issues\n"
+"Language: ar\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Handbook"
+msgstr "الدليل"
+
+msgid "The Handbook could not be loaded."
+msgstr "تعذّر تحميل الدليل."
+
+msgid "Choose files"
+msgstr "اختَر الملفات"
+
+msgid "Rebuilt from known-safe parts. Nothing unknown was kept."
+msgstr "أُعيد بناؤه من أجزاء معروفة الأمان. لم يُبقَ على أي شيء مجهول."
+
+msgid "Cleaned in place. Some structure may remain."
+msgstr "نُظِّف في مكانه. قد تبقى بعض البُنى."
+
+msgid "Could not take this format apart, so assume it still carries everything."
+msgstr "تعذّر تفكيك هذه الصيغة، لذا افترِض أنها لا تزال تحمل كل شيء."
+
+msgid "Removed: %1"
+msgstr "أُزيل: %1"
+
+msgid "Already clean. Nothing to remove."
+msgstr "نظيف بالفعل. لا شيء لإزالته."
+
+msgid "Nothing to save — none of these files could be cleaned."
+msgstr "لا شيء لحفظه — لم يُتمكَّن من تنظيف أيٍّ من هذه الملفات."
+
+msgid "metascrub"
+msgstr "metascrub"
+
+msgid "COMPLETE"
+msgstr "مكتمل"
+
+msgid "BEST EFFORT"
+msgstr "أقصى جهد"
+
+msgid "NOT CLEANED"
+msgstr "غير مُنظَّف"
+
+msgid "removes what a file says about you"
+msgstr "يُزيل ما يقوله الملف عنك"
+
+msgid "Add photos, PDFs or documents to clean them.\n\nEverything happens on this phone. Nothing is uploaded, and your files are only touched when you press Scrub."
+msgstr "أضِف صورًا أو ملفات PDF أو مستندات لتنظيفها.\n\nكل شيء يجري على هذا الهاتف. لا يُرفَع أي شيء، ولا تُمَسّ ملفاتك إلا عندما تضغط على «تنظيف»."
+
+msgid "Give cleaned files random names"
+msgstr "امنح الملفات المُنظَّفة أسماءً عشوائية"
+
+msgid "Keep colour profile"
+msgstr "الإبقاء على ملف تعريف الألوان"
+
+msgid "Keep image orientation"
+msgstr "الإبقاء على اتجاه الصورة"
+
+msgid "Reduce camera fingerprint (photos)"
+msgstr "تقليل بصمة الكاميرا (الصور)"
+
+msgid "Softens the pixels to weaken the sensor fingerprint a camera leaves in every photo. This reduces how easily photos can be linked to one camera. It does not remove the fingerprint, and it makes the photo softer and a little smaller. Photos are saved as JPEG."
+msgstr "يُنعِّم البِكسلات لإضعاف بصمة المُستشعِر التي تتركها الكاميرا في كل صورة. هذا يُقلِّل سهولة ربط الصور بكاميرا واحدة. لا يُزيل البصمة، ويجعل الصورة أنعم وأصغر قليلًا. تُحفَظ الصور بصيغة JPEG."
+
+msgid "Balanced"
+msgstr "متوازن"
+
+msgid "Gentle"
+msgstr "لطيف"
+
+msgid "Thorough"
+msgstr "شامل"
+
+msgid "Ready to scrub"
+msgstr "جاهز للتنظيف"
+
+msgid "Results"
+msgstr "النتائج"
+
+msgid "Recorded where it was taken."
+msgstr "سجّل مكان التقاطها."
+
+msgid "Still in the file"
+msgstr "ما زال في الملف"
+
+msgid "Remove"
+msgstr "إزالة"
+
+msgid "Add more"
+msgstr "أضِف المزيد"
+
+msgid "Start over"
+msgstr "ابدأ من جديد"

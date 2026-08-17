@@ -118,6 +118,37 @@ DISPLAY=:99 ./build/install/metascrub &
 DISPLAY=:99 import -window root shot.png
 ```
 
+## Translations
+
+Ten languages, from the Android app: Arabic, Belarusian, Esperanto, Farsi,
+Kurmanji, Latin, Burmese, Russian, Sorani and Ukrainian.
+
+`po/from-android.py` fills each catalogue from
+`android/app/src/main/res/values-*/strings.xml`, matching on the English text.
+It only ever takes an **exact** match, so nothing is invented: 30 of the 56
+strings in this interface are already translated for Android and come across;
+the 26 that are new here (the Content Hub banners, the About page, the option
+subtitles) stay in English until someone who reads the language writes them. A
+confidently wrong sentence in a tool people may be using under pressure is worse
+than an honest English one.
+
+The Handbook is separate and complete: the build installs each translated
+`handbook.json` the Android app carries, and the page picks one by locale,
+falling back to English.
+
+```bash
+po/update-pot.sh        # after changing any string in the QML
+po/from-android.py      # after Android's translations change
+po/from-android.py --report   # coverage per language, writes nothing
+```
+
+Arabic, Farsi, Sorani and Kurmanji read right to left, and the interface mirrors
+itself when the system locale is one of them. The mirroring sits on each page's
+content and header rather than on `MainView`: mirroring the whole window makes
+`PageStack` lay every page out at twice the window width, parked at `-width`,
+which puts the middle of the page off-screen. That took a while to find, so it
+is written down here as well as in the QML.
+
 ## What is actually verified
 
 On amd64, Qt 5.15, against the Lomiri UI toolkit 1.3.5100 and the
@@ -144,6 +175,10 @@ lomiri-content-hub QML module 1.1.1 from the Ubuntu 24.04 archive:
   turned on, a 4000x3000 photo was cleaned while the app kept drawing and
   showed "Cleaning 1 of 2". It came out downscaled and re-encoded, as that
   option says it will, and carrying none of its GPS, make or model.
+- **It runs in Russian and in Farsi.** With `LANGUAGE=ru` the interface comes up
+  in Russian; with `LANGUAGE=fa` it comes up in Persian, mirrored right to left,
+  with the switches on the left, the header title on the right and the Handbook
+  loaded from the Persian file.
 - `cmake --install` lays out a click tree with the binary, the QML, the icon and
   all four metadata files in the right places, and the app runs from that tree.
 - Every QML file parses (`qmllint`), and every JSON file in the package is valid.
@@ -170,10 +205,8 @@ shipped app has no way to be handed a file except through the Content Hub.
 
 ## Known gaps
 
-- **No translations.** The interface uses `i18n.tr` throughout, so the strings
-  are ready to extract, but there is no `po/` yet. Android already ships eleven
-  languages and the Handbook is translated with it; wiring those up here is the
-  obvious next job.
+- **Half the interface is translated, not all of it.** 30 of 56 strings, in ten
+  languages. See [Translations](#translations).
 - **No OpenStore submission.** The maintainer address in `manifest.json.in` is a
   GitHub noreply placeholder, and the app id namespace (`metascrub.noxtoxcipher`)
   has to match whatever OpenStore account publishes it.

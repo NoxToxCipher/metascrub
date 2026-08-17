@@ -1,0 +1,103 @@
+# Translations for metascrub on Ubuntu Touch.
+#
+# Written by from-android.py: every string here was already translated for the
+# Android app and carries the identical English source. Strings new to this
+# platform are absent on purpose and fall back to English.
+msgid ""
+msgstr ""
+"Project-Id-Version: metascrub.noxtoxcipher\n"
+"Report-Msgid-Bugs-To: https://github.com/NoxToxCipher/metascrub/issues\n"
+"Language: fa\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Handbook"
+msgstr "کتابچه‌ی راهنما"
+
+msgid "The Handbook could not be loaded."
+msgstr "کتابچه‌ی راهنما بارگذاری نشد."
+
+msgid "Choose files"
+msgstr "انتخاب فایل‌ها"
+
+msgid "Rebuilt from known-safe parts. Nothing unknown was kept."
+msgstr "از بخش‌های شناخته‌شده و امن بازسازی شد. هیچ‌چیز ناشناخته‌ای نگه داشته نشد."
+
+msgid "Cleaned in place. Some structure may remain."
+msgstr "در جای خود پاک‌سازی شد. ممکن است بخشی از ساختار باقی مانده باشد."
+
+msgid "Could not take this format apart, so assume it still carries everything."
+msgstr "این فرمت قابل تجزیه نبود، پس فرض کنید هنوز همه‌چیز را با خود دارد."
+
+msgid "Removed: %1"
+msgstr "حذف‌شده: %1"
+
+msgid "Already clean. Nothing to remove."
+msgstr "از قبل پاک است. چیزی برای حذف نیست."
+
+msgid "Nothing to save — none of these files could be cleaned."
+msgstr "چیزی برای ذخیره نیست — هیچ‌کدام از این فایل‌ها قابل پاک‌سازی نبودند."
+
+msgid "metascrub"
+msgstr "metascrub"
+
+msgid "COMPLETE"
+msgstr "کامل"
+
+msgid "BEST EFFORT"
+msgstr "بهترین تلاش"
+
+msgid "NOT CLEANED"
+msgstr "پاک‌نشده"
+
+msgid "removes what a file says about you"
+msgstr "آنچه را که یک فایل درباره‌ی شما می‌گوید حذف می‌کند"
+
+msgid "Add photos, PDFs or documents to clean them.\n\nEverything happens on this phone. Nothing is uploaded, and your files are only touched when you press Scrub."
+msgstr "عکس‌ها، PDFها یا اسناد را برای پاک‌سازی اضافه کنید.\n\nهمه‌چیز روی همین گوشی انجام می‌شود. هیچ‌چیزی آپلود نمی‌شود، و فایل‌های شما فقط زمانی لمس می‌شوند که دکمه‌ی پاک‌سازی را بزنید."
+
+msgid "Give cleaned files random names"
+msgstr "به فایل‌های پاک‌شده نام‌های تصادفی بده"
+
+msgid "Keep colour profile"
+msgstr "حفظ نمایه‌ی رنگ"
+
+msgid "Keep image orientation"
+msgstr "حفظ جهت تصویر"
+
+msgid "Reduce camera fingerprint (photos)"
+msgstr "کاهش اثرانگشت دوربین (عکس‌ها)"
+
+msgid "Softens the pixels to weaken the sensor fingerprint a camera leaves in every photo. This reduces how easily photos can be linked to one camera. It does not remove the fingerprint, and it makes the photo softer and a little smaller. Photos are saved as JPEG."
+msgstr "پیکسل‌ها را نرم می‌کند تا اثرانگشت حسگری را که دوربین در هر عکس به‌جا می‌گذارد ضعیف کند. این کار، مرتبط‌کردن عکس‌ها به یک دوربین را دشوارتر می‌کند. اثرانگشت را حذف نمی‌کند، و عکس را نرم‌تر و کمی کوچک‌تر می‌کند. عکس‌ها با فرمت JPEG ذخیره می‌شوند."
+
+msgid "Balanced"
+msgstr "متعادل"
+
+msgid "Gentle"
+msgstr "ملایم"
+
+msgid "Thorough"
+msgstr "عمیق"
+
+msgid "Ready to scrub"
+msgstr "آماده‌ی پاک‌سازی"
+
+msgid "Results"
+msgstr "نتایج"
+
+msgid "Recorded where it was taken."
+msgstr "محل گرفته‌شدن آن را ثبت کرده بود."
+
+msgid "Still in the file"
+msgstr "هنوز در فایل"
+
+msgid "Remove"
+msgstr "حذف"
+
+msgid "Add more"
+msgstr "افزودن موارد بیشتر"
+
+msgid "Start over"
+msgstr "شروع دوباره"

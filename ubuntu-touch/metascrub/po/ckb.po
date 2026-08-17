@@ -1,0 +1,103 @@
+# Translations for metascrub on Ubuntu Touch.
+#
+# Written by from-android.py: every string here was already translated for the
+# Android app and carries the identical English source. Strings new to this
+# platform are absent on purpose and fall back to English.
+msgid ""
+msgstr ""
+"Project-Id-Version: metascrub.noxtoxcipher\n"
+"Report-Msgid-Bugs-To: https://github.com/NoxToxCipher/metascrub/issues\n"
+"Language: ckb\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Handbook"
+msgstr "ڕێبەر"
+
+msgid "The Handbook could not be loaded."
+msgstr "ڕێبەرەکە نەکرا بار بکرێت."
+
+msgid "Choose files"
+msgstr "فایلەکان هەڵبژێرە"
+
+msgid "Rebuilt from known-safe parts. Nothing unknown was kept."
+msgstr "لە بەشە سەلامەت و ناسراوەکانەوە لەنوێ دروستکرایەوە. هیچ شتێکی نەناسراو نەهێڵدرایەوە."
+
+msgid "Cleaned in place. Some structure may remain."
+msgstr "لە شوێنی خۆیدا پاککرایەوە. لەوانەیە هەندێک پێکهاتە بمێنێتەوە."
+
+msgid "Could not take this format apart, so assume it still carries everything."
+msgstr "نەکرا ئەم فۆرماتە لێک بکرێتەوە، بۆیە وا دابنێ کە هێشتا هەموو شتێک هەڵدەگرێت."
+
+msgid "Removed: %1"
+msgstr "لابردرا: %1"
+
+msgid "Already clean. Nothing to remove."
+msgstr "پێشتر پاکە. هیچ شتێک نییە بۆ لابردن."
+
+msgid "Nothing to save — none of these files could be cleaned."
+msgstr "هیچ شتێک نییە بۆ هەڵگرتن — هیچ کام لەم فایلانە نەکران پاک بکرێنەوە."
+
+msgid "metascrub"
+msgstr "metascrub"
+
+msgid "COMPLETE"
+msgstr "تەواو"
+
+msgid "BEST EFFORT"
+msgstr "باشترین هەوڵ"
+
+msgid "NOT CLEANED"
+msgstr "پاک نەکراوە"
+
+msgid "removes what a file says about you"
+msgstr "ئەوە دەسڕێتەوە کە فایلێک دەربارەی تۆ دەیڵێت"
+
+msgid "Add photos, PDFs or documents to clean them.\n\nEverything happens on this phone. Nothing is uploaded, and your files are only touched when you press Scrub."
+msgstr "وێنە، PDF یان بەڵگەنامە زیاد بکە بۆ پاککردنەوەیان.\n\nهەموو شتێک لەسەر ئەم مۆبایلە ڕوودەدات. هیچ شتێک بار ناکرێت، و فایلەکانت تەنها کاتێک دەست لێ دەدرێن کە پەنجە بۆ پاککردنەوە دەنێیت."
+
+msgid "Give cleaned files random names"
+msgstr "ناوی هەڕەمەکی بدە بە فایلە پاککراوەکان"
+
+msgid "Keep colour profile"
+msgstr "پرۆفایلی ڕەنگ بهێڵەرەوە"
+
+msgid "Keep image orientation"
+msgstr "ئاراستەی وێنە بهێڵەرەوە"
+
+msgid "Reduce camera fingerprint (photos)"
+msgstr "پەنجەمۆری کامێرا کەم بکەرەوە (وێنەکان)"
+
+msgid "Softens the pixels to weaken the sensor fingerprint a camera leaves in every photo. This reduces how easily photos can be linked to one camera. It does not remove the fingerprint, and it makes the photo softer and a little smaller. Photos are saved as JPEG."
+msgstr "پیکسڵەکان نەرم دەکات بۆ لاوازکردنی پەنجەمۆری سێنسەر کە کامێرا لە هەموو وێنەیەکدا بەجێی دەهێڵێت. ئەمە کەم دەکاتەوە کە بە چ ئاسانییەک وێنەکان دەکرێن ببەسترێنەوە بە یەک کامێراوە. پەنجەمۆرەکە ناسڕێتەوە، و وێنەکە نەرمتر و کەمێک بچووکتر دەکات. وێنەکان وەک JPEG هەڵدەگیرێن."
+
+msgid "Balanced"
+msgstr "هاوسەنگ"
+
+msgid "Gentle"
+msgstr "نەرم"
+
+msgid "Thorough"
+msgstr "ورد"
+
+msgid "Ready to scrub"
+msgstr "ئامادەیە بۆ پاککردنەوە"
+
+msgid "Results"
+msgstr "ئەنجامەکان"
+
+msgid "Recorded where it was taken."
+msgstr "شوێنی گیرانی تۆمار کرابوو."
+
+msgid "Still in the file"
+msgstr "هێشتا لە پەڕگەکەدایە"
+
+msgid "Remove"
+msgstr "لابردن"
+
+msgid "Add more"
+msgstr "زیاتر زیاد بکە"
+
+msgid "Start over"
+msgstr "لە سەرەتاوە دەست پێبکەوە"

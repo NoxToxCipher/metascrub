@@ -1,0 +1,103 @@
+# Translations for metascrub on Ubuntu Touch.
+#
+# Written by from-android.py: every string here was already translated for the
+# Android app and carries the identical English source. Strings new to this
+# platform are absent on purpose and fall back to English.
+msgid ""
+msgstr ""
+"Project-Id-Version: metascrub.noxtoxcipher\n"
+"Report-Msgid-Bugs-To: https://github.com/NoxToxCipher/metascrub/issues\n"
+"Language: uk\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Handbook"
+msgstr "Довідник"
+
+msgid "The Handbook could not be loaded."
+msgstr "Не вдалося завантажити Довідник."
+
+msgid "Choose files"
+msgstr "Вибрати файли"
+
+msgid "Rebuilt from known-safe parts. Nothing unknown was kept."
+msgstr "Перезібрано із заздалегідь безпечних частин. Нічого невідомого не збережено."
+
+msgid "Cleaned in place. Some structure may remain."
+msgstr "Очищено на місці. Частина структури може залишитися."
+
+msgid "Could not take this format apart, so assume it still carries everything."
+msgstr "Не вдалося розібрати цей формат, тому вважайте, що він усе ще несе все."
+
+msgid "Removed: %1"
+msgstr "Видалено: %1"
+
+msgid "Already clean. Nothing to remove."
+msgstr "Уже чисто. Нічого видаляти."
+
+msgid "Nothing to save — none of these files could be cleaned."
+msgstr "Нічого зберігати — жоден із цих файлів не вдалося очистити."
+
+msgid "metascrub"
+msgstr "metascrub"
+
+msgid "COMPLETE"
+msgstr "ПОВНІСТЮ"
+
+msgid "BEST EFFORT"
+msgstr "ЗА МОЖЛИВОСТІ"
+
+msgid "NOT CLEANED"
+msgstr "НЕ ОЧИЩЕНО"
+
+msgid "removes what a file says about you"
+msgstr "прибирає те, що файл розповідає про вас"
+
+msgid "Add photos, PDFs or documents to clean them.\n\nEverything happens on this phone. Nothing is uploaded, and your files are only touched when you press Scrub."
+msgstr "Додайте фотографії, PDF або документи, щоб очистити їх.\n\nУсе відбувається на цьому телефоні. Нічого не завантажується, і ваші файли зачіпаються лише тоді, коли ви натискаєте «Очистити»."
+
+msgid "Give cleaned files random names"
+msgstr "Давати очищеним файлам випадкові імена"
+
+msgid "Keep colour profile"
+msgstr "Зберегти колірний профіль"
+
+msgid "Keep image orientation"
+msgstr "Зберегти орієнтацію зображення"
+
+msgid "Reduce camera fingerprint (photos)"
+msgstr "Зменшити відбиток камери (фото)"
+
+msgid "Softens the pixels to weaken the sensor fingerprint a camera leaves in every photo. This reduces how easily photos can be linked to one camera. It does not remove the fingerprint, and it makes the photo softer and a little smaller. Photos are saved as JPEG."
+msgstr "Пом'якшує пікселі, щоб послабити відбиток сенсора, який камера залишає на кожній фотографії. Це зменшує те, наскільки легко фотографії можна пов'язати з однією камерою. Це не видаляє відбиток і робить фотографію м'якшою та трохи меншою. Фотографії зберігаються як JPEG."
+
+msgid "Balanced"
+msgstr "Збалансовано"
+
+msgid "Gentle"
+msgstr "М'яко"
+
+msgid "Thorough"
+msgstr "Ретельно"
+
+msgid "Ready to scrub"
+msgstr "Готово до очищення"
+
+msgid "Results"
+msgstr "Результати"
+
+msgid "Recorded where it was taken."
+msgstr "Записано, де було зроблено знімок."
+
+msgid "Still in the file"
+msgstr "Залишилось у файлі"
+
+msgid "Remove"
+msgstr "Видалити"
+
+msgid "Add more"
+msgstr "Додати ще"
+
+msgid "Start over"
+msgstr "Почати заново"

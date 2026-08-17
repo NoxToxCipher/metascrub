@@ -1,6 +1,8 @@
 #include <QCoreApplication>
 #include <QDir>
 #include <QGuiApplication>
+#include <QLocale>
+#include <QQmlContext>
 #include <QQmlEngine>
 #include <QQuickView>
 #include <QUrl>
@@ -31,6 +33,19 @@ int main(int argc, char *argv[])
     qmlRegisterType<Workspace>("org.crake.metascrub", 1, 0, "Workspace");
 
     QQuickView view;
+
+    // Where the interface finds its translations, and which way round it should
+    // read. The locale comes from the system: LANGUAGE, then LC_ALL, LC_MESSAGES
+    // and LANG, the ordinary gettext order.
+    const QString appDir = QCoreApplication::applicationDirPath();
+    view.rootContext()->setContextProperty(
+        QStringLiteral("localeDir"), QDir(appDir).filePath(QStringLiteral("share/locale")));
+    view.rootContext()->setContextProperty(
+        QStringLiteral("systemLocale"), QLocale::system().name());
+    view.rootContext()->setContextProperty(
+        QStringLiteral("systemRightToLeft"),
+        QLocale::system().textDirection() == Qt::RightToLeft);
+
     view.setResizeMode(QQuickView::SizeRootObjectToView);
     view.setSource(QUrl::fromLocalFile(
         QDir(QCoreApplication::applicationDirPath()).filePath(QStringLiteral("qml/Main.qml"))));

@@ -1,0 +1,103 @@
+# Translations for metascrub on Ubuntu Touch.
+#
+# Written by from-android.py: every string here was already translated for the
+# Android app and carries the identical English source. Strings new to this
+# platform are absent on purpose and fall back to English.
+msgid ""
+msgstr ""
+"Project-Id-Version: metascrub.noxtoxcipher\n"
+"Report-Msgid-Bugs-To: https://github.com/NoxToxCipher/metascrub/issues\n"
+"Language: my\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+msgid "Handbook"
+msgstr "လက်စွဲ"
+
+msgid "The Handbook could not be loaded."
+msgstr "လက်စွဲကို ဖွင့်၍ မရပါ။"
+
+msgid "Choose files"
+msgstr "ဖိုင်များ ရွေးရန်"
+
+msgid "Rebuilt from known-safe parts. Nothing unknown was kept."
+msgstr "လုံခြုံမှန်းသိသောအပိုင်းများမှ ပြန်တည်ဆောက်ထားသည်။ မသိသောအရာ ဘာမျှ မထားရှိပါ။"
+
+msgid "Cleaned in place. Some structure may remain."
+msgstr "နေရာတွင်း၌ သန့်စင်ထားသည်။ အချို့ဖွဲ့စည်းပုံ ကျန်နိုင်သည်။"
+
+msgid "Could not take this format apart, so assume it still carries everything."
+msgstr "ဤဖော်မတ်ကို ခွဲ၍မရသဖြင့် ၎င်းသည် အားလုံးကို ဆက်လက်သယ်ဆောင်နေသည်ဟု ယူဆပါ။"
+
+msgid "Removed: %1"
+msgstr "ဖယ်ရှားပြီး— %1"
+
+msgid "Already clean. Nothing to remove."
+msgstr "သန့်ပြီးသား။ ဖယ်ရှားစရာ မရှိ။"
+
+msgid "Nothing to save — none of these files could be cleaned."
+msgstr "သိမ်းစရာ မရှိ — ဤဖိုင်များ တစ်ခုမျှ သန့်စင်၍ မရခဲ့ပါ။"
+
+msgid "metascrub"
+msgstr "metascrub"
+
+msgid "COMPLETE"
+msgstr "အပြည့်အဝ"
+
+msgid "BEST EFFORT"
+msgstr "တတ်နိုင်သမျှ"
+
+msgid "NOT CLEANED"
+msgstr "မသန့်စင်ရသေး"
+
+msgid "removes what a file says about you"
+msgstr "ဖိုင်တစ်ခုက သင့်အကြောင်း ပြောသည်များကို ဖယ်ရှားသည်"
+
+msgid "Add photos, PDFs or documents to clean them.\n\nEverything happens on this phone. Nothing is uploaded, and your files are only touched when you press Scrub."
+msgstr "သန့်စင်ရန် ဓာတ်ပုံများ၊ PDF များ သို့မဟုတ် စာရွက်စာတမ်းများ ထည့်ပါ။\n\nအရာအားလုံး ဤဖုန်းပေါ်တွင် ဖြစ်ပျက်သည်။ ဘာမျှ အပ်လုဒ်မတင်ပါ၊ သင့်ဖိုင်များကို «သန့်စင်» ကို နှိပ်မှသာ ထိတွေ့သည်။"
+
+msgid "Give cleaned files random names"
+msgstr "ကျပန်း အမည်"
+
+msgid "Keep colour profile"
+msgstr "အရောင် ထားရှိ"
+
+msgid "Keep image orientation"
+msgstr "လှည့်ခြင်း ထားရှိ"
+
+msgid "Reduce camera fingerprint (photos)"
+msgstr "ကင်မရာလက်ဗွေ လျှော့ချ (ဓာတ်ပုံများ)"
+
+msgid "Softens the pixels to weaken the sensor fingerprint a camera leaves in every photo. This reduces how easily photos can be linked to one camera. It does not remove the fingerprint, and it makes the photo softer and a little smaller. Photos are saved as JPEG."
+msgstr "ကင်မရာတစ်လုံးက ဓာတ်ပုံတိုင်းတွင် ချန်ထားသည့် ဆင်ဆာလက်ဗွေကို အားနည်းစေရန် ပစ်ဆယ်များကို နူးညံ့စေသည်။ ၎င်းက ဓာတ်ပုံများကို ကင်မရာတစ်လုံးနှင့် မည်မျှလွယ်ကူစွာ ချိတ်ဆက်နိုင်သည်ကို လျှော့ချသည်။ ၎င်းက လက်ဗွေကို မဖယ်ရှား၊ ဓာတ်ပုံကို ပိုနူးညံ့ပြီး အနည်းငယ် ပိုသေးငယ်စေသည်။ ဓာတ်ပုံများကို JPEG အဖြစ် သိမ်းသည်။"
+
+msgid "Balanced"
+msgstr "မျှတ"
+
+msgid "Gentle"
+msgstr "နူးညံ့"
+
+msgid "Thorough"
+msgstr "စေ့စပ်"
+
+msgid "Ready to scrub"
+msgstr "သန့်စင်ရန် အသင့်"
+
+msgid "Results"
+msgstr "ရလဒ်များ"
+
+msgid "Recorded where it was taken."
+msgstr "ရိုက်ကူးခဲ့သည့်နေရာကို မှတ်တမ်းတင်ထားသည်။"
+
+msgid "Still in the file"
+msgstr "ဖိုင်ထဲတွင် ကျန်နေဆဲ"
+
+msgid "Remove"
+msgstr "ဖယ်ရှားရန်"
+
+msgid "Add more"
+msgstr "နောက်ထပ် ထည့်ရန်"
+
+msgid "Start over"
+msgstr "အစမှ ပြန်စရန်"

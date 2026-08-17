@@ -64,7 +64,13 @@ MainView {
     property bool optFingerprint: false
     property int optStrength: 1            // 0 gentle, 1 balanced, 2 thorough
 
-    PageStack { id: pageStack }
+    // Pinned to the window on purpose. Left to size itself, the stack came out
+    // twice as wide and half off-screen once the layout was mirrored for a
+    // right-to-left language, which put every page's centre outside the window.
+    PageStack {
+        id: pageStack
+        anchors.fill: parent
+    }
 
     ScrubPage {
         id: scrubPage
@@ -75,7 +81,12 @@ MainView {
 
     // Pushed from here rather than from the PageStack's own onCompleted: the
     // stack is declared first, so at that point the page does not exist yet.
-    Component.onCompleted: pageStack.push(scrubPage)
+    Component.onCompleted: {
+        // The catalogues live inside the click, not in the system locale tree.
+        i18n.domain = applicationName
+        i18n.bindtextdomain(applicationName, localeDir)
+        pageStack.push(scrubPage)
+    }
 
     Component { id: contentItemComponent; ContentItem {} }
 

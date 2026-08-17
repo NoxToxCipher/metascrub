@@ -18,6 +18,8 @@ Page {
     property var stack
 
     header: PageHeader {
+        LayoutMirroring.enabled: systemRightToLeft
+        LayoutMirroring.childrenInherit: true
         id: pageHeader
         title: i18n.tr("metascrub")
         trailingActionBar.actions: [
@@ -114,6 +116,13 @@ Page {
             bottom: parent.bottom
         }
         clip: true
+        // Read the other way round in Arabic, Farsi, Sorani and Kurmanji. This
+        // sits on the page content rather than on MainView: mirroring the whole
+        // window makes PageStack size every page to twice the window width and
+        // park it at -width, which puts the middle of the page off-screen.
+        LayoutMirroring.enabled: systemRightToLeft
+        LayoutMirroring.childrenInherit: true
+        contentWidth: width
         contentHeight: column.height + units.gu(4)
 
         Column {
@@ -173,8 +182,12 @@ Page {
                     id: randomLayout
                     title.text: i18n.tr("Give cleaned files random names")
                     title.color: Style.text
+                    title.wrapMode: Text.WordWrap
+                    title.maximumLineCount: 3
                     subtitle.text: i18n.tr("A file name is metadata too")
                     subtitle.color: Style.muted
+                    subtitle.wrapMode: Text.WordWrap
+                    subtitle.maximumLineCount: 3
                     Switch {
                         SlotsLayout.position: SlotsLayout.Trailing
                         checked: app.optRandomNames
@@ -192,8 +205,12 @@ Page {
                     id: colourLayout
                     title.text: i18n.tr("Keep colour profile")
                     title.color: Style.text
+                    title.wrapMode: Text.WordWrap
+                    title.maximumLineCount: 3
                     subtitle.text: i18n.tr("Keeps colours accurate, and is itself identifying")
                     subtitle.color: Style.muted
+                    subtitle.wrapMode: Text.WordWrap
+                    subtitle.maximumLineCount: 3
                     Switch {
                         SlotsLayout.position: SlotsLayout.Trailing
                         checked: app.optKeepColour
@@ -211,8 +228,12 @@ Page {
                     id: orientLayout
                     title.text: i18n.tr("Keep image orientation")
                     title.color: Style.text
+                    title.wrapMode: Text.WordWrap
+                    title.maximumLineCount: 3
                     subtitle.text: i18n.tr("Stops photos appearing rotated")
                     subtitle.color: Style.muted
+                    subtitle.wrapMode: Text.WordWrap
+                    subtitle.maximumLineCount: 3
                     Switch {
                         SlotsLayout.position: SlotsLayout.Trailing
                         checked: app.optKeepOrientation
@@ -230,8 +251,12 @@ Page {
                     id: fingerLayout
                     title.text: i18n.tr("Reduce camera fingerprint (photos)")
                     title.color: Style.text
+                    title.wrapMode: Text.WordWrap
+                    title.maximumLineCount: 3
                     subtitle.text: i18n.tr("Reduces linkability. Does not remove it.")
                     subtitle.color: Style.muted
+                    subtitle.wrapMode: Text.WordWrap
+                    subtitle.maximumLineCount: 3
                     Switch {
                         SlotsLayout.position: SlotsLayout.Trailing
                         checked: app.optFingerprint
@@ -263,7 +288,8 @@ Page {
             // --- the queue and its results ----------------------------------
             Label {
                 visible: app.queue.count > 0
-                x: units.gu(2)
+                anchors.horizontalCenter: parent.horizontalCenter
+                width: parent.width - units.gu(4)
                 text: app.scrubbed ? i18n.tr("Results") : i18n.tr("Ready to scrub")
                 color: Style.teal
                 fontSize: "medium"
@@ -274,7 +300,7 @@ Page {
 
                 delegate: Rectangle {
                     width: column.width - units.gu(4)
-                    x: units.gu(2)
+                    anchors.horizontalCenter: parent.horizontalCenter
                     height: rowColumn.height + units.gu(3)
                     radius: units.gu(0.5)
                     color: Style.surface
@@ -284,7 +310,7 @@ Page {
                     Column {
                         id: rowColumn
                         y: units.gu(1.5)
-                        x: units.gu(1.5)
+                        anchors.horizontalCenter: parent.horizontalCenter
                         width: parent.width - units.gu(3)
                         spacing: units.gu(0.5)
 
@@ -401,7 +427,7 @@ Page {
             }
 
             Label {
-                x: units.gu(2)
+                anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width - units.gu(4)
                 wrapMode: Text.WordWrap
                 fontSize: "x-small"

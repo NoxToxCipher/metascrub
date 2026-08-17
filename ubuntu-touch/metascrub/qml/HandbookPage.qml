@@ -18,6 +18,8 @@ Page {
     property var chapters: []
 
     header: PageHeader {
+        LayoutMirroring.enabled: systemRightToLeft
+        LayoutMirroring.childrenInherit: true
         title: i18n.tr("Handbook")
         leadingActionBar.actions: [
             Action {
@@ -34,20 +36,49 @@ Page {
         z: -1
     }
 
-    Component.onCompleted: load()
+    Component.onCompleted: load(candidates())
 
-    function load() {
+    /*
+     * The Handbook in the phone's language if it exists, English otherwise.
+     * A locale like "pt_BR" is tried whole first, then as "pt", which is what
+     * gettext does for the interface strings, so both follow the same rule.
+     */
+    function candidates() {
+        var locale = systemLocale ? systemLocale : ""
+        var names = []
+        if (locale !== "") {
+            names.push("handbook-" + locale + ".json")
+            var bare = locale.split(/[_.@]/)[0]
+            if (bare !== "" && bare !== locale) {
+                names.push("handbook-" + bare + ".json")
+            }
+        }
+        names.push("handbook.json")
+        return names
+    }
+
+    /* Tries each name in turn; the last one is the English original. */
+    function load(names) {
+        if (names.length === 0) {
+            page.chapters = []
+            return
+        }
         var request = new XMLHttpRequest()
-        request.open("GET", Qt.resolvedUrl("handbook.json"))
+        request.open("GET", Qt.resolvedUrl(names[0]))
         request.onreadystatechange = function() {
             if (request.readyState !== XMLHttpRequest.DONE) {
                 return
             }
+            var parsed = null
             try {
-                var document = JSON.parse(request.responseText)
-                page.chapters = document.chapters ? document.chapters : document
+                parsed = JSON.parse(request.responseText)
             } catch (error) {
-                page.chapters = []
+                parsed = null
+            }
+            if (parsed) {
+                page.chapters = parsed.chapters ? parsed.chapters : parsed
+            } else {
+                load(names.slice(1))
             }
         }
         request.send()
@@ -62,6 +93,13 @@ Page {
             bottom: parent.bottom
         }
         clip: true
+        // Read the other way round in Arabic, Farsi, Sorani and Kurmanji. This
+        // sits on the page content rather than on MainView: mirroring the whole
+        // window makes PageStack size every page to twice the window width and
+        // park it at -width, which puts the middle of the page off-screen.
+        LayoutMirroring.enabled: systemRightToLeft
+        LayoutMirroring.childrenInherit: true
+        contentWidth: width
         contentHeight: content.height + units.gu(4)
 
         Column {
@@ -72,7 +110,7 @@ Page {
 
             Label {
                 visible: page.chapters.length === 0
-                x: units.gu(2)
+                anchors.horizontalCenter: parent.horizontalCenter
                 width: parent.width - units.gu(4)
                 wrapMode: Text.WordWrap
                 color: Style.muted
@@ -88,7 +126,7 @@ Page {
                     spacing: units.gu(1)
 
                     Label {
-                        x: units.gu(2)
+                        anchors.horizontalCenter: parent.horizontalCenter
                         width: parent.width - units.gu(4)
                         wrapMode: Text.WordWrap
                         fontSize: "large"
@@ -98,7 +136,7 @@ Page {
 
                     Label {
                         visible: text !== ""
-                        x: units.gu(2)
+                        anchors.horizontalCenter: parent.horizontalCenter
                         width: parent.width - units.gu(4)
                         wrapMode: Text.WordWrap
                         fontSize: "small"
@@ -117,7 +155,7 @@ Page {
 
                             Label {
                                 visible: text !== ""
-                                x: units.gu(2)
+                                anchors.horizontalCenter: parent.horizontalCenter
                                 width: parent.width - units.gu(4)
                                 wrapMode: Text.WordWrap
                                 fontSize: "medium"
@@ -126,7 +164,7 @@ Page {
                             }
 
                             Label {
-                                x: units.gu(2)
+                                anchors.horizontalCenter: parent.horizontalCenter
                                 width: parent.width - units.gu(4)
                                 wrapMode: Text.WordWrap
                                 fontSize: "small"
