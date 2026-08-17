@@ -59,14 +59,17 @@ desktop-file-install --delete-original \
 # bit across from a Windows checkout, which makes rpmlint flag every one as a
 # script-without-shebang. Force them to plain 0644.
 find %{buildroot}%{_datadir}/%{name} -type f -exec chmod 0644 {} +
-chmod 0644 %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/%{name}.svg
+find %{buildroot}%{_datadir}/icons -type f -exec chmod 0644 {} +
 
 %files
 %defattr(-,root,root,-)
 %{_bindir}/%{name}
 %{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
-%{_datadir}/icons/hicolor/scalable/apps/%{name}.svg
+%{_datadir}/icons/hicolor/86x86/apps/%{name}.png
+%{_datadir}/icons/hicolor/108x108/apps/%{name}.png
+%{_datadir}/icons/hicolor/128x128/apps/%{name}.png
+%{_datadir}/icons/hicolor/172x172/apps/%{name}.png
 
 %changelog
 * Mon Aug 17 2026 NoxToxCipher <github.elitism514@passmail.com> - 0.1.0-1

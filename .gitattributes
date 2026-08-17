@@ -9,3 +9,6 @@
 sailfish/**/*.qml   text eol=lf
 sailfish/**/*.json  text eol=lf
 sailfish/**/*.svg   text eol=lf
+
+# Binary assets: never touch line endings.
+*.png binary
