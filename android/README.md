@@ -29,8 +29,9 @@ The same Rust core as the desktop, behind a thin JNI boundary
 ## Build
 
 Prerequisites are the same toolchain the Tox client uses, under
-`C:/Users/user/android-tools` (JDK 17, the SDK with build-tools 34.0.0 and
-platform android-34, and an NDK). Plus the Rust Android targets:
+`$HOME/android-tools` by default (JDK 17, the SDK with build-tools 34.0.0 and
+platform android-34, and an NDK); override `ANDROID_TOOLS` to point elsewhere.
+Plus the Rust Android targets:
 
 ```bash
 rustup target add aarch64-linux-android armv7-linux-androideabi x86_64-linux-android

@@ -4,10 +4,10 @@
 #   android/build-apk.sh [abi]
 #
 # Reuses the toolchain the sibling Tox client already installed under
-# C:/Users/user/android-tools (JDK 17, the SDK, and an NDK). If you keep the
-# toolchain elsewhere, change ANDROID_TOOLS here — nothing else hard-codes it.
+# $HOME/android-tools (JDK 17, the SDK, and an NDK). Override ANDROID_TOOLS in
+# your environment if you keep it elsewhere; nothing else hard-codes the path.
 
-export ANDROID_TOOLS="C:/Users/user/android-tools"
+export ANDROID_TOOLS="${ANDROID_TOOLS:-$HOME/android-tools}"
 export JAVA_HOME="$ANDROID_TOOLS/jdk-17.0.20+8"
 export ANDROID_HOME="$ANDROID_TOOLS/sdk"
 export ANDROID_SDK_ROOT="$ANDROID_HOME"
