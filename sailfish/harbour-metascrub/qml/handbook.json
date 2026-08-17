@@ -2,11 +2,11 @@
   "chapters": [
     {
       "title": "How metascrub cleans",
-      "intro": "metascrub never gives a green tick it has not earned. Every file comes back with one of three honest results.",
+      "intro": "metascrub never gives a green tick it has not earned. Every file comes back with one of three plain results.",
       "entries": [
         {
           "heading": "COMPLETE",
-          "body": "The file was taken apart and rebuilt from a list of the parts worth keeping. Anything not on that list — including private, vendor-specific or hidden blocks the tool has never seen — is left behind by construction. Photos and documents (JPEG, PNG, WebP, HEIC, AVIF, GIF, TIFF, PDF and Office files) are cleaned this way."
+          "body": "The file was taken apart and rebuilt from a list of the parts worth keeping. Anything not on that list, including private, vendor-specific or hidden blocks the tool has never seen, is left behind by construction. Photos and documents (JPEG, PNG, WebP, HEIC, AVIF, GIF, TIFF, PDF and Office files) are cleaned this way."
         },
         {
           "heading": "BEST EFFORT",
@@ -45,7 +45,7 @@
       "entries": [
         {
           "heading": "EXIF",
-          "body": "A block of tags written by the camera: model, lens, serial number, shutter count, exposure settings, the date and time to the second, and often GPS coordinates.\n\nGPS is the obvious one, and it is accurate to a few metres, so a single holiday photo can give away a home address. The rest is quieter but adds up: the same camera body and lens across a set of photographs ties them to one person even when nothing else does."
+          "body": "A block of tags written by the camera: model, lens, serial number, shutter count, exposure settings, the date and time to the second, and often GPS coordinates.\n\nGPS is the obvious one, and it is accurate to a few metres, so a single holiday photo can give away a home address. The rest is less obvious but adds up: the same camera body and lens across a set of photographs ties them to one person even when nothing else does."
         },
         {
           "heading": "Maker note",
@@ -156,7 +156,7 @@
         },
         {
           "heading": "Why the maker note is kept, and what that leaks",
-          "body": "The maker note is the manufacturer's private block. It does hold the camera's internal serial number and its shutter count, which are identifying. It would be good to remove.\n\nBut manufacturers also store the settings a raw converter needs to develop the file in that same block: black and white levels, the sensor's colour-filter layout, white balance, lens corrections. On real files from Canon, Nikon, Olympus, Pentax and others, removing the maker note either stopped the raw opening or changed how it decoded. Corrupting the file is the one outcome this tool refuses, so the maker note stays.\n\nThe honest consequence: on a raw, the internal serial number in the maker note usually survives. How much identifying data remains therefore depends on your camera, because some brands also write the serial into a standard field, which is removed, while others keep it only in the maker note, which is not. If that serial matters to you, use the safe path below."
+          "body": "The maker note is the manufacturer's private block. It does hold the camera's internal serial number and its shutter count, which are identifying. It would be good to remove.\n\nBut manufacturers also store the settings a raw converter needs to develop the file in that same block: black and white levels, the sensor's colour-filter layout, white balance, lens corrections. On real files from Canon, Nikon, Olympus, Pentax and others, removing the maker note either stopped the raw opening or changed how it decoded. Corrupting the file is the one outcome this tool refuses, so the maker note stays.\n\nWhat this means: on a raw, the internal serial number in the maker note usually survives. How much identifying data remains therefore depends on your camera, because some brands also write the serial into a standard field, which is removed, while others keep it only in the maker note, which is not. If that serial matters to you, use the safe path below."
         },
         {
           "heading": "The safest path, and which cameras are covered",
@@ -170,7 +170,7 @@
       "entries": [
         {
           "heading": "What a sensor fingerprint is",
-          "body": "A camera sensor is a grid of millions of light-sensitive wells etched into silicon. Manufacturing cannot make them perfectly identical, so each responds to light a fraction differently from its neighbours. That variation is fixed for the life of the camera and is imprinted, faintly, on every photograph it takes. It is called Photo Response Non-Uniformity, or PRNU — a serial number written into the picture itself rather than into the file's information fields. Removing EXIF does not touch it, and neither does renaming the file, screenshotting it, or sending it through an app that strips metadata."
+          "body": "A camera sensor is a grid of millions of light-sensitive wells etched into silicon. Manufacturing cannot make them perfectly identical, so each responds to light a fraction differently from its neighbours. That variation is fixed for the life of the camera and is imprinted, faintly, on every photograph it takes. It is called Photo Response Non-Uniformity, or PRNU: a serial number written into the picture itself rather than into the file's information fields. Removing EXIF does not touch it, and neither does renaming the file, screenshotting it, or sending it through an app that strips metadata."
         },
         {
           "heading": "How it is used against someone",
@@ -178,15 +178,15 @@
         },
         {
           "heading": "What this option does",
-          "body": "Reduce camera fingerprint denoises the photo at full resolution (the pattern lives in the fine detail, so this is the reverse of how detectors find it), downscales it (mixing each output pixel from several input pixels, which breaks the pixel-for-pixel match correlation depends on — the single most effective step), adds a little fresh noise, and re-encodes as JPEG. Gentle keeps 90% of the size, Balanced 70%, Thorough 50%. The stronger the setting, the softer and smaller the photo."
+          "body": "Reduce camera fingerprint denoises the photo at full resolution (the pattern lives in the fine detail, so this is the reverse of how detectors find it), downscales it (mixing each output pixel from several input pixels, which breaks the pixel-for-pixel match correlation depends on, the single most effective step), adds a little fresh noise, and re-encodes as JPEG. Gentle keeps 90% of the size, Balanced 70%, Thorough 50%. The stronger the setting, the softer and smaller the photo."
         },
         {
           "heading": "What does not work",
           "body": "Shifting the colours or white balance does nothing at all. Detectors use normalised correlation, which divides out any uniform per-channel scaling or offset before comparing. A global colour change is exactly that, so it is removed by the maths before the comparison happens. It costs colour accuracy and buys no protection. This is written down because it is an intuitive idea that happens to be wrong."
         },
         {
-          "heading": "The honest limit",
-          "body": "This reduces correlation. It does not remove the fingerprint, and nothing here will tell you that it has. A forensic analyst with a strong reference pattern, many samples and time can still succeed. Every setting also degrades the photo — softer detail, fewer pixels, more compression. If your safety depends on being unlinkable, the stronger measure is not to publish from the same camera under two identities in the first place."
+          "heading": "The real limit",
+          "body": "This reduces correlation. It does not remove the fingerprint, and nothing here will tell you that it has. A forensic analyst with a strong reference pattern, many samples and time can still succeed. Every setting also degrades the photo: softer detail, fewer pixels, more compression. If your safety depends on being unlinkable, the stronger measure is not to publish from the same camera under two identities in the first place."
         }
       ]
     },
@@ -225,7 +225,7 @@
       "entries": [
         {
           "heading": "",
-          "body": "Hello.\n\nI'm a photographer, and I've learned how much a single photo can reveal about the person who took it: where they stood, the camera in their hands, a name they never chose to attach. Around the world, that hidden data has been used to take people's privacy, and sometimes their safety, away from them.\n\nI built metascrub to hand that back. It's for anyone who wants it, and above all for people living under censorship or surveillance, for people getting free of someone dangerous, and for anyone who simply wants to be harder to follow.\n\nEverything happens on your phone. Nothing is ever uploaded.\n\nKeep going.\n— Cipher"
+          "body": "Hello,\n\nI'm a photographer, and I've learned how much a single photo can reveal about the person who took it: where they stood, the camera in their hands, a name they never chose to attach. Around the world, that hidden data has been used to take people's privacy, and sometimes their safety, away from them.\n\nI built metascrub to hand that back. It's for anyone who wants it, and above all for people living under censorship or surveillance, for people getting free of someone dangerous, and for anyone who wants to be harder to follow.\n\nEverything happens on your phone. Nothing is ever uploaded.\n\nKeep going,\nCipher"
         }
       ]
     }

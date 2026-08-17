@@ -3,7 +3,7 @@
 //! Kept apart from the interface code because it is the part most likely to be
 //! read closely, argued with, and corrected. Every claim here should be one the
 //! project is willing to defend, and where something cannot be promised the
-//! text says so rather than going quiet.
+//! text says so rather than staying silent.
 
 use crate::i18n::Lang;
 
@@ -22,7 +22,7 @@ pub const METADATA: &[Item] = &[
                the second, and often GPS coordinates.",
         why: "GPS is the obvious one, and it is accurate to a few metres, so a \
               single holiday photo can give away a home address. The rest is \
-              quieter but adds up: the same camera body and lens across a set \
+              less obvious but adds up: the same camera body and lens across a set \
               of photographs ties them to one person even when nothing else \
               does.",
     },
@@ -342,7 +342,7 @@ pub const PRNU: &[Section] = &[
                happens to be wrong, and it appears in a lot of advice online.",
     },
     Section {
-        heading: "The honest limit",
+        heading: "The real limit",
         body: "This reduces correlation. It does not remove the fingerprint, \
                and nothing in this app will ever tell you that it has.\n\n\
                A forensic analyst with a strong reference pattern, many sample \
@@ -458,7 +458,7 @@ pub const RAW: &[Section] = &[
                the maker note either stopped the raw opening or changed how it \
                decoded. Corrupting the file is the one outcome this tool refuses, \
                so the maker note stays.\n\n\
-               The honest consequence: on a raw, the internal serial number in \
+               What this means: on a raw, the internal serial number in \
                the maker note usually survives. How much identifying data remains \
                therefore depends on your camera, because some brands also write \
                the serial into a standard field, which is removed, while others \
@@ -640,7 +640,7 @@ pub const EVIDENCE: &[Section] = &[
     },
     Section {
         heading: "What the evidence says about resizing",
-        body: "This is where the honesty matters most, because resizing is the \
+        body: "This matters most here, because resizing is the \
                main thing this tool does.\n\n\
                The literature is consistent: identification from downscaled \
                images remains possible, but performance degrades \
@@ -649,7 +649,7 @@ pub const EVIDENCE: &[Section] = &[
                who knows or guesses the scale factor can compensate for it.\n\n\
                So downscaling is the most effective operation available here, \
                and it is still not a defeat. 'Significantly degrades' is the \
-               honest description, and it is the one this app uses.",
+               plain description, and it is the one this app uses.",
     },
     Section {
         heading: "What the evidence says about counter-forensics",
@@ -1759,7 +1759,7 @@ I built metascrub to hand that back. It's for anyone who wants it, and above all
 Everything happens on your computer. Nothing is ever uploaded.
 
 Keep going,
-— Cipher",
+Cipher",
 }];
 
 pub const LETTER_RU: &[Section] = &[Section {
@@ -1773,7 +1773,7 @@ pub const LETTER_RU: &[Section] = &[Section {
 Всё происходит на вашем компьютере. Ничего никогда не загружается.
 
 Держитесь,
-— Cipher",
+Cipher",
 }];
 
 pub const LETTER_MY: &[Section] = &[Section {
@@ -1787,7 +1787,7 @@ pub const LETTER_MY: &[Section] = &[Section {
 အရာအားလုံး သင့်ကွန်ပျူတာပေါ်တွင် ဖြစ်ပျက်သည်။ ဘာမျှ မည်သည့်အခါမျှ အပ်လုဒ်မတင်ပါ။
 
 ဆက်လျှောက်ပါ၊
-— Cipher",
+Cipher",
 }];
 
 pub const LETTER_LA: &[Section] = &[Section {
@@ -1801,7 +1801,7 @@ metascrub aedificavi ut id redderem. Est cuivis qui id vult, et ante omnia homin
 Omnia in computatro tuo fiunt. Nihil umquam imponitur.
 
 Perge,
-— Cipher",
+Cipher",
 }];
 
 /// The letter from the creator, shown at the foot of the handbook.

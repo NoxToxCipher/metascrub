@@ -37,9 +37,9 @@ Page {
                 wrapMode: Text.WordWrap
                 color: Theme.primaryColor
                 font.pixelSize: Theme.fontSizeSmall
-                text: qsTr("metascrub removes the hidden data a file carries about you — where a "
+                text: qsTr("metascrub removes the hidden data a file carries about you: where a "
                          + "photo was taken, which camera and account made a document, its editing "
-                         + "history — and tells you honestly how much it could remove.")
+                         + "history. It tells you plainly how much it could remove.")
             }
 
             SectionHeader { text: qsTr("What it will not do") }
