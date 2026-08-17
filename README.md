@@ -9,8 +9,9 @@ the editing-session identifiers that link two documents to one machine. Sending
 a file sends all of it.
 
 > **Status: working, not yet released.**
-> Desktop application and command line tool, 173 tests, 20,000 fuzz cases with
-> no panics. No installer or icon yet, and no signed builds.
+> Desktop application and command line tool, 253 tests, 20,000 fuzz cases with
+> no panics. Linux, Windows and Android builds; packaged for Linux and
+> ChromeOS. No signed builds yet.
 
 ## What makes this different
 
@@ -70,6 +71,12 @@ what does not, and how it differs by camera brand.
 **Desktop.** Drag files onto the window. It lists what it found in each one,
 and writes cleaned copies only when you ask. Originals are never modified.
 
+Drag and drop is the recommended path, and not only because it is quick. A file
+picker is the thing that writes your filename into the desktop's recent-files
+list, which is a record of exactly which files somebody thought were worth
+cleaning. metascrub deletes those entries afterwards, but never creating one is
+stronger than removing it.
+
 **Command line.**
 
 ```bash
@@ -81,6 +88,36 @@ metascrub --json *.jpg        # machine-readable
 Exit status `2` means a file was left uncleaned because its format is not
 supported, so a script cannot mistake "not understood" for success.
 
+## Installing on Linux
+
+Download the archive for your machine, or the `.deb` on Debian, Ubuntu, Mint
+and ChromeOS. `uname -m` says which architecture you have: `x86_64` is `amd64`,
+`aarch64` is `arm64`.
+
+```bash
+tar xzf metascrub-0.1.0-linux-amd64.tar.gz
+cd metascrub-0.1.0-linux-amd64
+./install.sh              # into ~/.local, no root needed
+sudo ./install.sh         # into /usr/local, for everyone
+```
+
+Or do not install anything. `./metascrub-gui` runs from wherever you unpacked
+it, and `./metascrub` is the command line tool. Both are self-contained.
+
+There is nothing to configure and nothing to keep up to date. metascrub writes
+no configuration file, no cache and no state, so `./uninstall.sh` leaves
+nothing behind.
+
+**What it needs.** glibc 2.31 or newer, which covers every supported
+distribution, and a graphical session for the window. No GTK, no Qt, no
+toolkit to install: X11, Wayland and OpenGL are all reached at runtime, so one
+binary works on GNOME, KDE, Xfce, a tiling window manager, and ChromeOS. The
+command line tool is statically linked and needs nothing at all.
+
+**ChromeOS.** Install the `.deb` into the Linux environment and it appears in
+the launcher like any other app. See [`docs/chromeos.md`](docs/chromeos.md),
+which also covers sharing folders with the Linux container.
+
 ## Building
 
 ```bash
@@ -89,6 +126,10 @@ cargo test --workspace
 ```
 
 No system dependencies. The toolchain is pinned in `rust-toolchain.toml`.
+
+Building a *release* is a different matter, because a Linux binary demands the
+glibc of whatever machine compiled it. See
+[`packaging/linux/README.md`](packaging/linux/README.md).
 
 ## Crates
 

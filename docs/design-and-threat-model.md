@@ -214,9 +214,12 @@ effect and must not be told it is pixelwash.
 - **The pixel decoder is opt-in.** The image-decoding library, historically the
   most exploit-prone dependency, is reached only through the fingerprint tool,
   which is off by default. The always-on metadata path never decodes a pixel.
-- **Local traces.** On Windows the tool clears the Recent-Items shortcuts a file
-  dialog creates, and it suppresses crash dumps so a crash cannot write a photo
-  or its coordinates to disk. Sensitive buffers are zeroized.
+- **Local traces.** The tool clears the recent-file record a file dialog
+  creates: Recent-Items shortcuts on Windows, GTK's `recently-used.xbel` and
+  KDE's `RecentDocuments` on Linux. It suppresses crash dumps so a crash cannot
+  write a photo or its coordinates to disk. Sensitive buffers are zeroized. It
+  writes no configuration, cache or state anywhere, so the mere existence of a
+  directory never records that the tool was run on this machine.
 
 ### Residual risks (stated plainly)
 
@@ -229,6 +232,15 @@ effect and must not be told it is pixelwash.
 - The original file persists on disk, and the tool cannot securely delete it.
 - While processing, data can be paged to unencrypted swap. Use full-disk
   encryption for high-threat work.
+- **A crash inside a graphics driver can still write a core dump on Linux.**
+  The panic hook exits directly rather than aborting, so a Rust panic produces
+  nothing, and that covers this crate's own logic, which contains no `unsafe`.
+  It does not cover a segmentation fault inside the system OpenGL or Wayland
+  libraries the window reaches through `dlopen`. `systemd-coredump` would then
+  write the process image, decoded photograph included, to
+  `/var/lib/systemd/coredump`. Closing that means setting `RLIMIT_CORE` to
+  zero, which needs either `libc` or `rustix` and therefore an exception to
+  `#![forbid(unsafe_code)]`, so it is stated here rather than done quietly.
 
 ## 9. Format coverage
 

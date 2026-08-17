@@ -42,10 +42,20 @@ so the remaining claims are checkable.
   Different attack, different defence.
 - **Anything about an upload being traceable.** The platform's own record of
   which account uploaded what is outside any file-cleaning tool's reach.
-- **Jump-list entries after using the file picker.** Windows records opened
-  files in several places. The `Recent` folder shortcuts are cleaned up;
+- **Recent-file entries the desktop keeps after you use the file picker.**
+  Every desktop records them, in more places than one, and metascrub cleans up
+  what it can reach immediately afterwards.
+
+  On Windows the `Recent` folder shortcuts are removed;
   `AutomaticDestinations-ms` jump-list databases are an undocumented binary
-  format and are not touched. Drag and drop creates neither.
+  format and are not touched. On Linux, GTK's `recently-used.xbel` and KDE's
+  `RecentDocuments` entries are removed; search indexes that keep their own
+  copy, such as Tracker, Baloo, Zeitgeist and the KDE activity manager, are
+  not. A desktop that has already read the list into a running process keeps
+  its copy until it next writes one out.
+
+  Drag and drop creates none of this on either platform, and is what the
+  interface recommends.
 - **Anything requiring an already-compromised operating system**, or physical
   access to an unlocked machine.
 

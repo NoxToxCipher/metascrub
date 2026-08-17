@@ -178,14 +178,15 @@
     <div class="built">
       <span>&#10003;</span>
       <div>
-        <strong>Running now on Windows.</strong>
-        One 6.3 MB file with no installer and no dependencies to fetch. The same
-        Rust core also builds a 781 kB command line tool, and both work offline
-        with no account and no network access of any kind.
+        <strong>Running now on Windows, Linux and ChromeOS.</strong>
+        One file with no dependencies to fetch: 6.3 MB on Windows, 10 MB on Linux,
+        where the window carries its own icon and fonts. The same Rust core also
+        builds a command line tool, statically linked on Linux at 1.3 MB, and both
+        work offline with no account and no network access of any kind.
       </div>
     </div>
     <div class="facts">
-      <div class="fact"><div class="n">232</div><div class="l">tests passing</div></div>
+      <div class="fact"><div class="n">253</div><div class="l">tests passing</div></div>
       <div class="fact"><div class="n">20,000</div><div class="l">fuzz cases, 0 panics</div></div>
       <div class="fact"><div class="n">7</div><div class="l">formats handled</div></div>
       <div class="fact"><div class="n">0</div><div class="l">network calls</div></div>
@@ -563,8 +564,9 @@ archive.7z: <span style="color:var(--danger)">NOT SANITIZED</span>, unknown form
     <div>
       <h3>Working today</h3>
       <ul>
-        <li>Desktop app, Windows, single 6.3 MB file</li>
-        <li>Command line tool, 781 kB</li>
+        <li>Desktop app on Windows, Linux and ChromeOS</li>
+        <li>Command line tool, statically linked on Linux</li>
+        <li>Launcher entry, icon and file associations</li>
         <li>Seven formats, documents included</li>
         <li>Optional fingerprint reduction</li>
         <li>3,300-word reference panel</li>
@@ -573,10 +575,10 @@ archive.7z: <span style="color:var(--danger)">NOT SANITIZED</span>, unknown form
     <div>
       <h3>Next</h3>
       <ul>
-        <li>An icon and an installer</li>
-        <li>Linux and macOS builds from the same code</li>
+        <li>Signed releases (the builds are already reproducible)</li>
+        <li>A macOS build from the same code</li>
         <li>Android share sheet</li>
-        <li>Signed, reproducible releases</li>
+        <li>Flathub, and a screenshot for the software centres</li>
         <li>A name of its own</li>
       </ul>
     </div>
