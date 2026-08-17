@@ -140,18 +140,29 @@ correlation; it does not remove the fingerprint, and nothing in the tool will
 ever say it does. It also only applies to a camera-captured raster photo: it
 cannot apply to a raw (that would destroy the raw) or to a non-photo file.
 
-## 7a. Serving an embedding client: the render path (designed, not built)
+## 7a. Serving an embedding client: the render path (built)
 
-The messenger in this suite needs something metascrub does not yet offer. It
-receives pictures from people who are not using our software, has to draw them,
-and must never hand a stranger's bytes to the browser engine that draws its
-interface. Its design is recorded in that project's §79; this section is the
-half that lives here.
+The messenger in this suite needs something the always-on metadata path does not
+offer. It receives pictures from people who are not using our software, has to
+draw them, and must never hand a stranger's bytes to the browser engine that
+draws its interface. Its design is recorded in that project's §79; this section
+is the half that lives here.
 
-**The job.** Take an arbitrary inbound image, produce a small PNG that is safe to
-display, and leave the stored original alone. Concretely: decode, downscale to a
-display size, re-encode as PNG, return that. Refuse anything whose declared
-dimensions are absurd *before* allocating for them.
+**The job.** Take an arbitrary inbound image, produce a PNG that is safe to
+display and carries none of the source's metadata, and leave the stored original
+alone. Concretely: decode, optionally downscale to a display size, re-encode as
+PNG, return that. Refuse anything whose declared dimensions are absurd *before*
+allocating for them.
+
+**What is built.** `pixelwash::to_png` does exactly this: it reuses the same
+bounded decoder as the wash path (allowlist, pre-decode dimension check against a
+megapixel cap, decode, zero-dimension guard), downscales with Lanczos3 so the
+longest edge is at most `max_edge` (never enlarging a smaller image), and
+re-encodes as PNG from the raw pixels — dropping every scrap of source metadata
+and preserving any alpha channel. It is exposed to native hosts as `ms_to_png` in
+`metascrub-ffi`, which additionally runs the PNG back through the sanitizer so the
+render path makes the same honest allowlist guarantee as every other output. The
+conversion is deliberately *not* wired into `metascrub`; see the next paragraph.
 
 **Where it goes, and why it is not negotiable.** In `pixelwash`, never in
 `metascrub`. Section 8 makes a specific promise — "the always-on metadata path
@@ -244,10 +255,6 @@ its end marker; metascrub drops that video and reports it specifically.
 - An external security audit.
 - Reproducible builds and signed releases (in progress).
 - Per-format raw testing beyond a few real samples of each vendor.
-- **The render path in section 7a.** `pixelwash` decodes and re-encodes already;
-  what does not exist is a convert-to-PNG-at-a-bounded-size entry point, its
-  exposure through `metascrub-ffi`, or a dimension check that refuses a
-  decompression bomb before allocating for it.
 - **A sealed report format.** `report.rs` records what was removed and under
   which `Kind`. An embedding application wants to keep that beside a file it has
   cleaned, so a person who needs to know when a photograph was taken can be told

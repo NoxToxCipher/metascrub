@@ -35,7 +35,7 @@
 //! is the private thing, and a log line is the last place it should surface.
 
 use metascrub::{ColorProfile, Orientation, Policy, Report};
-use pixelwash::{Settings, Strength};
+use pixelwash::{PngSettings, Settings, Strength};
 use std::os::raw::c_char;
 
 /// An owned byte buffer handed across the boundary. On failure `data` is null and
@@ -177,6 +177,49 @@ pub unsafe extern "C" fn ms_reduce_fingerprint(
     };
     match pixelwash::wash(bytes, &settings) {
         Ok(washed) => MsBuffer::from_vec(washed.data),
+        Err(_) => MsBuffer::null(),
+    }
+}
+
+/// Convert a photo to a metadata-free PNG, re-encoded from raw pixels.
+///
+/// The "render path": a host takes a JPEG (or PNG/WebP) a user picked, and gets
+/// back a PNG it can display or store — a Crake avatar, say — that carries none of
+/// the source's metadata. It drops everything by rebuilding from decoded pixels,
+/// preserves any alpha channel, and optionally downscales so the longest edge is
+/// at most `max_edge` (pass 0 to keep the size). A small image is never enlarged.
+///
+/// This is a format conversion plus a metadata scrub. It is **not** fingerprint
+/// reduction and must never be presented as such — for that, use
+/// [`ms_reduce_fingerprint`]. The PNG is additionally run through the sanitizer so
+/// the guarantee is the same honest allowlist rebuild the rest of the core gives.
+///
+/// On error (not a decodable image, or larger than the phone-sized cap) `data` is
+/// null.
+///
+/// # Safety
+/// `input` must be null or point to `len` readable bytes. Free the result with
+/// [`ms_buffer_free`].
+#[no_mangle]
+pub unsafe extern "C" fn ms_to_png(input: *const u8, len: usize, max_edge: u32) -> MsBuffer {
+    let Some(bytes) = as_slice(input, len) else {
+        return MsBuffer::null();
+    };
+    let settings = PngSettings {
+        max_edge: if max_edge == 0 { None } else { Some(max_edge) },
+        // Same phone-sized decode ceiling as the wash path, so an oversize image is
+        // refused cleanly instead of running the process out of memory.
+        max_megapixels: Some(50),
+    };
+    let png = match pixelwash::to_png(bytes, &settings) {
+        Ok(png) => png,
+        Err(_) => return MsBuffer::null(),
+    };
+    // Belt and braces: the PNG is already built from raw pixels, but rebuilding it
+    // through the sanitizer's allowlist means the render path makes exactly the
+    // same honest guarantee as every other output of the core.
+    match metascrub::sanitize(&png, &Policy::default()) {
+        Ok(out) => MsBuffer::from_vec(out.data),
         Err(_) => MsBuffer::null(),
     }
 }

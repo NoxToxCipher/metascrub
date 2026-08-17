@@ -52,7 +52,19 @@ char *ms_report_json(const uint8_t *input, size_t len,
  */
 MsBuffer ms_reduce_fingerprint(const uint8_t *input, size_t len, int32_t strength);
 
-/* Free a buffer from ms_sanitize / ms_reduce_fingerprint. NULL-data is a no-op. */
+/*
+ * Convert a photo (JPEG/PNG/WebP) to a metadata-free PNG, re-encoded from raw
+ * pixels — the "render path" for things like avatars, where a user may pick a
+ * JPEG but it should be stored and shown as a clean PNG. Drops all source
+ * metadata, preserves alpha, and downscales so the longest edge is at most
+ * `max_edge` (0 keeps the original size; a small image is never enlarged). This
+ * is a format conversion plus a scrub, NOT fingerprint reduction — use
+ * ms_reduce_fingerprint for that. `data` is NULL on error. Free with
+ * ms_buffer_free.
+ */
+MsBuffer ms_to_png(const uint8_t *input, size_t len, uint32_t max_edge);
+
+/* Free a buffer from ms_sanitize / ms_reduce_fingerprint / ms_to_png. NULL-data is a no-op. */
 void ms_buffer_free(MsBuffer buf);
 
 /* Free a string from ms_report_json. NULL is a no-op. */

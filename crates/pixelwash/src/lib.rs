@@ -195,44 +195,33 @@ pub struct Washed {
     pub report: WashReport,
 }
 
-/// Denoise, downscale, add noise, and re-encode, to reduce PRNU correlation.
+/// Decode `input` as one of the formats this crate handles (JPEG, PNG, WebP),
+/// refusing a decompression bomb *before* any pixel buffer is allocated. Shared
+/// by [`wash`] and [`to_png`].
 ///
-/// Output is always JPEG: the point is to discard fine detail, so preserving a
-/// lossless container would be working against the purpose.
-///
-/// This **reduces** linkability. It does not remove the sensor fingerprint, and
-/// any interface built on this must say so.
-pub fn wash(input: &[u8], settings: &Settings) -> Result<Washed, Error> {
-    // Bound the decoder *before* it runs. The previous approach decoded first
-    // and checked dimensions afterwards, which is the decompression-bomb order
-    // of operations: a 30000x30000 PNG is a couple of hundred bytes on disk and
-    // several gigabytes decoded, and the size check never gets a turn because
-    // the allocation happens inside the decode. The `image` crate has its own
-    // default memory cap, but relying on a dependency's default for a security
-    // property is fragile across version bumps, so the limit is set explicitly
-    // here from our own configuration.
+/// Bounding the decoder before it runs is the important part: a 30000x30000 PNG
+/// is a couple of hundred bytes on disk and several gigabytes decoded, and a
+/// size check *after* the decode never gets a turn because the allocation
+/// happens inside it. The `image` crate has its own default cap, but relying on
+/// a dependency's default for a security property is fragile across version
+/// bumps, so the limit is set explicitly here.
+fn decode_bounded(input: &[u8], max_megapixels: Option<u32>) -> Result<DynamicImage, Error> {
     let mut reader = image::ImageReader::new(std::io::Cursor::new(input));
     reader = reader.with_guessed_format().map_err(|e| Error::Decode(e.to_string()))?;
 
-    // Constrain the decode to the formats we intend to wash, independent of what
-    // the `image` crate was *compiled* to support: in the GUI binary, Cargo
-    // feature unification (via eframe/arboard) enables more decoders than this
-    // crate declares, so a file guessing to BMP/ICO/TGA/etc. would otherwise be
-    // handed to a decoder outside this crate's audited surface. Refuse it.
-    // Only the formats this crate is actually compiled to decode (see
-    // Cargo.toml: jpeg, png, webp). Format *guessing* is independent of the
-    // enabled decoders, so a real TIFF/GIF/BMP/ICO — which feature unification in
-    // the GUI binary can pull a decoder in for — would otherwise be handed to a
-    // decoder outside this crate's audited surface, or guess-then-fail with a
-    // misleading error. Refuse anything else up front.
+    // Only the formats this crate is actually compiled to decode (Cargo.toml:
+    // jpeg, png, webp). Format *guessing* is independent of the enabled decoders,
+    // so a real TIFF/GIF/BMP/ICO — which feature unification in the GUI binary can
+    // pull a decoder in for — would otherwise be handed to a decoder outside this
+    // crate's audited surface, or guess-then-fail with a misleading error.
     if !matches!(
         reader.format(),
         Some(image::ImageFormat::Jpeg | image::ImageFormat::Png | image::ImageFormat::WebP)
     ) {
-        return Err(Error::Decode("pixel washing only handles JPEG, PNG and WebP".to_string()));
+        return Err(Error::Decode("pixelwash only handles JPEG, PNG and WebP".to_string()));
     }
 
-    if let Some(mp) = settings.max_megapixels {
+    if let Some(mp) = max_megapixels {
         let max_px = mp as u64 * 1_000_000;
 
         // Decoder-agnostic ceiling on the *total* pixel count, read from the
@@ -269,20 +258,28 @@ pub fn wash(input: &[u8], settings: &Settings) -> Result<Washed, Error> {
     let decoded = reader.decode().map_err(|e| Error::Decode(e.to_string()))?;
     let (w, h) = decoded.dimensions();
     if w == 0 || h == 0 {
-        // Defends the resize/denoise math below, which is not written for an
-        // empty raster. Real decoders reject zero-dimension images, so this is
-        // belt-and-braces against a future/lenient decoder.
+        // Defends the resize/denoise math in callers, not written for an empty
+        // raster. Real decoders reject zero-dimension images; belt-and-braces.
         return Err(Error::Decode("decoded image is empty".to_string()));
     }
-
-    // Belt and braces: the reader limits should have caught an oversize image,
-    // but check the decoded dimensions too so the reported error is precise.
-    if let Some(limit) = settings.max_megapixels {
-        let megapixels = (w as u64 * h as u64) / 1_000_000;
-        if megapixels > limit as u64 {
+    if let Some(limit) = max_megapixels {
+        if (w as u64 * h as u64) / 1_000_000 > limit as u64 {
             return Err(Error::TooLarge { width: w, height: h, limit });
         }
     }
+    Ok(decoded)
+}
+
+/// Denoise, downscale, add noise, and re-encode, to reduce PRNU correlation.
+///
+/// Output is always JPEG: the point is to discard fine detail, so preserving a
+/// lossless container would be working against the purpose.
+///
+/// This **reduces** linkability. It does not remove the sensor fingerprint, and
+/// any interface built on this must say so.
+pub fn wash(input: &[u8], settings: &Settings) -> Result<Washed, Error> {
+    let decoded = decode_bounded(input, settings.max_megapixels)?;
+    let (w, h) = decoded.dimensions();
 
     let strength = settings.strength;
     let mut rgb = decoded.to_rgb8();
@@ -316,7 +313,6 @@ pub fn wash(input: &[u8], settings: &Settings) -> Result<Washed, Error> {
 
     // The encoder writes a bare JFIF with no EXIF, but callers should still run
     // the result through metascrub: this crate makes no metadata promises.
-    let _ = ImageFormat::Jpeg;
 
     Ok(Washed {
         report: WashReport {
@@ -327,6 +323,63 @@ pub fn wash(input: &[u8], settings: &Settings) -> Result<Washed, Error> {
         },
         data: out,
     })
+}
+
+/// Settings for [`to_png`].
+#[derive(Debug, Clone)]
+pub struct PngSettings {
+    /// Downscale so the longest edge is at most this many pixels, keeping the
+    /// aspect ratio. `None` keeps the original dimensions. For a chat avatar,
+    /// something like `Some(512)` both shrinks the file and, as a side effect,
+    /// weakens PRNU (see the note on [`to_png`]).
+    pub max_edge: Option<u32>,
+    /// Refuse images above this many megapixels before decoding, so a
+    /// decompression bomb cannot exhaust memory. `None` disables the check.
+    pub max_megapixels: Option<u32>,
+}
+
+impl Default for PngSettings {
+    fn default() -> Self {
+        Self { max_edge: None, max_megapixels: Some(120) }
+    }
+}
+
+/// Decode an image and re-encode it as PNG, optionally downscaled — a format
+/// conversion for a caller that needs a PNG it can safely display.
+///
+/// The intended use is turning an uploaded JPEG avatar into a PNG. Because the
+/// output is built from the decoded pixels alone, **every scrap of the input's
+/// metadata is dropped**: a JPEG's EXIF, GPS, timestamp, thumbnail and maker
+/// note do not survive, since the PNG this writes carries only image data.
+/// Alpha is preserved if the source had it.
+///
+/// It is **not** fingerprint reduction. The pixels are preserved (or only
+/// downscaled), and PRNU lives in the pixels, so converting JPEG to PNG does
+/// nothing to a sensor fingerprint on its own. For that, use [`wash`].
+/// Downscaling to a small avatar does weaken PRNU as a side effect of resampling,
+/// but that is a consequence of the resize, not a promise this function makes,
+/// and it must never be presented to a user as fingerprint protection.
+///
+/// Like [`wash`], this decodes untrusted input; a caller handling hostile files
+/// should run it where a decoder crash is contained.
+pub fn to_png(input: &[u8], settings: &PngSettings) -> Result<Vec<u8>, Error> {
+    let decoded = decode_bounded(input, settings.max_megapixels)?;
+    let (w, h) = decoded.dimensions();
+
+    // `resize` fits the image inside an edge x edge box while keeping the aspect
+    // ratio, so the longest side ends up at `edge`. Only shrink, never enlarge.
+    let image = match settings.max_edge {
+        Some(edge) if edge > 0 && (w > edge || h > edge) => {
+            decoded.resize(edge, edge, image::imageops::FilterType::Lanczos3)
+        }
+        _ => decoded,
+    };
+
+    let mut out = Vec::new();
+    image
+        .write_to(&mut std::io::Cursor::new(&mut out), ImageFormat::Png)
+        .map_err(|e| Error::Encode(e.to_string()))?;
+    Ok(out)
 }
 
 /// Add zero-mean Gaussian-ish noise, clamped into range.
@@ -407,6 +460,63 @@ mod tests {
         let thorough =
             wash(&photo, &Settings { strength: Strength::Thorough, ..Default::default() }).unwrap();
         assert!(thorough.report.washed.0 < gentle.report.washed.0);
+    }
+
+    // --- to_png: the render path ---
+
+    /// A JPEG carrying a comment (COM) segment with a marker string, so a test
+    /// can prove the conversion drops the source's metadata.
+    fn jpeg_with_marker(w: u32, h: u32, marker: &[u8]) -> Vec<u8> {
+        let mut j = fake_photo(w, h, &sensor);
+        // A JPEG comment right after the SOI — metadata a decoder simply skips.
+        let mut com = vec![0xFF, 0xFE];
+        com.extend_from_slice(&((marker.len() + 2) as u16).to_be_bytes());
+        com.extend_from_slice(marker);
+        j.splice(2..2, com);
+        j
+    }
+
+    #[test]
+    fn to_png_converts_a_jpeg_to_a_valid_png() {
+        let jpeg = fake_photo(160, 120, &sensor);
+        let png = to_png(&jpeg, &PngSettings::default()).unwrap();
+        assert_eq!(&png[..8], b"\x89PNG\r\n\x1a\n", "output is not a PNG");
+        assert_eq!(image::load_from_memory(&png).unwrap().dimensions(), (160, 120));
+    }
+
+    #[test]
+    fn to_png_drops_the_source_metadata() {
+        let jpeg = jpeg_with_marker(80, 80, b"SECRET-GPS-9988");
+        assert!(jpeg.windows(15).any(|w| w == b"SECRET-GPS-9988"), "marker must be in the input");
+        let png = to_png(&jpeg, &PngSettings::default()).unwrap();
+        assert!(
+            !png.windows(15).any(|w| w == b"SECRET-GPS-9988"),
+            "source metadata rode through the conversion"
+        );
+    }
+
+    #[test]
+    fn to_png_downscales_to_max_edge_keeping_aspect() {
+        let jpeg = fake_photo(400, 200, &sensor); // 2:1
+        let png =
+            to_png(&jpeg, &PngSettings { max_edge: Some(100), ..Default::default() }).unwrap();
+        assert_eq!(image::load_from_memory(&png).unwrap().dimensions(), (100, 50));
+    }
+
+    #[test]
+    fn to_png_does_not_enlarge_a_small_image() {
+        let jpeg = fake_photo(64, 48, &sensor);
+        let png =
+            to_png(&jpeg, &PngSettings { max_edge: Some(512), ..Default::default() }).unwrap();
+        assert_eq!(image::load_from_memory(&png).unwrap().dimensions(), (64, 48));
+    }
+
+    #[test]
+    fn to_png_refuses_a_decompression_bomb() {
+        let jpeg = fake_photo(1100, 1000, &sensor); // 1.1 MP
+        let err =
+            to_png(&jpeg, &PngSettings { max_edge: None, max_megapixels: Some(1) }).unwrap_err();
+        assert!(matches!(err, Error::TooLarge { .. }), "oversize must be refused, got {err:?}");
     }
 
     /// The point of the whole crate: the fixed pattern must correlate less with
