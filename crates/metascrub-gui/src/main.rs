@@ -1374,9 +1374,7 @@ impl App {
                         && reference::EVIDENCE
                             .iter()
                             .all(|s| !handbook_hit(&q, &[s.heading, s.body]))
-                        && reference::LETTER
-                            .iter()
-                            .all(|s| !handbook_hit(&q, &[s.heading, s.body]))
+                        && reference::LETTER.iter().all(|s| !handbook_hit(&q, &[s.heading, s.body]))
                     {
                         ui.add_space(16.0);
                         ui.label(
