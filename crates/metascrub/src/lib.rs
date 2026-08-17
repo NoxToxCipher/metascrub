@@ -125,9 +125,10 @@ pub fn sanitize(input: &[u8], policy: &Policy) -> Result<Sanitized> {
     sanitize_at_depth(input, policy, 0)
 }
 
-/// Sanitize, then check the result: re-scan the cleaned output to confirm
-/// nothing this tool removes survived, and confirm the clean is reproducible by
-/// running it a second time and comparing bytes.
+/// Sanitize, then check the result: confirm the cleaned output is a fixed point
+/// (cleaning it again produces identical bytes, so nothing this tool removes
+/// survived), and confirm the clean is reproducible by running it a second time
+/// and comparing bytes.
 ///
 /// This is the tool marking its own homework. It cannot catch a leak in a
 /// structure the tool does not know to look for (nothing can verify what it
@@ -149,11 +150,16 @@ pub fn sanitize_verified(input: &[u8], policy: &Policy) -> Result<Sanitized> {
         let second = sanitize_at_depth(input, policy, 0)?;
         let deterministic = first.data == second.data;
 
-        // Re-inspect the cleaned output: a second scan should find nothing left
-        // that we claim to remove. Disclosed residuals (a kept maker note) are
-        // not "removable", so they do not count against this.
-        let reinspection = sanitize_at_depth(&first.data, policy, 0)?.report;
-        let output_reinspected_clean = reinspection.removed.is_empty();
+        // Re-clean the output: a genuinely clean result is a fixed point, so
+        // cleaning it a second time must produce identical bytes. This is the
+        // right test for a rebuilt format (nothing left to remove) AND for one
+        // cleaned in place, where an emptied-but-still-declared block (a blanked
+        // HEIF EXIF item) is re-processed on the second pass and would be counted
+        // as "removable" by a check on the removed list, wrongly failing a clean
+        // file. Disclosed residuals are stable too, so they do not count against
+        // this.
+        let recleaned = sanitize_at_depth(&first.data, policy, 0)?;
+        let output_reinspected_clean = recleaned.data == first.data;
 
         first.report.verification = Some(Verification { output_reinspected_clean, deterministic });
     }

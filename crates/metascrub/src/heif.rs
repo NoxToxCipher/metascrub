@@ -700,6 +700,19 @@ mod tests {
     }
 
     #[test]
+    fn re_cleaning_an_in_place_clean_is_a_fixed_point() {
+        // sanitize_verified relies on this: HEIF is cleaned in place and leaves
+        // the emptied metadata items still declared, so a second clean must
+        // change nothing. If it did not, a correctly cleaned file would fail its
+        // own verification.
+        let input = heif(&[(1, &exif_payload(), true), (2, b"<x:xmpmeta/>", false)]);
+        let (once, _) = run(&input);
+        let mut report = Report::new(Format::Heif, once.len());
+        let twice = sanitize(&once, &Policy::default(), &mut report).unwrap();
+        assert_eq!(once, twice, "re-cleaning an in-place clean must produce identical bytes");
+    }
+
+    #[test]
     fn a_file_with_no_metadata_box_is_reported_as_such_and_returned_intact() {
         let mut input = ftyp();
         input.extend_from_slice(&bx(b"mdat", b"just image data"));
