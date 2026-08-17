@@ -23,3 +23,6 @@ ubuntu-touch/metascrub/rustlib/
 
 # Clickable build output
 ubuntu-touch/metascrub/build/
+
+# Built click packages
+*.click

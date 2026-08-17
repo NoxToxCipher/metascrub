@@ -4,10 +4,10 @@ A native Lomiri app over the same pure-Rust core the desktop, Android and
 Sailfish builds use. Hand it a photo or a document, see honestly what it carries,
 and get a cleaned copy back — all on the phone.
 
-> **Status: runs. A photo with GPS in it has been scrubbed end to end through
-> this interface, on a desktop, against the real Lomiri toolkit. Never packaged
-> by clickable, never started on a phone, and no Content Hub transfer has ever
-> completed.** The section
+> **Status: runs, and packages. A photo with GPS in it has been scrubbed end to
+> end through this interface, on a desktop, against the real Lomiri toolkit, and
+> a real `.click` builds and passes click's validation. Never installed on a
+> phone, and no Content Hub transfer has ever completed.** The section
 > [What is actually verified](#what-is-actually-verified) says exactly which
 > parts are proven and which are still claims.
 
@@ -69,7 +69,8 @@ to drift.
 
 ## Building
 
-Two steps, because the Rust core has to exist before the app links it.
+For a phone, use clickable. Two steps, because the Rust core has to exist before
+the app links it.
 
 ```bash
 # 1. the core, for the architecture you are building
@@ -81,6 +82,22 @@ cd ubuntu-touch/metascrub
 clickable build --arch arm64
 clickable install --arch arm64         # to a device over adb/ssh
 ```
+
+**Without Docker**, and so without clickable, there is a second path for the
+host architecture:
+
+```bash
+sudo apt install click click-dev python3-gi qtbase5-dev qtdeclarative5-dev
+ubuntu-touch/build-click.sh            # core, build, install, package
+```
+
+It runs the whole pipeline and hands the package to `click` itself, so the
+manifest and the hooks are checked by the same tool the phone uses. It cannot
+cross-build — that needs a Qt for the target, which in practice means the
+clickable container — and it says so rather than producing something broken.
+This path exists because clickable needs Docker, and the machine this project is
+developed on runs Virtualization-Based Security, which already made the Sailfish
+SDK unusable.
 
 Prerequisites for step 1 when cross-compiling on a host:
 
@@ -183,10 +200,18 @@ lomiri-content-hub QML module 1.1.1 from the Ubuntu 24.04 archive:
   all four metadata files in the right places, and the app runs from that tree.
 - Every QML file parses (`qmllint`), and every JSON file in the package is valid.
 
+- **A real `.click` package builds and passes click's own validation.** 62
+  entries: the binary, the QML, eleven Handbooks, ten message catalogues, the
+  icon and the four metadata files. `click info` reads back the name, version,
+  framework, architecture, maintainer and all three hooks. The only warning is
+  that the `ubuntu-sdk-20.04` framework is not installed on the machine doing
+  the packaging, which is expected off-device.
+
 Still not verified:
 
-- **The package has never been built by `clickable` or installed on a device.**
-  No emulator, no phone, no `clickable` in this environment.
+- **The package has never been installed on a device**, and it has never been
+  built by `clickable` — no Docker in this environment, so no container and no
+  cross-built arm64 package.
 - **Desktop Lomiri is not the phone.** These modules come from Ubuntu 24.04,
   while the click targets the focal image. Versions differ; layout on a real
   screen, at a real grid unit, with a real on-screen keyboard, is untested.

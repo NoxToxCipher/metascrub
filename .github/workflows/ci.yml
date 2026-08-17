@@ -76,6 +76,14 @@ jobs:
             msgfmt --check-format --statistics -o /dev/null "$po"
           done
           ubuntu-touch/metascrub/po/from-android.py --report
+      # Build the package the way the phone would read it. click validates the
+      # manifest and the hooks, so a metadata mistake fails here rather than on
+      # somebody's device.
+      - name: Build a real .click package
+        run: |
+          sudo apt-get install -y click click-dev python3-gi
+          ./ubuntu-touch/build-click.sh
+          ls -l ubuntu-touch/metascrub/build/package/*.click
       - name: Check the click package lays out
         run: |
           cmake --install ubuntu-touch/metascrub/build
