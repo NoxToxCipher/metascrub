@@ -77,6 +77,14 @@ pub enum Error {
         /// Configured ceiling, in megapixels.
         limit: u32,
     },
+    /// A byte budget was requested, but even the smallest render is over it.
+    #[error("smallest PNG is {got} bytes, over the {limit}-byte budget")]
+    Budget {
+        /// Size of the smallest render attempted.
+        got: usize,
+        /// The requested ceiling, in bytes.
+        limit: usize,
+    },
 }
 
 /// How hard to work, traded against how much the photograph is degraded.
@@ -344,6 +352,15 @@ pub struct PngSettings {
     /// something like `Some(512)` both shrinks the file and, as a side effect,
     /// weakens PRNU (see the note on [`to_png`]).
     pub max_edge: Option<u32>,
+    /// Shrink the image until the encoded PNG fits within this many bytes.
+    ///
+    /// PNG is lossless, so the only lever is the pixel count: the image is
+    /// downscaled (below `max_edge` if need be) until it fits. `None` disables the
+    /// budget. This is what an embedding client passes to get a fixed-ceiling
+    /// avatar (Crake uses 65536, a 64 KB PNG) without having to resize the image
+    /// itself. If even a small render cannot fit, [`to_png`] returns
+    /// [`Error::Budget`] rather than hand back an over-budget file.
+    pub max_bytes: Option<usize>,
     /// Refuse images above this many megapixels before decoding, so a
     /// decompression bomb cannot exhaust memory. `None` disables the check.
     pub max_megapixels: Option<u32>,
@@ -351,7 +368,7 @@ pub struct PngSettings {
 
 impl Default for PngSettings {
     fn default() -> Self {
-        Self { max_edge: None, max_megapixels: Some(120) }
+        Self { max_edge: None, max_bytes: None, max_megapixels: Some(120) }
     }
 }
 
@@ -377,6 +394,11 @@ impl Default for PngSettings {
 /// but that is a consequence of the resize, not a promise this function makes,
 /// and it must never be presented to a user as fingerprint protection.
 ///
+/// When [`PngSettings::max_bytes`] is set, the image is downscaled until the
+/// encoded PNG fits that budget: an embedding client can ask for "any image, as a
+/// PNG no larger than N bytes" and get exactly that, without doing the resizing
+/// itself.
+///
 /// Like [`wash`], this decodes untrusted input; a caller handling hostile files
 /// should run it where a decoder crash is contained.
 pub fn to_png(input: &[u8], settings: &PngSettings) -> Result<Vec<u8>, Error> {
@@ -385,18 +407,77 @@ pub fn to_png(input: &[u8], settings: &PngSettings) -> Result<Vec<u8>, Error> {
 
     // `resize` fits the image inside an edge x edge box while keeping the aspect
     // ratio, so the longest side ends up at `edge`. Only shrink, never enlarge.
-    let image = match settings.max_edge {
+    let base = match settings.max_edge {
         Some(edge) if edge > 0 && (w > edge || h > edge) => {
             decoded.resize(edge, edge, image::imageops::FilterType::Lanczos3)
         }
         _ => decoded,
     };
 
+    let out = encode_png(&base)?;
+    match settings.max_bytes {
+        Some(budget) if out.len() > budget => fit_png_to_budget(&base, budget),
+        _ => Ok(out),
+    }
+}
+
+/// Encode a decoded image as PNG.
+fn encode_png(image: &DynamicImage) -> Result<Vec<u8>, Error> {
     let mut out = Vec::new();
     image
         .write_to(&mut std::io::Cursor::new(&mut out), ImageFormat::Png)
         .map_err(|e| Error::Encode(e.to_string()))?;
     Ok(out)
+}
+
+/// Shrink `base` until its PNG encoding fits `budget` bytes.
+///
+/// PNG is lossless, so the only lever is the pixel count. This binary-searches the
+/// longest edge for the largest size that still fits, and only ever returns an
+/// encoding it has checked is within budget (the search stores a candidate solely
+/// when it is under the ceiling, so a non-monotonic size/edge curve costs at most a
+/// few pixels of resolution, never a correctness violation). Called only when the
+/// full-size render is already over budget. If even the floor size cannot fit an
+/// absurdly small budget, it returns [`Error::Budget`] rather than an oversized
+/// file.
+fn fit_png_to_budget(base: &DynamicImage, budget: usize) -> Result<Vec<u8>, Error> {
+    // Below this the picture is no longer recognisable; a smaller budget is a
+    // caller error, reported honestly rather than met with a useless render.
+    const MIN_EDGE: u32 = 16;
+    let (bw, bh) = base.dimensions();
+    let longest = bw.max(bh);
+
+    let mut lo = MIN_EDGE.min(longest);
+    // The caller only reaches here when `base` (at `longest`) is over budget, so
+    // there is no point re-encoding it.
+    let mut hi = longest.saturating_sub(1);
+    let mut best: Option<Vec<u8>> = None;
+
+    while lo <= hi {
+        let mid = lo + (hi - lo) / 2;
+        let png = encode_png(&base.resize(mid, mid, image::imageops::FilterType::Lanczos3))?;
+        if png.len() <= budget {
+            best = Some(png);
+            lo = mid + 1;
+        } else if mid == 0 {
+            break;
+        } else {
+            hi = mid - 1;
+        }
+    }
+
+    if let Some(png) = best {
+        return Ok(png);
+    }
+    // Nothing in the search fit. Encode the floor once for an honest error figure
+    // (it may still fit if `longest` was itself below MIN_EDGE and never probed).
+    let floor =
+        encode_png(&base.resize(MIN_EDGE, MIN_EDGE, image::imageops::FilterType::Lanczos3))?;
+    if floor.len() <= budget {
+        Ok(floor)
+    } else {
+        Err(Error::Budget { got: floor.len(), limit: budget })
+    }
 }
 
 /// Add zero-mean Gaussian-ish noise, clamped into range.
@@ -569,9 +650,48 @@ mod tests {
     #[test]
     fn to_png_refuses_a_decompression_bomb() {
         let jpeg = fake_photo(1100, 1000, &sensor); // 1.1 MP
-        let err =
-            to_png(&jpeg, &PngSettings { max_edge: None, max_megapixels: Some(1) }).unwrap_err();
+        let err = to_png(&jpeg, &PngSettings { max_megapixels: Some(1), ..Default::default() })
+            .unwrap_err();
         assert!(matches!(err, Error::TooLarge { .. }), "oversize must be refused, got {err:?}");
+    }
+
+    #[test]
+    fn to_png_shrinks_to_fit_a_byte_budget() {
+        // A detailed 256x256 photo makes a PNG far bigger than the budget below.
+        let jpeg = fake_photo(256, 256, &sensor);
+        let full = to_png(&jpeg, &PngSettings::default()).unwrap();
+        let budget = full.len() / 3;
+        let fitted =
+            to_png(&jpeg, &PngSettings { max_bytes: Some(budget), ..Default::default() }).unwrap();
+        assert!(fitted.len() <= budget, "{} bytes over the {budget}-byte budget", fitted.len());
+        let (w, h) = image::load_from_memory(&fitted).unwrap().dimensions();
+        assert!(w <= 256 && h <= 256 && w > 0 && h > 0);
+        assert!(fitted.len() < full.len(), "the budget must actually shrink it");
+    }
+
+    #[test]
+    fn to_png_leaves_an_already_small_image_under_budget_alone() {
+        let jpeg = fake_photo(48, 48, &sensor);
+        let unbudgeted = to_png(&jpeg, &PngSettings::default()).unwrap();
+        let budgeted = to_png(
+            &jpeg,
+            &PngSettings { max_bytes: Some(unbudgeted.len() + 1000), ..Default::default() },
+        )
+        .unwrap();
+        // Comfortably under budget already, so it comes back untouched.
+        assert_eq!(budgeted, unbudgeted);
+    }
+
+    #[test]
+    fn to_png_reports_an_impossible_budget_rather_than_overshooting() {
+        // No PNG is 10 bytes (the signature alone is 8), so this cannot be met.
+        let jpeg = fake_photo(64, 64, &sensor);
+        let err =
+            to_png(&jpeg, &PngSettings { max_bytes: Some(10), ..Default::default() }).unwrap_err();
+        assert!(
+            matches!(err, Error::Budget { .. }),
+            "an impossible budget must error, got {err:?}"
+        );
     }
 
     /// The point of the whole crate: the fixed pattern must correlate less with

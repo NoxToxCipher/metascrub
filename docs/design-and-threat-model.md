@@ -162,7 +162,12 @@ re-encodes as PNG from the raw pixels — dropping every scrap of source metadat
 and preserving any alpha channel. The EXIF orientation flag is the one piece of
 metadata that changes the *picture* rather than describing it, so it is honoured
 before it is dropped: the raster is rotated upright and written that way, since a
-PNG has no orientation tag to carry the flag forward. It is exposed to native hosts as `ms_to_png` in
+PNG has no orientation tag to carry the flag forward. It also takes an optional
+byte budget: PNG is lossless, so the only lever is the pixel count, and the image
+is downscaled until the encoded file fits. An embedding client can therefore ask
+for "any image, as a PNG no larger than N bytes" (Crake uses a 64 KB avatar) and
+get exactly that, without doing the resizing itself. If a budget is so small that
+no render can meet it, the function says so rather than return an oversized file. It is exposed to native hosts as `ms_to_png` in
 `metascrub-ffi`, which additionally runs the PNG back through the sanitizer so the
 render path makes the same honest allowlist guarantee as every other output. The
 conversion is deliberately *not* wired into `metascrub`; see the next paragraph.

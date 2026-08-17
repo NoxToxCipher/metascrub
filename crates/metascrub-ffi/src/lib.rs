@@ -191,6 +191,12 @@ pub unsafe extern "C" fn ms_reduce_fingerprint(
 /// longest edge is at most `max_edge` (pass 0 to keep the size). A small image is
 /// never enlarged.
 ///
+/// `max_bytes` caps the encoded PNG: when non-zero, the image is shrunk until the
+/// result fits that many bytes, so a host can ask for "any image, as a PNG no
+/// larger than N bytes" (Crake passes 65536 for a 64 KB avatar) without resizing
+/// the image itself. Pass 0 to disable the budget. If even a small render cannot
+/// fit an absurdly small budget, `data` is null.
+///
 /// This is a format conversion plus a metadata scrub. It is **not** fingerprint
 /// reduction and must never be presented as such — for that, use
 /// [`ms_reduce_fingerprint`]. The PNG is additionally run through the sanitizer so
@@ -203,12 +209,18 @@ pub unsafe extern "C" fn ms_reduce_fingerprint(
 /// `input` must be null or point to `len` readable bytes. Free the result with
 /// [`ms_buffer_free`].
 #[no_mangle]
-pub unsafe extern "C" fn ms_to_png(input: *const u8, len: usize, max_edge: u32) -> MsBuffer {
+pub unsafe extern "C" fn ms_to_png(
+    input: *const u8,
+    len: usize,
+    max_edge: u32,
+    max_bytes: usize,
+) -> MsBuffer {
     let Some(bytes) = as_slice(input, len) else {
         return MsBuffer::null();
     };
     let settings = PngSettings {
         max_edge: if max_edge == 0 { None } else { Some(max_edge) },
+        max_bytes: if max_bytes == 0 { None } else { Some(max_bytes) },
         // Same phone-sized decode ceiling as the wash path, so an oversize image is
         // refused cleanly instead of running the process out of memory.
         max_megapixels: Some(50),
@@ -219,7 +231,9 @@ pub unsafe extern "C" fn ms_to_png(input: *const u8, len: usize, max_edge: u32) 
     };
     // Belt and braces: the PNG is already built from raw pixels, but rebuilding it
     // through the sanitizer's allowlist means the render path makes exactly the
-    // same honest guarantee as every other output of the core.
+    // same honest guarantee as every other output of the core. The PNG sanitizer
+    // only drops chunks and copies the kept ones verbatim, so it can only shrink
+    // the file — a byte budget met by `to_png` is still met after this.
     match metascrub::sanitize(&png, &Policy::default()) {
         Ok(out) => MsBuffer::from_vec(out.data),
         Err(_) => MsBuffer::null(),

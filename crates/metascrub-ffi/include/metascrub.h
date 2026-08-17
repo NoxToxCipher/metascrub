@@ -58,12 +58,14 @@ MsBuffer ms_reduce_fingerprint(const uint8_t *input, size_t len, int32_t strengt
  * JPEG but it should be stored and shown as a clean PNG. Drops all source
  * metadata, preserves alpha, rotates upright per the source's EXIF orientation,
  * and downscales so the longest edge is at most `max_edge` (0 keeps the original
- * size; a small image is never enlarged). This
- * is a format conversion plus a scrub, NOT fingerprint reduction — use
- * ms_reduce_fingerprint for that. `data` is NULL on error. Free with
+ * size; a small image is never enlarged). When `max_bytes` is non-zero the image
+ * is shrunk until the encoded PNG fits that many bytes (Crake passes 65536 for a
+ * 64 KB avatar); pass 0 to disable the budget. This is a format conversion plus a
+ * scrub, NOT fingerprint reduction — use ms_reduce_fingerprint for that. `data`
+ * is NULL on error (including a budget too small for any render). Free with
  * ms_buffer_free.
  */
-MsBuffer ms_to_png(const uint8_t *input, size_t len, uint32_t max_edge);
+MsBuffer ms_to_png(const uint8_t *input, size_t len, uint32_t max_edge, size_t max_bytes);
 
 /* Free a buffer from ms_sanitize / ms_reduce_fingerprint / ms_to_png. NULL-data is a no-op. */
 void ms_buffer_free(MsBuffer buf);
