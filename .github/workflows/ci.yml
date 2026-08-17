@@ -95,6 +95,21 @@ jobs:
           done
           python3 -c "import json,sys; [json.load(open(p)) for p in sys.argv[1:]]" \
             manifest.json metascrub.apparmor metascrub-contenthub.json qml/handbook.json
+      # A stripped binary still carries the absolute path of every source file
+      # that can panic, including the building user's home directory. Shipping
+      # that from a tool whose job is removing exactly this kind of thing would
+      # be embarrassing as well as wrong, and it breaks reproducibility. The
+      # first click built here held 108 of them.
+      - name: Assert the shipped binary carries no build-machine paths
+        run: |
+          binary=ubuntu-touch/metascrub/build/install/metascrub
+          leaked=$(strings "$binary" | grep -cE '/home/[^/]+/|/root/|/Users/[^/]+/' || true)
+          if [ "$leaked" != "0" ]; then
+            echo "::error::$leaked build-machine paths are embedded in $binary"
+            strings "$binary" | grep -oE '(/home/[^/]+|/root|/Users/[^/]+)[^ ]*' | sort -u | head
+            exit 1
+          fi
+          echo "no build-machine paths in the shipped binary"
       # The phone build must never gain the ability to send a file anywhere
       # either. On Ubuntu Touch that is enforced by the system, but only for as
       # long as nobody adds the policy group.

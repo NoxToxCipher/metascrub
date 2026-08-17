@@ -63,6 +63,25 @@ if [ "$ARCH_TRIPLET" != "$(gcc -dumpmachine 2>/dev/null || echo none)" ] \
     echo "==> cross linker: $linker"
 fi
 
+# Keep the build machine out of the shipped binary.
+#
+# `strip` removes symbols, not data. Panic locations are &'static str literals
+# in .rodata, so a stripped library still carries the absolute path of every
+# source file that can panic, including the building user's home directory. The
+# first click built here held 108 of them. That is the same leak the Android
+# build already fixes, in a tool whose entire job is removing exactly this kind
+# of thing from other people's files, and it also breaks the reproducibility
+# that pinning the compiler exists to support: two people with the same
+# toolchain and the same source get different bytes if their home directories
+# differ.
+#
+# `trim-paths` in [profile.release] is the tidy form and is still unstable in
+# Cargo 1.97.1, which this workspace pins on purpose, so it is done with flags
+# here exactly as android/build-apk.sh does it.
+win() { if command -v cygpath >/dev/null 2>&1; then cygpath -w "$1"; else printf '%s' "$1"; fi; }
+: "${CARGO_HOME:=$HOME/.cargo}"
+export RUSTFLAGS="${RUSTFLAGS:-} --remap-path-prefix=$(win "$CARGO_HOME")=/cargo --remap-path-prefix=$(win "$root")=/src"
+
 echo "==> building metascrub-ffi for $arch ($TRIPLE)"
 cargo build --release --manifest-path "$root/Cargo.toml" -p metascrub-ffi --target "$TRIPLE"
 
