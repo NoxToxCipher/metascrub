@@ -56,6 +56,38 @@ mkdir -p "$work" "$root/dist"
 echo "==> metascrub $version, $arch"
 
 # ---------------------------------------------------------------------------
+# Refuse to package something that should not be downloaded
+# ---------------------------------------------------------------------------
+#
+# build-in-container.sh already checks its own output, but this script takes
+# whatever is sitting in dist/linux/<arch>/, and it is easy to drop a plain
+# `cargo build` result in there while testing and then forget. This is the last
+# point at which a binary is still a build artefact rather than a download, so
+# the checks run again here. Cheap, and the failure it prevents is the kind
+# that only shows up after somebody has the file.
+gate=0
+for b in "$bin/metascrub-gui" "$bin/metascrub"; do
+  for n in ".cargo/registry" "/home/" "/Users/" "/root/"; do
+    if found="$(grep -a -o -F -- "$n" "$b" 2>/dev/null | sort -u | head -2)" && [ -n "$found" ]; then
+      echo "   FAIL $(basename "$b") names a build path: $(echo "$found" | tr '\n' ' ')" >&2
+      gate=1
+    fi
+  done
+  need="$(readelf -V "$b" 2>/dev/null | sed -n 's/.*Name: GLIBC_\([0-9.]*\).*/\1/p' | sort -V | tail -1)"
+  floor="${METASCRUB_GLIBC_FLOOR:-2.31}"
+  if [ -n "$need" ] && [ "$(printf '%s\n%s\n' "$need" "$floor" | sort -V | tail -1)" != "$floor" ]; then
+    echo "   FAIL $(basename "$b") needs GLIBC_$need, floor is $floor" >&2
+    gate=1
+  fi
+done
+if [ "$gate" -ne 0 ]; then
+  echo >&2
+  echo "These binaries were not produced by build-in-container.sh." >&2
+  echo "Run: packaging/linux/build-in-container.sh --arch $arch" >&2
+  exit 1
+fi
+
+# ---------------------------------------------------------------------------
 # Tarball
 # ---------------------------------------------------------------------------
 tree="$work/$stem"
