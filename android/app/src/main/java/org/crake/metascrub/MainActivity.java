@@ -6,15 +6,18 @@ import android.content.ClipData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
+import android.graphics.Insets;
 import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.DocumentsContract;
 import android.provider.OpenableColumns;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.view.WindowInsets;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
@@ -150,6 +153,7 @@ public class MainActivity extends Activity {
     protected void onCreate(Bundle state) {
         super.onCreate(state);
         setContentView(R.layout.activity_main);
+        applyBarInsets();
 
         findings = findViewById(R.id.findings_container);
         handbookContainer = findViewById(R.id.handbook_container);
@@ -197,6 +201,36 @@ public class MainActivity extends Activity {
             restoreUris = null;
         }
         render();
+    }
+
+    /**
+     * Keep the layout out from under the status and navigation bars.
+     *
+     * From Android 15 an app targeting 35 or above is laid out edge to edge
+     * whether it asked to be or not, and the theme's statusBarColor and
+     * navigationBarColor are ignored. Left alone, the header would sit behind
+     * the clock and the buttons behind the gesture bar. Padding the root view by
+     * the system bars, and by a camera cutout (which is not one of them), is the
+     * whole fix and needs no support library.
+     *
+     * The padding shows the window background, so on this always-dark theme the
+     * bars keep reading as part of the app rather than as a light strip.
+     */
+    @SuppressWarnings("deprecation") // pre-30 has no getInsets(int); these are what it has
+    private void applyBarInsets() {
+        findViewById(R.id.root).setOnApplyWindowInsetsListener((v, insets) -> {
+            if (Build.VERSION.SDK_INT >= 30) {
+                Insets bars = insets.getInsets(
+                        WindowInsets.Type.systemBars() | WindowInsets.Type.displayCutout());
+                v.setPadding(bars.left, bars.top, bars.right, bars.bottom);
+            } else {
+                v.setPadding(insets.getSystemWindowInsetLeft(), insets.getSystemWindowInsetTop(),
+                        insets.getSystemWindowInsetRight(), insets.getSystemWindowInsetBottom());
+            }
+            // Passed on rather than consumed: nothing here needs to be the last
+            // view to see them, and swallowing insets breaks anything added later.
+            return insets;
+        });
     }
 
     // --- tabs ------------------------------------------------------------

@@ -19,8 +19,17 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="org.crake.metascrub">
 
+    <!--
+      extractNativeLibs="false" is the manifest half of the 16 KB page work in
+      build-apk.sh: it says the library is to be mapped straight out of the
+      installed archive instead of being unpacked into the app's data directory
+      first. That needs the .so stored uncompressed and aligned, which the build
+      does and then verifies, and in exchange the app takes half the disk space
+      and has only one copy of the library on the device rather than two.
+    -->
     <application
         android:allowBackup="false"
+        android:extractNativeLibs="false"
         android:largeHeap="true"
         android:supportsRtl="true"
         android:icon="@mipmap/ic_launcher"

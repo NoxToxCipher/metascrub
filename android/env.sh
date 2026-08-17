@@ -19,6 +19,18 @@ export ANDROID_NDK_ROOT="$ANDROID_NDK_HOME"
 
 export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$ANDROID_HOME/cmdline-tools/latest/bin:$PATH"
 
+# bundletool, which turns the build into the .apks set a store takes. It is a
+# single jar Google publishes on GitHub rather than an SDK package, so it is not
+# installed by sdkmanager and has to be dropped in by hand:
+#
+#   https://github.com/google/bundletool/releases -> bundletool-all-<ver>.jar
+#   mv bundletool-all-*.jar "$ANDROID_TOOLS/bundletool.jar"
+#
+# Only build-bundle.sh needs it; the plain APK build does not, so a missing jar
+# is reported there and not here.
+export BUNDLETOOL_JAR="${BUNDLETOOL_JAR:-$ANDROID_TOOLS/bundletool.jar}"
+
 echo "  JAVA_HOME        $JAVA_HOME"
 echo "  ANDROID_HOME     $ANDROID_HOME"
 echo "  ANDROID_NDK_HOME ${ANDROID_NDK_HOME:-NOT INSTALLED}"
+echo "  BUNDLETOOL_JAR   $BUNDLETOOL_JAR$([ -f "$BUNDLETOOL_JAR" ] || echo '  (not installed)')"
