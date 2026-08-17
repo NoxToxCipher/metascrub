@@ -95,6 +95,9 @@ pub(crate) fn sanitize(
         };
 
         let keep = KEEP.contains(&&ty) || (&ty == b"iCCP" && policy.keep_icc());
+        if &ty == b"iCCP" && policy.keep_icc() {
+            report.retain_icc();
+        }
 
         if keep {
             // Only verify what we are about to carry forward. A bad CRC on a
@@ -255,10 +258,16 @@ mod tests {
         let (dropped, report) = run(&png(std::slice::from_ref(&icc)), &Policy::strict());
         assert!(!dropped.windows(4).any(|w| w == b"iCCP"));
         assert_eq!(report.removed[0].kind, Kind::ColorProfile);
+        assert!(report.retained.iter().all(|r| r.what != "ICC colour profile"));
 
         let (kept, report) = run(&png(&[icc]), &Policy::preserve_appearance());
         assert!(kept.windows(4).any(|w| w == b"iCCP"));
         assert!(report.is_clean());
+        // Kept at the caller's request, so it must be disclosed honestly.
+        assert!(
+            report.retained.iter().any(|r| r.what == "ICC colour profile"),
+            "a kept ICC profile must be disclosed in the retained list"
+        );
     }
 
     #[test]

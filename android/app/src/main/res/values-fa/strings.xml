@@ -52,6 +52,7 @@
 
     <string name="found_location">محل گرفته‌شدن آن را ثبت کرده بود.</string>
     <string name="removed_prefix">حذف‌شده: %1$s</string>
+    <string name="still_in_file">هنوز در فایل</string>
     <string name="nothing_found">از قبل پاک است. چیزی برای حذف نیست.</string>
 
     <!-- Tabs and language -->

@@ -53,6 +53,7 @@
 
     <string name="found_location">Recorded where it was taken.</string>
     <string name="removed_prefix">Removed: %1$s</string>
+    <string name="still_in_file">Still in the file</string>
     <string name="nothing_found">Already clean. Nothing to remove.</string>
 
     <!-- Tabs and language -->

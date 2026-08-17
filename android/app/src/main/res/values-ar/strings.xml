@@ -64,6 +64,7 @@
 
     <string name="found_location">سجّل مكان التقاطها.</string>
     <string name="removed_prefix">أُزيل: %1$s</string>
+    <string name="still_in_file">ما زال في الملف</string>
     <string name="nothing_found">نظيف بالفعل. لا شيء لإزالته.</string>
 
     <!-- Tabs and language -->

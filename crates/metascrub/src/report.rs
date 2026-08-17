@@ -196,6 +196,23 @@ impl Report {
         }
     }
 
+    /// Record that an ICC colour profile was kept at the caller's request.
+    ///
+    /// One wording, shared by every format (JPEG, PNG, WebP, TIFF), so choosing
+    /// "keep colour" never silently leaves an identifying blob behind: the report
+    /// says what a kept profile can reveal. Deduplicated like the rest of
+    /// [`retain`](Self::retain), so recursing into embedded images tells the user
+    /// once.
+    pub(crate) fn retain_icc(&mut self) {
+        self.retain(
+            "ICC colour profile",
+            "A colour profile carries a free-text description, a device \
+             manufacturer and model, and an embedded creation date. A custom \
+             monitor, scanner or camera profile can be distinctive enough to \
+             link files made on the same machine.",
+        );
+    }
+
     pub(crate) fn warn(&mut self, msg: impl Into<String>) {
         self.warnings.push(msg.into());
     }

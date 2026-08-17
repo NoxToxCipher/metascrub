@@ -52,6 +52,7 @@
 
     <string name="found_location">شوێنی گیرانی تۆمار کرابوو.</string>
     <string name="removed_prefix">لابردرا: %1$s</string>
+    <string name="still_in_file">هێشتا لە پەڕگەکەدایە</string>
     <string name="nothing_found">پێشتر پاکە. هیچ شتێک نییە بۆ لابردن.</string>
 
     <!-- تابەکان و زمان -->

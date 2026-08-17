@@ -58,6 +58,7 @@
 
     <string name="found_location">Запісана, дзе быў зроблены здымак.</string>
     <string name="removed_prefix">Выдалена: %1$s</string>
+    <string name="still_in_file">Засталося ў файле</string>
     <string name="nothing_found">Ужо чыста. Няма чаго выдаляць.</string>
 
     <!-- Tabs and language -->

@@ -76,7 +76,12 @@ pub(crate) fn sanitize(
             let _ = r.u8();
         }
 
-        if KEEP.contains(&&ty) || (&ty == b"ICCP" && policy.keep_icc()) {
+        if &ty == b"ICCP" && policy.keep_icc() {
+            report.retain_icc();
+            chunks.push((ty, body));
+            continue;
+        }
+        if KEEP.contains(&&ty) {
             chunks.push((ty, body));
             continue;
         }
@@ -370,11 +375,17 @@ mod tests {
         let at = dropped.windows(4).position(|w| w == b"VP8X").unwrap();
         assert_eq!(dropped[at + 8] & FLAG_ICC, 0);
         assert!(report.removed.iter().any(|r| r.kind == Kind::ColorProfile));
+        assert!(report.retained.iter().all(|r| r.what != "ICC colour profile"));
 
-        let (kept, _) = run(&input, &Policy::preserve_appearance());
+        let (kept, report) = run(&input, &Policy::preserve_appearance());
         assert!(kept.windows(7).any(|w| w == b"profile"));
         let at = kept.windows(4).position(|w| w == b"VP8X").unwrap();
         assert_eq!(kept[at + 8] & FLAG_ICC, FLAG_ICC, "the flag must still match reality");
+        // Kept at the caller's request, so it must be disclosed honestly.
+        assert!(
+            report.retained.iter().any(|r| r.what == "ICC colour profile"),
+            "a kept ICC profile must be disclosed in the retained list"
+        );
     }
 
     #[test]

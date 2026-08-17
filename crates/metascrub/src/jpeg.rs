@@ -246,6 +246,7 @@ fn handle_app(marker: u8, payload: &[u8], policy: &Policy, report: &mut Report, 
 
         App::Icc => {
             if policy.keep_icc() {
+                report.retain_icc();
                 emit(out, marker, payload);
             } else {
                 report.removed(Kind::ColorProfile, "APP2 ICC_PROFILE", payload.len());
@@ -610,9 +611,15 @@ mod tests {
         let (dropped, report) = run(&skeleton(&[seg(0xE2, &icc)]), &Policy::strict());
         assert!(!dropped.windows(11).any(|w| w == b"ICC_PROFILE"));
         assert!(report.removed.iter().any(|r| r.kind == Kind::ColorProfile));
+        assert!(report.retained.iter().all(|r| r.what != "ICC colour profile"));
 
-        let (kept, _) = run(&skeleton(&[seg(0xE2, &icc)]), &Policy::preserve_appearance());
+        let (kept, report) = run(&skeleton(&[seg(0xE2, &icc)]), &Policy::preserve_appearance());
         assert!(kept.windows(17).any(|w| w == b"profile-body-here"));
+        // Kept at the caller's request, so it must be disclosed honestly.
+        assert!(
+            report.retained.iter().any(|r| r.what == "ICC colour profile"),
+            "a kept ICC profile must be disclosed in the retained list"
+        );
     }
 
     #[test]

@@ -457,6 +457,7 @@ fn build_ifd(
             // ICC follows the colour-profile policy, like WebP and the others.
             T_ICC_PROFILE => {
                 if policy.keep_icc() {
+                    report.retain_icc();
                     kept.push(*e);
                 } else {
                     report.removed(Kind::ColorProfile, "TIFF tag: ICC profile", 0);
@@ -1089,6 +1090,11 @@ mod tests {
         assert!(
             out_keep.windows(icc.len()).any(|w| w == icc),
             "ICC dropped even when asked to keep it"
+        );
+        // Kept at the caller's request, so it must be disclosed honestly.
+        assert!(
+            report.retained.iter().any(|r| r.what == "ICC colour profile"),
+            "a kept ICC profile must be disclosed in the retained list"
         );
     }
 

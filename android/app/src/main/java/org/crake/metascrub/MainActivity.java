@@ -72,6 +72,10 @@ public class MainActivity extends Activity {
         boolean foundLocation;
         int removedCount;
         String removedList = "";
+        // Identifying data knowingly left in the file, each {what, reveals}. Kept
+        // colour profiles and raw residue land here; surfacing it is the whole
+        // point of the report, so it must never stay silent.
+        final List<String[]> retained = new ArrayList<>();
         String assurance = "none";
         String note = "";
 
@@ -387,10 +391,21 @@ public class MainActivity extends Activity {
                 }
             }
             it.removedList = String.join(", ", kinds);
+            it.retained.clear();
+            JSONArray retained = r.optJSONArray("retained");
+            if (retained != null) {
+                for (int i = 0; i < retained.length(); i++) {
+                    JSONObject e = retained.optJSONObject(i);
+                    if (e != null) {
+                        it.retained.add(new String[] {e.optString("what"), e.optString("reveals")});
+                    }
+                }
+            }
         } catch (Throwable t) {
             it.assurance = "none";
             it.writable = false;
             it.removedCount = 0;
+            it.retained.clear();
             it.note = getString(R.string.read_failed, String.valueOf(t.getMessage()));
         }
     }
@@ -590,6 +605,18 @@ public class MainActivity extends Activity {
                 addLine(card, getString(R.string.removed_prefix, it.removedList), 12.5f, R.color.text_muted, 4);
             } else if (it.writable) {
                 addLine(card, getString(R.string.nothing_found), 12.5f, R.color.text_muted, 4);
+            }
+            // What was knowingly left in, and what it reveals. Framed in the
+            // best-effort amber: a clean that keeps something identifying but says
+            // nothing is worse than one that spells it out.
+            if (!it.retained.isEmpty()) {
+                addLine(card, getString(R.string.still_in_file), 12.5f, R.color.warn, 8);
+                for (String[] kept : it.retained) {
+                    addLine(card, "• " + kept[0], 12f, R.color.warn, 2);
+                    if (kept.length > 1 && !kept[1].isEmpty()) {
+                        addLine(card, kept[1], 11.5f, R.color.text_muted, 0);
+                    }
+                }
             }
         }
 

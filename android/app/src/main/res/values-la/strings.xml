@@ -52,6 +52,7 @@
 
     <string name="found_location">Ubi captum sit inscripsit.</string>
     <string name="removed_prefix">Remota: %1$s</string>
+    <string name="still_in_file">Adhuc in documento</string>
     <string name="nothing_found">Iam purum. Nihil removendum.</string>
 
     <!-- Tabs and language -->

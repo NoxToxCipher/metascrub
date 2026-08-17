@@ -49,6 +49,7 @@
 
     <string name="found_location">ရိုက်ကူးခဲ့သည့်နေရာကို မှတ်တမ်းတင်ထားသည်။</string>
     <string name="removed_prefix">ဖယ်ရှားပြီး— %1$s</string>
+    <string name="still_in_file">ဖိုင်ထဲတွင် ကျန်နေဆဲ</string>
     <string name="nothing_found">သန့်ပြီးသား။ ဖယ်ရှားစရာ မရှိ။</string>
 
     <!-- Tabs and language -->

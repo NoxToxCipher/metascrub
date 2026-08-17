@@ -52,6 +52,7 @@
 
     <string name="found_location">Cihê ku lê hate kişandin tomar kiribû.</string>
     <string name="removed_prefix">Hat rakirin: %1$s</string>
+    <string name="still_in_file">Hê di dosyeyê de</string>
     <string name="nothing_found">Jixwe paqij e. Tiştek ji bo rakirinê tune.</string>
 
     <!-- Tabs and language -->

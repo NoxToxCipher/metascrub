@@ -52,6 +52,7 @@
 
     <string name="found_location">Registris kie ĝi estis farita.</string>
     <string name="removed_prefix">Forigita: %1$s</string>
+    <string name="still_in_file">Ankoraŭ en la dosiero</string>
     <string name="nothing_found">Jam pura. Nenio forigenda.</string>
 
     <!-- Tabs and language -->
