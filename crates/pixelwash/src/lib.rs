@@ -51,7 +51,7 @@
 #![forbid(unsafe_code)]
 #![warn(missing_docs)]
 
-use image::{DynamicImage, GenericImageView, ImageFormat, RgbImage};
+use image::{DynamicImage, GenericImageView, ImageDecoder, ImageFormat, RgbImage};
 use rand::Rng;
 
 mod denoise;
@@ -255,7 +255,18 @@ fn decode_bounded(input: &[u8], max_megapixels: Option<u32>) -> Result<DynamicIm
         reader.limits(limits);
     }
 
-    let decoded = reader.decode().map_err(|e| Error::Decode(e.to_string()))?;
+    // Decode through the decoder object rather than `reader.decode()`, so the
+    // image's EXIF orientation can be read and applied to the pixels. Both callers
+    // re-encode from the raw raster and drop all metadata, so a sideways phone
+    // photo must be rotated upright *here*: otherwise the orientation flag is
+    // discarded with the rest of the metadata and the output is left on its side.
+    // Formats without an orientation tag (and the PNG/WebP decoders generally)
+    // return `NoTransforms`, so this is a no-op for them.
+    let mut decoder = reader.into_decoder().map_err(|e| Error::Decode(e.to_string()))?;
+    let orientation = decoder.orientation().map_err(|e| Error::Decode(e.to_string()))?;
+    let mut decoded =
+        DynamicImage::from_decoder(decoder).map_err(|e| Error::Decode(e.to_string()))?;
+    decoded.apply_orientation(orientation);
     let (w, h) = decoded.dimensions();
     if w == 0 || h == 0 {
         // Defends the resize/denoise math in callers, not written for an empty
@@ -352,6 +363,12 @@ impl Default for PngSettings {
 /// metadata is dropped**: a JPEG's EXIF, GPS, timestamp, thumbnail and maker
 /// note do not survive, since the PNG this writes carries only image data.
 /// Alpha is preserved if the source had it.
+///
+/// The one piece of metadata that changes the *picture* — the EXIF orientation
+/// flag a phone sets instead of rotating the raster — is honoured before it is
+/// dropped: the image is rotated upright and written that way. A PNG has no
+/// orientation tag to carry the flag forward, so baking it into the pixels is the
+/// only way the avatar shows the right way up.
 ///
 /// It is **not** fingerprint reduction. The pixels are preserved (or only
 /// downscaled), and PRNU lives in the pixels, so converting JPEG to PNG does
@@ -474,6 +491,44 @@ mod tests {
         com.extend_from_slice(marker);
         j.splice(2..2, com);
         j
+    }
+
+    /// A JPEG with a real EXIF APP1 carrying an Orientation tag, so a test can
+    /// prove the render path rotates the raster upright. Big-endian ("MM") TIFF
+    /// with a single IFD0 entry: tag 0x0112 (Orientation), SHORT, the given value.
+    fn jpeg_with_orientation(w: u32, h: u32, orientation: u16) -> Vec<u8> {
+        #[rustfmt::skip]
+        let tiff: Vec<u8> = vec![
+            b'M', b'M', 0x00, 0x2A, 0x00, 0x00, 0x00, 0x08, // header, IFD0 at offset 8
+            0x00, 0x01,                                     // one entry
+            0x01, 0x12, 0x00, 0x03, 0x00, 0x00, 0x00, 0x01, // Orientation, SHORT, count 1
+            (orientation >> 8) as u8, orientation as u8, 0x00, 0x00, // value, left-justified
+            0x00, 0x00, 0x00, 0x00,                         // next IFD: none
+        ];
+        let mut app1 = vec![0xFF, 0xE1];
+        let payload = [b"Exif\0\0".as_slice(), &tiff].concat();
+        app1.extend_from_slice(&((payload.len() + 2) as u16).to_be_bytes());
+        app1.extend_from_slice(&payload);
+        let mut j = fake_photo(w, h, &sensor);
+        j.splice(2..2, app1);
+        j
+    }
+
+    #[test]
+    fn to_png_applies_exif_orientation() {
+        // Orientation 6 means "rotate 90 clockwise to display", so a 100x60
+        // landscape raster must come out as a 60x100 portrait.
+        let jpeg = jpeg_with_orientation(100, 60, 6);
+        let png = to_png(&jpeg, &PngSettings::default()).unwrap();
+        assert_eq!(image::load_from_memory(&png).unwrap().dimensions(), (60, 100));
+    }
+
+    #[test]
+    fn to_png_leaves_an_upright_image_alone() {
+        // Orientation 1 ("no transform") must not touch the dimensions.
+        let jpeg = jpeg_with_orientation(100, 60, 1);
+        let png = to_png(&jpeg, &PngSettings::default()).unwrap();
+        assert_eq!(image::load_from_memory(&png).unwrap().dimensions(), (100, 60));
     }
 
     #[test]

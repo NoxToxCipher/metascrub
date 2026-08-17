@@ -159,7 +159,10 @@ bounded decoder as the wash path (allowlist, pre-decode dimension check against 
 megapixel cap, decode, zero-dimension guard), downscales with Lanczos3 so the
 longest edge is at most `max_edge` (never enlarging a smaller image), and
 re-encodes as PNG from the raw pixels — dropping every scrap of source metadata
-and preserving any alpha channel. It is exposed to native hosts as `ms_to_png` in
+and preserving any alpha channel. The EXIF orientation flag is the one piece of
+metadata that changes the *picture* rather than describing it, so it is honoured
+before it is dropped: the raster is rotated upright and written that way, since a
+PNG has no orientation tag to carry the flag forward. It is exposed to native hosts as `ms_to_png` in
 `metascrub-ffi`, which additionally runs the PNG back through the sanitizer so the
 render path makes the same honest allowlist guarantee as every other output. The
 conversion is deliberately *not* wired into `metascrub`; see the next paragraph.

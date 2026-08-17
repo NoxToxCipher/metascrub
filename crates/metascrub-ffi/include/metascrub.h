@@ -56,8 +56,9 @@ MsBuffer ms_reduce_fingerprint(const uint8_t *input, size_t len, int32_t strengt
  * Convert a photo (JPEG/PNG/WebP) to a metadata-free PNG, re-encoded from raw
  * pixels — the "render path" for things like avatars, where a user may pick a
  * JPEG but it should be stored and shown as a clean PNG. Drops all source
- * metadata, preserves alpha, and downscales so the longest edge is at most
- * `max_edge` (0 keeps the original size; a small image is never enlarged). This
+ * metadata, preserves alpha, rotates upright per the source's EXIF orientation,
+ * and downscales so the longest edge is at most `max_edge` (0 keeps the original
+ * size; a small image is never enlarged). This
  * is a format conversion plus a scrub, NOT fingerprint reduction — use
  * ms_reduce_fingerprint for that. `data` is NULL on error. Free with
  * ms_buffer_free.

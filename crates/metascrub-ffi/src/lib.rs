@@ -186,8 +186,10 @@ pub unsafe extern "C" fn ms_reduce_fingerprint(
 /// The "render path": a host takes a JPEG (or PNG/WebP) a user picked, and gets
 /// back a PNG it can display or store — a Crake avatar, say — that carries none of
 /// the source's metadata. It drops everything by rebuilding from decoded pixels,
-/// preserves any alpha channel, and optionally downscales so the longest edge is
-/// at most `max_edge` (pass 0 to keep the size). A small image is never enlarged.
+/// preserves any alpha channel, rotates the image upright per the source's EXIF
+/// orientation before that flag is dropped, and optionally downscales so the
+/// longest edge is at most `max_edge` (pass 0 to keep the size). A small image is
+/// never enlarged.
 ///
 /// This is a format conversion plus a metadata scrub. It is **not** fingerprint
 /// reduction and must never be presented as such — for that, use
