@@ -1,5 +1,6 @@
 [package]
 name = "metascrub-gui"
+publish = false
 description = "Desktop interface for metascrub: remove metadata from files"
 version.workspace = true
 edition.workspace = true
