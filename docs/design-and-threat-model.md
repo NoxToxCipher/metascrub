@@ -140,6 +140,43 @@ correlation; it does not remove the fingerprint, and nothing in the tool will
 ever say it does. It also only applies to a camera-captured raster photo: it
 cannot apply to a raw (that would destroy the raw) or to a non-photo file.
 
+## 7a. Serving an embedding client: the render path (designed, not built)
+
+The messenger in this suite needs something metascrub does not yet offer. It
+receives pictures from people who are not using our software, has to draw them,
+and must never hand a stranger's bytes to the browser engine that draws its
+interface. Its design is recorded in that project's §79; this section is the
+half that lives here.
+
+**The job.** Take an arbitrary inbound image, produce a small PNG that is safe to
+display, and leave the stored original alone. Concretely: decode, downscale to a
+display size, re-encode as PNG, return that. Refuse anything whose declared
+dimensions are absurd *before* allocating for them.
+
+**Where it goes, and why it is not negotiable.** In `pixelwash`, never in
+`metascrub`. Section 8 makes a specific promise — "the always-on metadata path
+never decodes a pixel", and the image decoder "is reached only through the
+fingerprint tool, which is off by default". That is why running metascrub on a
+hostile file is safe, and it is a claim we make in public. A converter decodes by
+definition. Putting one in `metascrub` would silently retire the promise, so the
+crate split that already exists is load-bearing and stays: `metascrub` walks
+containers with no image dependency, `pixelwash` decodes and is opt-in.
+
+**What the render path does and does not buy.** It removes the *embedding
+application's* exposure to a decoder it does not control, by making sure the only
+thing that application's renderer ever parses is a PNG we wrote. It does nothing
+for the decode itself, which is still a decode of hostile input — that risk is
+contained by the caller running this in a sandbox, not by anything in this
+crate. This document should never imply otherwise.
+
+**Conversion is not fingerprint reduction.** Changing a file from JPEG to PNG
+preserves the decoded pixels exactly, and PRNU lives in the pixels. Repeated
+conversion does not help: each lossy round degrades correlation slightly and
+unpredictably, and destroys the picture long before it destroys the pattern.
+Only the geometry changes in section 7 — downscale, denoise, added noise — do
+real work. A caller who downscales for display gets some of that as a side
+effect and must not be told it is pixelwash.
+
 ## 8. Security properties
 
 - **No network capability.** metascrub makes zero network connections. There are
@@ -207,6 +244,15 @@ its end marker; metascrub drops that video and reports it specifically.
 - An external security audit.
 - Reproducible builds and signed releases (in progress).
 - Per-format raw testing beyond a few real samples of each vendor.
+- **The render path in section 7a.** `pixelwash` decodes and re-encodes already;
+  what does not exist is a convert-to-PNG-at-a-bounded-size entry point, its
+  exposure through `metascrub-ffi`, or a dimension check that refuses a
+  decompression bomb before allocating for it.
+- **A sealed report format.** `report.rs` records what was removed and under
+  which `Kind`. An embedding application wants to keep that beside a file it has
+  cleaned, so a person who needs to know when a photograph was taken can be told
+  without the file carrying the answer. Nothing serialises a report for storage
+  today.
 
 These are stated here rather than left for a user to discover, because a tool
 that hides its limits is more dangerous than one that names them.
