@@ -4,8 +4,10 @@ A native Lomiri app over the same pure-Rust core the desktop, Android and
 Sailfish builds use. Hand it a photo or a document, see honestly what it carries,
 and get a cleaned copy back — all on the phone.
 
-> **Status: builds and runs its native tests on amd64. Never packaged by
-> clickable and never started on a device or emulator.** The section
+> **Status: runs. A photo with GPS in it has been scrubbed end to end through
+> this interface, on a desktop, against the real Lomiri toolkit. Never packaged
+> by clickable, never started on a phone, and no Content Hub transfer has ever
+> completed.** The section
 > [What is actually verified](#what-is-actually-verified) says exactly which
 > parts are proven and which are still claims.
 
@@ -92,18 +94,34 @@ The core is linked in as a static library, so the click ships one binary and no
 loose `.so` to find at runtime. If cmake cannot find the library it stops and
 tells you which command to run, rather than building an app with no core in it.
 
-To build and test on a desktop (no Lomiri, so the interface will not start, but
-everything below it will):
+### Running it on a desktop, without a phone
+
+Lomiri is packaged in the Ubuntu archive, so the interface runs on an ordinary
+desktop. This is how the app was first debugged, and it is the cheapest way to
+see a change.
 
 ```bash
+sudo apt install qtbase5-dev qtdeclarative5-dev \
+                 qml-module-lomiri-components qml-module-lomiri-content
+
 cd ubuntu-touch/metascrub
 cmake -S . -B build -DMETASCRUB_TESTS=ON -DCMAKE_INSTALL_PREFIX=$PWD/build/install
 cmake --build build && ./build/scrubber_smoke
+cmake --install build && ./build/install/metascrub
+```
+
+Headless, for a screenshot:
+
+```bash
+Xvfb :99 -screen 0 480x800x24 &
+DISPLAY=:99 ./build/install/metascrub &
+DISPLAY=:99 import -window root shot.png
 ```
 
 ## What is actually verified
 
-Run on this machine, amd64, Qt 5.15:
+On amd64, Qt 5.15, against the Lomiri UI toolkit 1.3.5100 and the
+lomiri-content-hub QML module 1.1.1 from the Ubuntu 24.04 archive:
 
 - The Rust core cross-compiles for `aarch64`, `armv7hf` and `x86_64`, and
   `build-ffi.sh` puts each one where the build looks for it.
@@ -112,25 +130,39 @@ Run on this machine, amd64, Qt 5.15:
   is reported `complete`, its text chunks are found, the cleaned copy has nothing
   left to remove and retains nothing, an unknown format is never reported as
   cleanable and **writes no file**, and a missing file fails with a message.
-- Every QML file parses (`qmllint`), and every JSON file in the package is valid.
+- **The interface runs**, with no warnings the toolkit does not also emit about
+  itself. The scrub page, the Handbook and About all render, and the page stack
+  and back actions work.
+- **A whole scrub runs through the interface.** A JPEG carrying GPS
+  coordinates, make, model, artist and a capture time, plus a PNG carrying a
+  comment, plus an unreadable `.dat`, were queued and scrubbed. The two photos
+  came back `COMPLETE`, the JPEG showed "Recorded where it was taken", and the
+  `.dat` came back `NOT CLEANED` with nothing written for it. ExifTool, a
+  separate codebase, finds none of those fields in the saved copies, which were
+  written under random names.
 - `cmake --install` lays out a click tree with the binary, the QML, the icon and
-  all four metadata files in the right places.
+  all four metadata files in the right places, and the app runs from that tree.
+- Every QML file parses (`qmllint`), and every JSON file in the package is valid.
 
-Not verified, and honestly cannot be from here:
+Still not verified:
 
 - **The package has never been built by `clickable` or installed on a device.**
   No emulator, no phone, no `clickable` in this environment.
-- **The interface has never been rendered.** Lomiri components are not installed
-  here, so `qmllint` checked syntax only. Expect the first run on a device to
-  turn up layout and property mistakes.
-- **The Content Hub paths have never run.** Import, share-in and export-back are
-  written to the documented API and are the most likely place for a first-run
-  bug. The import is `Lomiri.Content 0.1`, which is the version the Lomiri
-  Content QML API documents; on an older image the same types live under
-  `Ubuntu.Content 0.1`. Check that line first if the app fails to start.
+- **Desktop Lomiri is not the phone.** These modules come from Ubuntu 24.04,
+  while the click targets the focal image. Versions differ; layout on a real
+  screen, at a real grid unit, with a real on-screen keyboard, is untested.
+- **No Content Hub transfer has ever completed.** The picker instantiates and
+  correctly reports that no peer app is installed here, but choosing a peer,
+  building `ContentItem`s and charging a transfer are all unexercised, in both
+  directions. Import, share-in and export-back remain the likeliest place for a
+  first-run bug on a device.
 - **The framework and policy version** (`ubuntu-sdk-20.04`, `20.04`) target
   focal. A 24.04 image will want both bumped, in `CMakeLists.txt` and
   `metascrub.apparmor`.
+
+The queue was seeded for that run by a temporary local patch, since there is no
+Content Hub peer here to hand files over. The patch was not committed: the
+shipped app has no way to be handed a file except through the Content Hub.
 
 ## Known gaps
 

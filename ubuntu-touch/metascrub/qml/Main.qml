@@ -168,10 +168,15 @@ MainView {
             queueModel.setProperty(i, "note", noteFor(report.assurance))
             queueModel.setProperty(i, "writable", report.writable)
             queueModel.setProperty(i, "foundLocation", report.foundLocation)
+            // "Already clean" is only true of a file the core could actually take
+            // apart. Saying it about a format it could not read would be the
+            // reassuring lie this whole tool exists to avoid: nothing was found
+            // there because nothing could be looked for. Same guard the Android
+            // app uses.
             queueModel.setProperty(i, "removed",
-                report.removedCount === 0
-                    ? i18n.tr("Already clean. Nothing to remove.")
-                    : i18n.tr("Removed: %1").arg(report.removedKinds.join(", ")))
+                report.removedCount > 0
+                    ? i18n.tr("Removed: %1").arg(report.removedKinds.join(", "))
+                    : (report.writable ? i18n.tr("Already clean. Nothing to remove.") : ""))
 
             // What was knowingly kept, and what each thing would tell someone
             // looking. A clean that leaves something identifying but says
