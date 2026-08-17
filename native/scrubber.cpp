@@ -61,6 +61,17 @@ Scrubber::Scrubber(QObject *parent) : QObject(parent)
     });
 }
 
+Scrubber::~Scrubber()
+{
+    // Stop at the next file, then wait for the worker to actually be gone.
+    // Waiting here is the point: everything the worker touches after this
+    // returns would be freed memory.
+    m_abort.store(true);
+    if (m_work.isRunning()) {
+        m_work.waitForFinished();
+    }
+}
+
 QVariantMap Scrubber::inspect(const QString &path, bool keepColour, bool keepOrientation)
 {
     QVariantMap m;
@@ -216,27 +227,38 @@ void Scrubber::saveAll(const QVariantList &jobs, bool keepColour, bool keepOrien
     }
 
     m_busy = true;
+    m_abort.store(false);
     emit busyChanged();
 
     // save() holds no state, so running it off the main thread is safe, and it
     // keeps the guard that refuses to write a file the core could not take
-    // apart in exactly one place.
-    QtConcurrent::run([this, work, keepColour, keepOrientation, fingerprint, strength]() {
-        QStringList written;
-        int failed = 0;
-        for (int i = 0; i < work.size(); ++i) {
-            emit saveProgress(i, work.size());
-            const QString error = save(work[i].first, work[i].second, keepColour,
-                                       keepOrientation, fingerprint, strength);
-            if (error.isEmpty()) {
-                written << work[i].second;
-            } else {
-                ++failed;
+    // apart in exactly one place. The future is kept so the destructor can wait
+    // for this to finish rather than letting it signal into freed memory.
+    m_work = QtConcurrent::run(
+        [this, work, keepColour, keepOrientation, fingerprint, strength]() {
+            QStringList written;
+            int failed = 0;
+            for (int i = 0; i < work.size(); ++i) {
+                // Checked between files, never inside one: a half-written file
+                // would be worse than a missing one.
+                if (m_abort.load()) {
+                    break;
+                }
+                emit saveProgress(i, work.size());
+                const QString error = save(work[i].first, work[i].second, keepColour,
+                                           keepOrientation, fingerprint, strength);
+                if (error.isEmpty()) {
+                    written << work[i].second;
+                } else {
+                    ++failed;
+                }
             }
-        }
-        emit saveProgress(work.size(), work.size());
-        emit saveAllFinished(written, failed);
-    });
+            // A file skipped because the batch was abandoned is neither written
+            // nor failed, and is counted as neither. Nothing tried, nothing
+            // claimed.
+            emit saveProgress(work.size(), work.size());
+            emit saveAllFinished(written, failed);
+        });
 }
 
 bool Scrubber::isWashable(const QString &path) const

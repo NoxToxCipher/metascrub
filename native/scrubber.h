@@ -1,11 +1,14 @@
 #ifndef SCRUBBER_H
 #define SCRUBBER_H
 
+#include <QFuture>
 #include <QObject>
 #include <QString>
 #include <QStringList>
 #include <QVariantList>
 #include <QVariantMap>
+
+#include <atomic>
 
 /*
  * The native backend the QML talks to.
@@ -24,6 +27,18 @@ class Scrubber : public QObject
 
 public:
     explicit Scrubber(QObject *parent = nullptr);
+
+    /*
+     * Waits for a running batch before letting the object go.
+     *
+     * saveAll hands a worker thread a pointer to this object and the worker
+     * emits through it. If the object were destroyed first — the window is
+     * small, but it is exactly the moment an application is being closed, which
+     * is when a user is most likely to be in a hurry — the worker would be
+     * signalling into freed memory. So the destructor asks the batch to stop and
+     * then waits for it. The wait is one file long, not a whole batch.
+     */
+    ~Scrubber() override;
 
     /*
      * Inspect a file and return its report as a map:
@@ -84,6 +99,10 @@ signals:
 private:
     /* Only ever written on the thread that owns this object. */
     bool m_busy = false;
+    /* Set from this thread, read by the worker between files. */
+    std::atomic<bool> m_abort{false};
+    /* The running batch, so the destructor has something to wait on. */
+    QFuture<void> m_work;
 };
 
 #endif // SCRUBBER_H

@@ -253,6 +253,9 @@ shipped app has no way to be handed a file except through the Content Hub.
   has to match whatever OpenStore account publishes it.
 - **Clearing working files is an ordinary delete.** On flash storage the blocks
   may survive until they are reused. The About screen says so.
-- **A batch cannot be cancelled once it starts.** `Scrubber::saveAll` runs to
-  the end of its list. For a handful of photos that is fine; for fifty with the
-  wash on it is not, and there is no way out but to wait.
+- **A batch cannot be cancelled from the interface.** `Scrubber::saveAll` runs
+  to the end of its list unless the backend is destroyed, which is what closing
+  the app does. For a handful of photos that is fine; for fifty with the wash on
+  it is not, and there is no Stop button. The machinery is already there — the
+  destructor stops the batch at the next file — so this is a button and a signal
+  away, not a rewrite.
