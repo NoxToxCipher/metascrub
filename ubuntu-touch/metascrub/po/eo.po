@@ -42,6 +42,9 @@ msgstr "Nenio konservenda — neniu el ĉi tiuj dosieroj purigeblis."
 msgid "metascrub"
 msgstr "metascrub"
 
+msgid "Start over"
+msgstr "Komenci denove"
+
 msgid "COMPLETE"
 msgstr "KOMPLETA"
 
@@ -56,6 +59,24 @@ msgstr "forigas tion, kion dosiero diras pri vi"
 
 msgid "Add photos, PDFs or documents to clean them.\n\nEverything happens on this phone. Nothing is uploaded, and your files are only touched when you press Scrub."
 msgstr "Aldonu fotojn, PDF-ojn aŭ dokumentojn por purigi ilin.\n\nĈio okazas sur ĉi tiu telefono. Nenio estas alŝutata, kaj viaj dosieroj estas tuŝataj nur kiam vi premas Purigi."
+
+msgid "Ready to scrub"
+msgstr "Preta por purigi"
+
+msgid "Results"
+msgstr "Rezultoj"
+
+msgid "Remove"
+msgstr "Forigi"
+
+msgid "Recorded where it was taken."
+msgstr "Registris kie ĝi estis farita."
+
+msgid "Still in the file"
+msgstr "Ankoraŭ en la dosiero"
+
+msgid "Add more"
+msgstr "Aldoni pliajn"
 
 msgid "Give cleaned files random names"
 msgstr "Doni hazardajn nomojn al purigitaj dosieroj"
@@ -80,24 +101,3 @@ msgstr "Milda"
 
 msgid "Thorough"
 msgstr "Ĝisfunda"
-
-msgid "Ready to scrub"
-msgstr "Preta por purigi"
-
-msgid "Results"
-msgstr "Rezultoj"
-
-msgid "Recorded where it was taken."
-msgstr "Registris kie ĝi estis farita."
-
-msgid "Still in the file"
-msgstr "Ankoraŭ en la dosiero"
-
-msgid "Remove"
-msgstr "Forigi"
-
-msgid "Add more"
-msgstr "Aldoni pliajn"
-
-msgid "Start over"
-msgstr "Komenci denove"

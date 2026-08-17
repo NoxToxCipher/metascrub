@@ -17,6 +17,11 @@ domain="metascrub.noxtoxcipher"
 
 # QML is close enough to JavaScript for xgettext, which also concatenates the
 # "one line " + "and the next" strings the interface uses for long copy.
+# Run from the app directory and hand xgettext relative paths: it copies the
+# path it is given into every source reference, and an absolute one would put
+# the building machine's directories into a committed file.
+cd "$app"
+
 xgettext \
     --language=JavaScript \
     --keyword=tr:1 \
@@ -27,7 +32,7 @@ xgettext \
     --msgid-bugs-address="https://github.com/NoxToxCipher/metascrub/issues" \
     --sort-by-file \
     -o "$here/$domain.pot" \
-    "$app"/qml/*.qml
+    qml/*.qml
 
 echo "wrote $here/$domain.pot"
 

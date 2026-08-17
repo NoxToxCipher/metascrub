@@ -42,6 +42,9 @@ msgstr "Nihil servandum — nullum horum documentorum purgari potuit."
 msgid "metascrub"
 msgstr "metascrub"
 
+msgid "Start over"
+msgstr "Iterum incipe"
+
 msgid "COMPLETE"
 msgstr "COMPLETUM"
 
@@ -56,6 +59,24 @@ msgstr "removet quod documentum de te dicit"
 
 msgid "Add photos, PDFs or documents to clean them.\n\nEverything happens on this phone. Nothing is uploaded, and your files are only touched when you press Scrub."
 msgstr "Photographias, PDF aut documenta adde ut ea purges.\n\nOmnia in hoc telephono fiunt. Nihil imponitur, et documenta tua solum tanguntur cum «Purga» premis."
+
+msgid "Ready to scrub"
+msgstr "Parata ad purgandum"
+
+msgid "Results"
+msgstr "Exitus"
+
+msgid "Remove"
+msgstr "Aufer"
+
+msgid "Recorded where it was taken."
+msgstr "Ubi captum sit inscripsit."
+
+msgid "Still in the file"
+msgstr "Adhuc in documento"
+
+msgid "Add more"
+msgstr "Plura adde"
 
 msgid "Give cleaned files random names"
 msgstr "Da documentis purgatis nomina fortuita"
@@ -80,24 +101,3 @@ msgstr "Lenis"
 
 msgid "Thorough"
 msgstr "Accuratus"
-
-msgid "Ready to scrub"
-msgstr "Parata ad purgandum"
-
-msgid "Results"
-msgstr "Exitus"
-
-msgid "Recorded where it was taken."
-msgstr "Ubi captum sit inscripsit."
-
-msgid "Still in the file"
-msgstr "Adhuc in documento"
-
-msgid "Remove"
-msgstr "Aufer"
-
-msgid "Add more"
-msgstr "Plura adde"
-
-msgid "Start over"
-msgstr "Iterum incipe"

@@ -124,6 +124,7 @@ def main():
     print("%d of them exist word for word in the Android app\n"
           % sum(1 for m in msgids if m in by_text))
 
+    counts = []
     for res_dir, locale in sorted(LANGUAGES.items(), key=lambda kv: kv[1]):
         translated = android_strings(ANDROID_RES / res_dir / "strings.xml")
         entries = []
@@ -131,16 +132,19 @@ def main():
             name = by_text.get(msgid)
             if name and translated.get(name):
                 entries.append((msgid, translated[name]))
+        counts.append((locale, len(entries)))
 
-        print("%-5s %3d / %d" % (locale, len(entries), len(msgids)))
         if report_only:
             continue
-
         lines = [HEADER % locale]
         for msgid, msgstr in entries:
             lines.append("\nmsgid %s\nmsgstr %s\n" % (quote(msgid), quote(msgstr)))
         (HERE / ("%s.po" % locale)).write_text("".join(lines), encoding="utf-8")
 
+    # Reported only once every file is on disk, so a report piped into
+    # something that stops reading can never leave the set half written.
+    for locale, n in counts:
+        print("%-5s %3d / %d" % (locale, n, len(msgids)))
     if not report_only:
         print("\nwrote %d .po files" % len(LANGUAGES))
 

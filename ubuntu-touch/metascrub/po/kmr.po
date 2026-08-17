@@ -42,6 +42,9 @@ msgstr "Tiştek ji bo hilanînê tune — tu ji van dosyayan nehat paqijkirin."
 msgid "metascrub"
 msgstr "metascrub"
 
+msgid "Start over"
+msgstr "Ji nû ve dest pê bike"
+
 msgid "COMPLETE"
 msgstr "TEMAM"
 
@@ -56,6 +59,24 @@ msgstr "tiştê ku dosyayek li ser te dibêje jê radike"
 
 msgid "Add photos, PDFs or documents to clean them.\n\nEverything happens on this phone. Nothing is uploaded, and your files are only touched when you press Scrub."
 msgstr "Wêne, PDF an belgeyan lê zêde bike da ku wan paqij bikî.\n\nHer tişt li ser vê têlefonê pêk tê. Tu tişt nayê barkirin, û em dest nadin dosyayên te heta ku tu pêl Paqijkirinê bikî."
+
+msgid "Ready to scrub"
+msgstr "Ji bo paqijkirinê amade"
+
+msgid "Results"
+msgstr "Encam"
+
+msgid "Remove"
+msgstr "Rake"
+
+msgid "Recorded where it was taken."
+msgstr "Cihê ku lê hate kişandin tomar kiribû."
+
+msgid "Still in the file"
+msgstr "Hê di dosyeyê de"
+
+msgid "Add more"
+msgstr "Bêtir lê zêde bike"
 
 msgid "Give cleaned files random names"
 msgstr "Navên rasthatî li dosyayên paqijkirî bike"
@@ -80,24 +101,3 @@ msgstr "Nerm"
 
 msgid "Thorough"
 msgstr "Kûr"
-
-msgid "Ready to scrub"
-msgstr "Ji bo paqijkirinê amade"
-
-msgid "Results"
-msgstr "Encam"
-
-msgid "Recorded where it was taken."
-msgstr "Cihê ku lê hate kişandin tomar kiribû."
-
-msgid "Still in the file"
-msgstr "Hê di dosyeyê de"
-
-msgid "Remove"
-msgstr "Rake"
-
-msgid "Add more"
-msgstr "Bêtir lê zêde bike"
-
-msgid "Start over"
-msgstr "Ji nû ve dest pê bike"

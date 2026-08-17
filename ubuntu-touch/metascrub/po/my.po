@@ -42,6 +42,9 @@ msgstr "သိမ်းစရာ မရှိ — ဤဖိုင်များ
 msgid "metascrub"
 msgstr "metascrub"
 
+msgid "Start over"
+msgstr "အစမှ ပြန်စရန်"
+
 msgid "COMPLETE"
 msgstr "အပြည့်အဝ"
 
@@ -56,6 +59,24 @@ msgstr "ဖိုင်တစ်ခုက သင့်အကြောင်း �
 
 msgid "Add photos, PDFs or documents to clean them.\n\nEverything happens on this phone. Nothing is uploaded, and your files are only touched when you press Scrub."
 msgstr "သန့်စင်ရန် ဓာတ်ပုံများ၊ PDF များ သို့မဟုတ် စာရွက်စာတမ်းများ ထည့်ပါ။\n\nအရာအားလုံး ဤဖုန်းပေါ်တွင် ဖြစ်ပျက်သည်။ ဘာမျှ အပ်လုဒ်မတင်ပါ၊ သင့်ဖိုင်များကို «သန့်စင်» ကို နှိပ်မှသာ ထိတွေ့သည်။"
+
+msgid "Ready to scrub"
+msgstr "သန့်စင်ရန် အသင့်"
+
+msgid "Results"
+msgstr "ရလဒ်များ"
+
+msgid "Remove"
+msgstr "ဖယ်ရှားရန်"
+
+msgid "Recorded where it was taken."
+msgstr "ရိုက်ကူးခဲ့သည့်နေရာကို မှတ်တမ်းတင်ထားသည်။"
+
+msgid "Still in the file"
+msgstr "ဖိုင်ထဲတွင် ကျန်နေဆဲ"
+
+msgid "Add more"
+msgstr "နောက်ထပ် ထည့်ရန်"
 
 msgid "Give cleaned files random names"
 msgstr "ကျပန်း အမည်"
@@ -80,24 +101,3 @@ msgstr "နူးညံ့"
 
 msgid "Thorough"
 msgstr "စေ့စပ်"
-
-msgid "Ready to scrub"
-msgstr "သန့်စင်ရန် အသင့်"
-
-msgid "Results"
-msgstr "ရလဒ်များ"
-
-msgid "Recorded where it was taken."
-msgstr "ရိုက်ကူးခဲ့သည့်နေရာကို မှတ်တမ်းတင်ထားသည်။"
-
-msgid "Still in the file"
-msgstr "ဖိုင်ထဲတွင် ကျန်နေဆဲ"
-
-msgid "Remove"
-msgstr "ဖယ်ရှားရန်"
-
-msgid "Add more"
-msgstr "နောက်ထပ် ထည့်ရန်"
-
-msgid "Start over"
-msgstr "အစမှ ပြန်စရန်"

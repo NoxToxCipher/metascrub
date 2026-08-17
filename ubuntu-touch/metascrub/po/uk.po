@@ -42,6 +42,9 @@ msgstr "Нічого зберігати — жоден із цих файлів 
 msgid "metascrub"
 msgstr "metascrub"
 
+msgid "Start over"
+msgstr "Почати заново"
+
 msgid "COMPLETE"
 msgstr "ПОВНІСТЮ"
 
@@ -56,6 +59,24 @@ msgstr "прибирає те, що файл розповідає про вас"
 
 msgid "Add photos, PDFs or documents to clean them.\n\nEverything happens on this phone. Nothing is uploaded, and your files are only touched when you press Scrub."
 msgstr "Додайте фотографії, PDF або документи, щоб очистити їх.\n\nУсе відбувається на цьому телефоні. Нічого не завантажується, і ваші файли зачіпаються лише тоді, коли ви натискаєте «Очистити»."
+
+msgid "Ready to scrub"
+msgstr "Готово до очищення"
+
+msgid "Results"
+msgstr "Результати"
+
+msgid "Remove"
+msgstr "Видалити"
+
+msgid "Recorded where it was taken."
+msgstr "Записано, де було зроблено знімок."
+
+msgid "Still in the file"
+msgstr "Залишилось у файлі"
+
+msgid "Add more"
+msgstr "Додати ще"
 
 msgid "Give cleaned files random names"
 msgstr "Давати очищеним файлам випадкові імена"
@@ -80,24 +101,3 @@ msgstr "М'яко"
 
 msgid "Thorough"
 msgstr "Ретельно"
-
-msgid "Ready to scrub"
-msgstr "Готово до очищення"
-
-msgid "Results"
-msgstr "Результати"
-
-msgid "Recorded where it was taken."
-msgstr "Записано, де було зроблено знімок."
-
-msgid "Still in the file"
-msgstr "Залишилось у файлі"
-
-msgid "Remove"
-msgstr "Видалити"
-
-msgid "Add more"
-msgstr "Додати ще"
-
-msgid "Start over"
-msgstr "Почати заново"

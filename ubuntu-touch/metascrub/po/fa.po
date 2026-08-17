@@ -42,6 +42,9 @@ msgstr "چیزی برای ذخیره نیست — هیچ‌کدام از این 
 msgid "metascrub"
 msgstr "metascrub"
 
+msgid "Start over"
+msgstr "شروع دوباره"
+
 msgid "COMPLETE"
 msgstr "کامل"
 
@@ -56,6 +59,24 @@ msgstr "آنچه را که یک فایل درباره‌ی شما می‌گوی�
 
 msgid "Add photos, PDFs or documents to clean them.\n\nEverything happens on this phone. Nothing is uploaded, and your files are only touched when you press Scrub."
 msgstr "عکس‌ها، PDFها یا اسناد را برای پاک‌سازی اضافه کنید.\n\nهمه‌چیز روی همین گوشی انجام می‌شود. هیچ‌چیزی آپلود نمی‌شود، و فایل‌های شما فقط زمانی لمس می‌شوند که دکمه‌ی پاک‌سازی را بزنید."
+
+msgid "Ready to scrub"
+msgstr "آماده‌ی پاک‌سازی"
+
+msgid "Results"
+msgstr "نتایج"
+
+msgid "Remove"
+msgstr "حذف"
+
+msgid "Recorded where it was taken."
+msgstr "محل گرفته‌شدن آن را ثبت کرده بود."
+
+msgid "Still in the file"
+msgstr "هنوز در فایل"
+
+msgid "Add more"
+msgstr "افزودن موارد بیشتر"
 
 msgid "Give cleaned files random names"
 msgstr "به فایل‌های پاک‌شده نام‌های تصادفی بده"
@@ -80,24 +101,3 @@ msgstr "ملایم"
 
 msgid "Thorough"
 msgstr "عمیق"
-
-msgid "Ready to scrub"
-msgstr "آماده‌ی پاک‌سازی"
-
-msgid "Results"
-msgstr "نتایج"
-
-msgid "Recorded where it was taken."
-msgstr "محل گرفته‌شدن آن را ثبت کرده بود."
-
-msgid "Still in the file"
-msgstr "هنوز در فایل"
-
-msgid "Remove"
-msgstr "حذف"
-
-msgid "Add more"
-msgstr "افزودن موارد بیشتر"
-
-msgid "Start over"
-msgstr "شروع دوباره"

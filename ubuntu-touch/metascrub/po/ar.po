@@ -42,6 +42,9 @@ msgstr "لا شيء لحفظه — لم يُتمكَّن من تنظيف أيٍ�
 msgid "metascrub"
 msgstr "metascrub"
 
+msgid "Start over"
+msgstr "ابدأ من جديد"
+
 msgid "COMPLETE"
 msgstr "مكتمل"
 
@@ -56,6 +59,24 @@ msgstr "يُزيل ما يقوله الملف عنك"
 
 msgid "Add photos, PDFs or documents to clean them.\n\nEverything happens on this phone. Nothing is uploaded, and your files are only touched when you press Scrub."
 msgstr "أضِف صورًا أو ملفات PDF أو مستندات لتنظيفها.\n\nكل شيء يجري على هذا الهاتف. لا يُرفَع أي شيء، ولا تُمَسّ ملفاتك إلا عندما تضغط على «تنظيف»."
+
+msgid "Ready to scrub"
+msgstr "جاهز للتنظيف"
+
+msgid "Results"
+msgstr "النتائج"
+
+msgid "Remove"
+msgstr "إزالة"
+
+msgid "Recorded where it was taken."
+msgstr "سجّل مكان التقاطها."
+
+msgid "Still in the file"
+msgstr "ما زال في الملف"
+
+msgid "Add more"
+msgstr "أضِف المزيد"
 
 msgid "Give cleaned files random names"
 msgstr "امنح الملفات المُنظَّفة أسماءً عشوائية"
@@ -80,24 +101,3 @@ msgstr "لطيف"
 
 msgid "Thorough"
 msgstr "شامل"
-
-msgid "Ready to scrub"
-msgstr "جاهز للتنظيف"
-
-msgid "Results"
-msgstr "النتائج"
-
-msgid "Recorded where it was taken."
-msgstr "سجّل مكان التقاطها."
-
-msgid "Still in the file"
-msgstr "ما زال في الملف"
-
-msgid "Remove"
-msgstr "إزالة"
-
-msgid "Add more"
-msgstr "أضِف المزيد"
-
-msgid "Start over"
-msgstr "ابدأ من جديد"

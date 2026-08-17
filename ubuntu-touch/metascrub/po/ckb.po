@@ -42,6 +42,9 @@ msgstr "هیچ شتێک نییە بۆ هەڵگرتن — هیچ کام لەم ف
 msgid "metascrub"
 msgstr "metascrub"
 
+msgid "Start over"
+msgstr "لە سەرەتاوە دەست پێبکەوە"
+
 msgid "COMPLETE"
 msgstr "تەواو"
 
@@ -56,6 +59,24 @@ msgstr "ئەوە دەسڕێتەوە کە فایلێک دەربارەی تۆ دە
 
 msgid "Add photos, PDFs or documents to clean them.\n\nEverything happens on this phone. Nothing is uploaded, and your files are only touched when you press Scrub."
 msgstr "وێنە، PDF یان بەڵگەنامە زیاد بکە بۆ پاککردنەوەیان.\n\nهەموو شتێک لەسەر ئەم مۆبایلە ڕوودەدات. هیچ شتێک بار ناکرێت، و فایلەکانت تەنها کاتێک دەست لێ دەدرێن کە پەنجە بۆ پاککردنەوە دەنێیت."
+
+msgid "Ready to scrub"
+msgstr "ئامادەیە بۆ پاککردنەوە"
+
+msgid "Results"
+msgstr "ئەنجامەکان"
+
+msgid "Remove"
+msgstr "لابردن"
+
+msgid "Recorded where it was taken."
+msgstr "شوێنی گیرانی تۆمار کرابوو."
+
+msgid "Still in the file"
+msgstr "هێشتا لە پەڕگەکەدایە"
+
+msgid "Add more"
+msgstr "زیاتر زیاد بکە"
 
 msgid "Give cleaned files random names"
 msgstr "ناوی هەڕەمەکی بدە بە فایلە پاککراوەکان"
@@ -80,24 +101,3 @@ msgstr "نەرم"
 
 msgid "Thorough"
 msgstr "ورد"
-
-msgid "Ready to scrub"
-msgstr "ئامادەیە بۆ پاککردنەوە"
-
-msgid "Results"
-msgstr "ئەنجامەکان"
-
-msgid "Recorded where it was taken."
-msgstr "شوێنی گیرانی تۆمار کرابوو."
-
-msgid "Still in the file"
-msgstr "هێشتا لە پەڕگەکەدایە"
-
-msgid "Remove"
-msgstr "لابردن"
-
-msgid "Add more"
-msgstr "زیاتر زیاد بکە"
-
-msgid "Start over"
-msgstr "لە سەرەتاوە دەست پێبکەوە"

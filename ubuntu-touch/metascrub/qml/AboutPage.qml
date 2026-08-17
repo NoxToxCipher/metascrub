@@ -51,7 +51,11 @@ Page {
 
         Column {
             id: column
-            width: parent.width
+            // Capped and centred for the same reason as the main page: this
+            // also runs on a monitor, and a line of body text should not be
+            // a screen wide.
+            width: Math.min(parent.width, units.gu(50))
+            anchors.horizontalCenter: parent.horizontalCenter
             spacing: units.gu(2)
             topPadding: units.gu(2)
 
