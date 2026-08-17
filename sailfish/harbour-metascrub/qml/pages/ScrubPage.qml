@@ -57,7 +57,7 @@ Page {
                 queue.append({ "path": path,
                                "name": path.substring(path.lastIndexOf('/') + 1),
                                "assurance": "", "note": "", "writable": false,
-                               "foundLocation": false, "removed": "" })
+                               "foundLocation": false, "removed": "", "retained": "" })
             }
         }
         scrubbed = false
@@ -71,12 +71,24 @@ Page {
                 queue.setProperty(i, "assurance", "none")
                 queue.setProperty(i, "note", r.error)
                 queue.setProperty(i, "writable", false)
+                queue.setProperty(i, "retained", "")
                 continue
             }
             queue.setProperty(i, "assurance", r.assurance)
             queue.setProperty(i, "writable", r.writable)
             queue.setProperty(i, "foundLocation", r.foundLocation)
             queue.setProperty(i, "removed", r.removedKinds.join(", "))
+            // What was knowingly kept, and what it reveals. Each item on its own
+            // line so a kept colour profile (or raw residue) is never silent.
+            var keptLines = []
+            var kept = r.retained
+            for (var k = 0; k < kept.length; ++k) {
+                var line = "• " + kept[k].what
+                if (kept[k].reveals !== "")
+                    line += ": " + kept[k].reveals
+                keptLines.push(line)
+            }
+            queue.setProperty(i, "retained", keptLines.join("\n"))
         }
         scrubbed = true
     }
@@ -186,13 +198,17 @@ Page {
                 model: queue
                 delegate: ListItem {
                     id: row
-                    contentHeight: Theme.itemSizeMedium
+                    // Grows when there is retained data to disclose, so the amber
+                    // line is never clipped; a plain row keeps its compact height.
+                    contentHeight: Math.max(Theme.itemSizeMedium, rowCol.height + Theme.paddingMedium)
                     menu: ContextMenu {
                         MenuItem { text: qsTr("Remove"); onClicked: queue.remove(index) }
                     }
 
                     Column {
-                        anchors.verticalCenter: parent.verticalCenter
+                        id: rowCol
+                        anchors.top: parent.top
+                        anchors.topMargin: Theme.paddingSmall
                         x: Theme.horizontalPageMargin
                         width: parent.width - 2 * Theme.horizontalPageMargin
                         spacing: Theme.paddingSmall
@@ -230,6 +246,19 @@ Page {
                                 truncationMode: TruncationMode.Fade
                                 width: page.width / 2
                             }
+                        }
+
+                        // Knowingly kept, and what it reveals. Amber, like the
+                        // best-effort badge: a clean that leaves something
+                        // identifying but says nothing is worse than one that
+                        // spells it out.
+                        Label {
+                            visible: model.retained !== ""
+                            width: parent.width
+                            wrapMode: Text.WordWrap
+                            text: qsTr("Still in the file:") + "\n" + model.retained
+                            color: "#d08a1e"
+                            font.pixelSize: Theme.fontSizeExtraSmall
                         }
                     }
                 }

@@ -31,6 +31,8 @@ public:
      *   removedKinds  list     - de-duplicated category names
      *   removedCount  int
      *   warnings      list
+     *   retained      list     - [{what, reveals}] knowingly left in the file,
+     *                            with what each would tell someone examining it
      */
     Q_INVOKABLE QVariantMap inspect(const QString &path,
                                     bool keepColour, bool keepOrientation);

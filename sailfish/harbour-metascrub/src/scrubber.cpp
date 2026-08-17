@@ -7,6 +7,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QStringList>
+#include <QVariantList>
 #include <cstring>
 
 namespace {
@@ -101,6 +102,21 @@ QVariantMap Scrubber::inspect(const QString &path, bool keepColour, bool keepOri
         warnings << v.toString();
     }
     m[QStringLiteral("warnings")] = warnings;
+
+    // Identifying data knowingly left in the file, each with what it reveals. A
+    // kept colour profile or raw residue lands here; surfacing it is the whole
+    // point of the report, so it must never stay silent (mirrors the desktop and
+    // Android surfaces). Passed through as a list of {what, reveals} maps.
+    QVariantList retained;
+    const QJsonArray retArr = o.value(QStringLiteral("retained")).toArray();
+    for (const QJsonValue &v : retArr) {
+        const QJsonObject ro = v.toObject();
+        QVariantMap rm;
+        rm[QStringLiteral("what")] = ro.value(QStringLiteral("what")).toString();
+        rm[QStringLiteral("reveals")] = ro.value(QStringLiteral("reveals")).toString();
+        retained << rm;
+    }
+    m[QStringLiteral("retained")] = retained;
     return m;
 }
 
