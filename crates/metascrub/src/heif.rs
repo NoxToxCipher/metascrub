@@ -98,6 +98,11 @@ pub(crate) fn sanitize(
     let locations = parse_iloc(input, &children, report);
     let idat = children.iter().find(|b| &b.ty == b"idat").map(|b| b.body);
 
+    // The container is not rebuilt, so an embedded ICC colour profile is carried
+    // through. Disclose it the way the other formats do rather than letting it
+    // stay silent.
+    disclose_kept_icc(input, &children, report);
+
     let mut touched = 0usize;
     for (item_id, kind) in &items {
         let Some(extents) = locations.get(item_id) else {
@@ -207,6 +212,28 @@ fn inspect_heif_exif(item: &[u8], report: &mut Report) {
     }
     if found.thumbnail {
         report.removed(Kind::Thumbnail, "meta EXIF IFD1", 0);
+    }
+}
+
+/// Disclose a kept ICC colour profile. HEIF stores it as a `colr` box of type
+/// `prof` (an ICC profile) or `rICC` (a restricted ICC profile) inside
+/// `meta > iprp > ipco`. Because this format is overwritten in place rather than
+/// rebuilt, the profile is carried through; naming it gives the same honest
+/// disclosure the JPEG, PNG, WebP and TIFF paths provide, rather than letting an
+/// iPhone HEIC keep its profile silently. A `colr` of type `nclx` is only colour
+/// parameters, not an embeddable profile, so it is left alone.
+fn disclose_kept_icc(input: &[u8], meta_children: &[BoxSpan], report: &mut Report) {
+    let Some(iprp) = meta_children.iter().find(|b| &b.ty == b"iprp") else { return };
+    let Ok(iprp_children) = walk(input, iprp.body, iprp.end) else { return };
+    let Some(ipco) = iprp_children.iter().find(|b| &b.ty == b"ipco") else { return };
+    let Ok(props) = walk(input, ipco.body, ipco.end) else { return };
+    for colr in props.iter().filter(|b| &b.ty == b"colr") {
+        if let Some(kind) = input.get(colr.body..colr.body + 4) {
+            if kind == b"prof" || kind == b"rICC" {
+                report.retain_icc();
+                return;
+            }
+        }
     }
 }
 
@@ -641,6 +668,35 @@ mod tests {
         let (out, report) = run(&input);
         assert!(!out.windows(7).any(|w| w == b"51.5074"));
         assert!(report.removed.iter().any(|r| r.location == "uuid XMP box"));
+    }
+
+    /// meta > iprp > ipco > colr('prof' ...) holds an ICC profile that this
+    /// format keeps; it must be disclosed like the other formats do.
+    fn heif_with_colr(kind: &[u8]) -> Vec<u8> {
+        let colr = bx(b"colr", kind);
+        let ipco = bx(b"ipco", &colr);
+        let iprp = bx(b"iprp", &ipco);
+        let mut meta_body = vec![0, 0, 0, 0];
+        meta_body.extend_from_slice(&iprp);
+        let mut input = ftyp();
+        input.extend_from_slice(&bx(b"meta", &meta_body));
+        input
+    }
+
+    #[test]
+    fn a_kept_icc_colour_profile_is_disclosed() {
+        let (_, report) = run(&heif_with_colr(b"prof\x00\x00\x00\x0cacsp"));
+        assert!(
+            report.retained.iter().any(|r| r.what == "ICC colour profile"),
+            "a HEIF ICC colour profile must be disclosed"
+        );
+    }
+
+    #[test]
+    fn an_nclx_colour_box_is_not_treated_as_an_icc_profile() {
+        // nclx is colour parameters, not an embeddable profile: nothing to disclose.
+        let (_, report) = run(&heif_with_colr(b"nclx\x00\x01\x00\x01\x00\x01\x80"));
+        assert!(report.retained.iter().all(|r| r.what != "ICC colour profile"));
     }
 
     #[test]
