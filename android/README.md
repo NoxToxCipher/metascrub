@@ -123,7 +123,8 @@ requirements](https://accrescent.app/docs/guide/publish/requirements.html):
 | targetSdk tracks Google Play's floor (36 from 31 August 2026) | `config.sh` |
 | `debuggable`, `testOnly`, `usesCleartextTraffic` all absent | manifest declares none |
 | No non-standard update mechanism | there is no networking code at all |
-| A 512×512 PNG icon and a listing | to do |
+| A 512×512 PNG icon | `listing/icon-512.png`, generated from the launcher icon by `make-store-icon.py` |
+| Listing text (what the app is, what it does not do) | to do |
 | Developer console account (GitHub login, currently allowlisted) | to do — access has to be requested |
 | A domain matching the app ID, verified by a DNS record they send | **blocked**: `org.crake.metascrub` requires `crake.org` |
 
