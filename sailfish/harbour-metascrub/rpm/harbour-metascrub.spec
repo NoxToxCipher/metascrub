@@ -51,6 +51,11 @@ fi
 %install
 %qmake5_install
 
+# Strip the binary. The statically linked Rust core leaves a large symbol table,
+# and harbour wants stripped binaries; the build's brp-strip does not catch it, so
+# strip it explicitly here.
+strip %{buildroot}%{_bindir}/%{name}
+
 desktop-file-install --delete-original \
   --dir %{buildroot}%{_datadir}/applications \
   %{buildroot}%{_datadir}/applications/*.desktop
