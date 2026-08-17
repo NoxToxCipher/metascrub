@@ -30,6 +30,8 @@ use metascrub::{Assurance, ColorProfile, Orientation, Policy, Sanitized};
 use pixelwash::{Strength, WashReport};
 
 mod i18n;
+mod icon;
+mod platform;
 mod privacy;
 mod reference;
 
@@ -392,7 +394,38 @@ impl App {
             style.spacing.window_margin = egui::Margin::same(14);
         });
 
-        Self::default()
+        // Open in the language the session is set to, not in English with a
+        // two-letter toggle the user may not be able to read. An unsupported
+        // language leaves the previous default in place.
+        let mut app = Self::default();
+        if let Some(lang) = platform::session_language().as_deref().and_then(i18n::Lang::from_tag) {
+            app.lang = lang;
+        }
+        app
+    }
+
+    /// Ask for files, and notice when the system had no way to ask.
+    ///
+    /// `rfd` returns `None` both when the user pressed Cancel and when there
+    /// was no file chooser to press Cancel in. Those look identical from here,
+    /// so the second one is only diagnosed once the first has already happened,
+    /// and only where there is positive evidence no portal is installed. The
+    /// button is never disabled on a guess.
+    fn ask_for_files(&mut self) -> Option<Vec<PathBuf>> {
+        let files = rfd::FileDialog::new().pick_files();
+        if files.is_none() && !platform::file_dialog_supported() {
+            let mut message = self.tr().no_file_chooser.to_string();
+            // The package name is the same on Debian and on the Debian
+            // container inside ChromeOS, but a Chromebook user has no "desktop
+            // environment" to go looking through, so say where to type it.
+            message.push_str(if platform::is_crostini() {
+                " (in the Linux terminal: sudo apt install xdg-desktop-portal-gtk)"
+            } else {
+                " (sudo apt install xdg-desktop-portal-gtk, or the equivalent)"
+            });
+            self.error = Some(message);
+        }
+        files
     }
 
     fn queue(&mut self, paths: Vec<PathBuf>) {
@@ -1458,7 +1491,7 @@ impl App {
                             self.error = None;
                         }
                         if ui.button(self.tr().add_files).clicked() {
-                            if let Some(files) = rfd::FileDialog::new().pick_files() {
+                            if let Some(files) = self.ask_for_files() {
                                 privacy::forget_recent(&files);
                                 self.queue(files);
                             }
@@ -1497,7 +1530,7 @@ impl App {
                     ui.label(RichText::new(self.tr().drop_sub).size(13.0).color(theme::INK_FAINT));
                     ui.add_space(16.0);
                     if ui.button(self.tr().choose_files).clicked() {
-                        if let Some(files) = rfd::FileDialog::new().pick_files() {
+                        if let Some(files) = self.ask_for_files() {
                             privacy::forget_recent(&files);
                             self.queue(files);
                         }
@@ -1875,16 +1908,74 @@ fn badge(ui: &mut egui::Ui, text: &str, colour: Color32, mark: Mark) {
         });
 }
 
+/// The reverse-DNS name this application is known by to the desktop.
+///
+/// It has to match three things or the window ends up with no icon: the
+/// `StartupWMClass` in `packaging/linux/org.crake.metascrub.desktop`, the name
+/// of that file, and the name of the installed icons. It is also the identifier
+/// the Android package already uses, so the suite says the same thing
+/// everywhere.
+///
+/// Without it, eframe falls back to the application name, and a Wayland
+/// compositor asked to find "metascrub.desktop" finds nothing.
+const APP_ID: &str = "org.crake.metascrub";
+
+/// Files named on the command line.
+///
+/// `Exec=metascrub-gui %F` in the desktop file means a file manager's "Open
+/// with" hands the paths over this way, so without this the menu entry appears,
+/// is selected, and opens an empty window. Anything that is not an existing
+/// file is dropped rather than reported: argv on a desktop launch is not
+/// something the user typed, so there is nobody to tell.
+fn files_from_argv() -> Vec<PathBuf> {
+    std::env::args_os().skip(1).map(PathBuf::from).filter(|p| p.is_file()).collect()
+}
+
 fn main() -> eframe::Result<()> {
     // Before anything is loaded, so a crash during startup cannot dump either.
     privacy::suppress_crash_dumps();
 
+    // A binary installed in $PATH will be run with --help by somebody, and
+    // opening a window in reply is not an answer.
+    for arg in std::env::args().skip(1) {
+        match arg.as_str() {
+            "-h" | "--help" => {
+                println!("metascrub-gui: remove metadata from files");
+                println!();
+                println!("  metascrub-gui [FILE...]   open the window, with any files loaded");
+                println!("  metascrub-gui --help      this text");
+                println!("  metascrub-gui --version   version");
+                println!();
+                println!("For scripting, use the `metascrub` command line tool instead.");
+                return Ok(());
+            }
+            "-V" | "--version" => {
+                println!("metascrub-gui {}", env!("CARGO_PKG_VERSION"));
+                return Ok(());
+            }
+            _ => {}
+        }
+    }
+
+    let initial = files_from_argv();
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_inner_size([760.0, 620.0])
             .with_min_inner_size([520.0, 400.0])
-            .with_title("metascrub"),
+            .with_title("metascrub")
+            .with_app_id(APP_ID)
+            .with_icon(icon::window_icon()),
         ..Default::default()
     };
-    eframe::run_native("metascrub", options, Box::new(|cc| Ok(Box::new(App::new(cc)))))
+    eframe::run_native(
+        "metascrub",
+        options,
+        Box::new(move |cc| {
+            let mut app = App::new(cc);
+            if !initial.is_empty() {
+                app.queue(initial);
+            }
+            Ok(Box::new(app))
+        }),
+    )
 }

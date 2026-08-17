@@ -27,6 +27,23 @@ impl Lang {
             Lang::La => "LA",
         }
     }
+
+    /// The language for an ISO 639 code, if the interface has been translated
+    /// into it.
+    ///
+    /// `None` for anything else, which leaves the window in English. That is
+    /// not a claim that English is a sensible default, only that a language
+    /// nobody has written the strings for cannot be shown. The Android build
+    /// has eleven and this has four; the gap is tracked, not pretended away.
+    pub fn from_tag(tag: &str) -> Option<Lang> {
+        match tag {
+            "en" => Some(Lang::En),
+            "ru" => Some(Lang::Ru),
+            "my" => Some(Lang::My),
+            "la" => Some(Lang::La),
+            _ => None,
+        }
+    }
 }
 
 /// The user-facing strings the core screen needs, in one language.
@@ -131,6 +148,9 @@ pub struct T {
     pub wash_gentle_desc: &'static str,
     pub wash_balanced_desc: &'static str,
     pub wash_thorough_desc: &'static str,
+    /// Shown only after a file dialog has already come back empty on a system
+    /// with no XDG portal installed, where the button genuinely does nothing.
+    pub no_file_chooser: &'static str,
 }
 
 impl T {
@@ -236,6 +256,7 @@ impl T {
         wash_gentle_desc: "Barely visible change. Keeps 90% of the size.",
         wash_balanced_desc: "Softer on close inspection. Keeps 70% of the size.",
         wash_thorough_desc: "Clearly softened and noticeably smaller. Keeps 50%.",
+        no_file_chooser: "This system has no file chooser. Drag files onto the window instead.",
     };
 
     // Russian. Cyrillic renders with egui's bundled Ubuntu font, so no font
@@ -332,6 +353,7 @@ impl T {
         wash_gentle_desc: "Едва заметное изменение. Сохраняет 90% размера.",
         wash_balanced_desc: "Мягче при близком рассмотрении. Сохраняет 70% размера.",
         wash_thorough_desc: "Заметно смягчено и ощутимо меньше. Сохраняет 50%.",
+        no_file_chooser: "В этой системе нет диалога выбора файлов. Перетащите файлы в окно.",
     };
 
     // Burmese. UNVERIFIED machine draft — the app shows a "draft" notice while
@@ -429,6 +451,7 @@ impl T {
         wash_gentle_desc: "မမြင်ရသလောက် ပြောင်းလဲမှု။ အရွယ်အစား၏ 90% ကို ထိန်းသိမ်းသည်။",
         wash_balanced_desc: "အနီးကပ်ကြည့်လျှင် ပိုနူးညံ့သည်။ အရွယ်အစား၏ 70% ကို ထိန်းသိမ်းသည်။",
         wash_thorough_desc: "သိသိသာသာ နူးညံ့ပြီး သိသိသာသာ သေးငယ်သည်။ 50% ကို ထိန်းသိမ်းသည်။",
+        no_file_chooser: "ဤစနစ်တွင် ဖိုင်ရွေးချယ်ရေးကိရိယာ မရှိပါ။ ဖိုင်များကို ဝင်းဒိုးထဲသို့ ဆွဲထည့်ပါ။",
     };
 
     // Latin. Machine draft for the Living-Latin / classicist community to refine
@@ -525,6 +548,7 @@ impl T {
         wash_gentle_desc: "Mutatio vix visibilis. Servat 90% magnitudinis.",
         wash_balanced_desc: "Mollior propius inspecta. Servat 70% magnitudinis.",
         wash_thorough_desc: "Manifeste mollita et notabiliter minor. Servat 50%.",
+        no_file_chooser: "Hoc systema fenestram fasciculos eligendi non habet. Fasciculos in fenestram trahe.",
     };
 }
 
