@@ -2,7 +2,7 @@ Name:       harbour-metascrub
 Summary:    Remove metadata from your files, on your device
 Version:    0.1.0
 Release:    1
-License:    GPL-3.0-or-later
+License:    GPLv3+
 URL:        https://github.com/NoxToxCipher/metascrub
 Source0:    %{name}-%{version}.tar.bz2
 
@@ -55,9 +55,19 @@ desktop-file-install --delete-original \
   --dir %{buildroot}%{_datadir}/applications \
   %{buildroot}%{_datadir}/applications/*.desktop
 
+# QML, JSON and SVG are data, not scripts. qmake's install can carry an executable
+# bit across from a Windows checkout, which makes rpmlint flag every one as a
+# script-without-shebang. Force them to plain 0644.
+find %{buildroot}%{_datadir}/%{name} -type f -exec chmod 0644 {} +
+chmod 0644 %{buildroot}%{_datadir}/icons/hicolor/scalable/apps/%{name}.svg
+
 %files
 %defattr(-,root,root,-)
 %{_bindir}/%{name}
 %{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/scalable/apps/%{name}.svg
+
+%changelog
+* Mon Aug 17 2026 NoxToxCipher <github.elitism514@passmail.com> - 0.1.0-1
+- First Sailfish package: native Silica UI over the pure-Rust metascrub core.
