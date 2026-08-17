@@ -1,0 +1,22 @@
+[Desktop Entry]
+Type=Application
+Version=1.0
+Name=metascrub
+GenericName=Metadata Remover
+Comment=Remove the information a file carries about you
+Exec=metascrub-gui %F
+TryExec=metascrub-gui
+Icon=org.crake.metascrub
+Terminal=false
+Categories=Utility;Security;Graphics;Photography;
+Keywords=metadata;EXIF;GPS;IPTC;XMP;privacy;photo;strip;scrub;clean;anonymous;
+StartupNotify=true
+# Must match the app_id the window sets, or the compositor cannot tie the
+# window to this file and the launcher shows a blank icon. See
+# crates/metascrub-gui/src/main.rs.
+StartupWMClass=org.crake.metascrub
+# Only the formats the tool can actually take apart. Video and audio are
+# recognised and reported honestly, but they are not cleaned yet, so offering
+# metascrub as a handler for them in a file manager would promise something it
+# does not do.
+MimeType=image/jpeg;image/png;image/webp;image/heif;image/heic;image/avif;image/gif;image/tiff;image/svg+xml;application/pdf;application/vnd.openxmlformats-officedocument.wordprocessingml.document;application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;application/vnd.openxmlformats-officedocument.presentationml.presentation;application/vnd.oasis.opendocument.text;application/vnd.oasis.opendocument.spreadsheet;application/vnd.oasis.opendocument.presentation;application/vnd.oasis.opendocument.graphics;image/x-adobe-dng;image/x-canon-cr2;image/x-canon-cr3;image/x-nikon-nef;image/x-nikon-nrw;image/x-sony-arw;image/x-sony-sr2;image/x-panasonic-rw2;image/x-olympus-orf;image/x-fuji-raf;image/x-pentax-pef;image/x-samsung-srw;image/x-epson-erf;

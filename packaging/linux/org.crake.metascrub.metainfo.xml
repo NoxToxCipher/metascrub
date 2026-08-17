@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>org.crake.metascrub</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+
+  <name>metascrub</name>
+  <summary>Remove the information a file carries about you</summary>
+
+  <description>
+    <p>
+      Photographs and documents hold a second payload that has nothing to do
+      with what they look like: GPS coordinates, camera serial numbers, the
+      author's real name, the editing-session identifiers that link two
+      documents to one machine. Sending a file sends all of it.
+    </p>
+    <p>metascrub removes it, and tells you exactly what it found.</p>
+    <p>What makes it different:</p>
+    <ul>
+      <li>
+        It rebuilds files rather than editing them. Each parser copies across
+        only what is on an explicit keep-list, so a vendor's private segment or
+        an unknown chunk type is dropped for not being on it.
+      </li>
+      <li>
+        It says when it could not help. A format it cannot take apart is
+        reported as such and returned untouched, and no output file is written.
+      </li>
+      <li>
+        It separates what is provable from what is not. Metadata removal is
+        verifiable. Reducing a camera sensor fingerprint is statistical, so it
+        lives behind a separate setting and is described in different words.
+      </li>
+    </ul>
+    <p>
+      It makes no network connections of any kind, has no account and no
+      telemetry, and never modifies your original file.
+    </p>
+  </description>
+
+  <launchable type="desktop-id">org.crake.metascrub.desktop</launchable>
+
+  <provides>
+    <binary>metascrub-gui</binary>
+    <binary>metascrub</binary>
+  </provides>
+
+  <categories>
+    <category>Utility</category>
+    <category>Security</category>
+    <category>Graphics</category>
+  </categories>
+
+  <keywords>
+    <keyword>metadata</keyword>
+    <keyword>EXIF</keyword>
+    <keyword>GPS</keyword>
+    <keyword>privacy</keyword>
+    <keyword>photo</keyword>
+  </keywords>
+
+  <url type="homepage">https://github.com/NoxToxCipher/metascrub</url>
+  <url type="bugtracker">https://github.com/NoxToxCipher/metascrub/issues</url>
+  <url type="vcs-browser">https://github.com/NoxToxCipher/metascrub</url>
+
+  <developer id="org.crake">
+    <name>metascrub contributors</name>
+  </developer>
+
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+  </supports>
+
+  <recommends>
+    <display_length compare="ge">520</display_length>
+  </recommends>
+
+  <!-- Nothing here is age-restricted, but the tag has to be present and
+       explicit or stores treat the rating as unknown rather than as none. -->
+  <content_rating type="oars-1.1"/>
+
+  <!-- TODO before a Flathub submission: <screenshots>. Flathub requires at
+       least one, and a screenshot has to be taken from a real running window
+       rather than generated, so it is left out here instead of faked. The
+       tarball and .deb do not need it. -->
+
+  <releases>
+    <release version="0.1.0" date="2026-08-17">
+      <description>
+        <p>First Linux release. Desktop application and command line tool.</p>
+      </description>
+    </release>
+  </releases>
+</component>

@@ -1,0 +1,20 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 88" width="88" height="88" role="img" aria-label="metascrub">
+  <!-- The same mark as brand/metascrub.svg, recentred in a square box with a
+       margin so it sits correctly in a launcher tile. The shapes are untouched;
+       only the surrounding box changed. packaging/linux/make-icons.py renders
+       the raster sizes from these same coordinates. -->
+  <g transform="translate(-7,-10)">
+    <mask id="ms">
+      <rect x="14" y="15" width="74" height="78" fill="black"/>
+      <circle cx="54" cy="54" r="19" fill="white"/>
+      <path d="M70 49 L80 46 L72 58 Z" fill="white"/>
+      <circle cx="47" cy="33" r="13" fill="white"/>
+      <path d="M37 30 C29 31 23 34 19 37 C21 38 29 35 38 34 Z" fill="white"/>
+      <line x1="49" y1="70" x2="49" y2="80" stroke="white" stroke-width="2.6" stroke-linecap="round"/>
+      <line x1="58" y1="70" x2="58" y2="80" stroke="white" stroke-width="2.6" stroke-linecap="round"/>
+      <ellipse cx="54" cy="83" rx="22" ry="3.2" fill="white"/>
+      <circle cx="50" cy="30" r="3.6" fill="black"/>
+    </mask>
+    <rect x="14" y="15" width="74" height="78" fill="#5fb0ba" mask="url(#ms)"/>
+  </g>
+</svg>
