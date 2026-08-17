@@ -21,12 +21,15 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: clippy, rustfmt
-      # Linux needs the X11/Wayland headers eframe links against.
-      - name: Install GUI build dependencies
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y libxkbcommon-dev libgtk-3-dev
+      # No GUI development packages. This job used to install libxkbcommon-dev
+      # and libgtk-3-dev on the assumption that eframe links against them. It
+      # does not: X11, Wayland, EGL, xkbcommon and dbus are all opened with
+      # dlopen at runtime, and rfd reaches the file chooser through the XDG
+      # portal rather than GTK, so there is no gtk-sys in the lockfile at all.
+      # Verified by building the whole workspace in a container with neither
+      # package present. Keeping them would have hidden the fact that one
+      # binary works across desktops, which is the most useful property the
+      # Linux build has.
       - run: cargo fmt --all --check
       - run: cargo clippy --workspace --all-targets -- -D warnings
       # The backends are independently switchable, so a crate that only compiles
@@ -58,3 +61,78 @@ jobs:
             exit 1
           fi
           echo "no networking crates present"
+
+  # The desktop entry, the AppStream metadata and the icons are the difference
+  # between a binary and an application, and all three fail silently: a bad
+  # desktop file does not appear in the launcher, a bad metainfo file is
+  # ignored by the software centre, and neither prints anything. Checked on
+  # every change because they are edited by hand.
+  packaging-assets:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install validators
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y desktop-file-utils appstream
+      - name: Validate the desktop entry
+        run: desktop-file-validate packaging/linux/org.crake.metascrub.desktop
+      - name: Validate the AppStream metadata
+        run: appstreamcli validate --no-net --pedantic packaging/linux/org.crake.metascrub.metainfo.xml
+      - name: The desktop entry, the metainfo and the window must agree on the app ID
+        # Three files and one Rust constant have to carry the same string or the
+        # launcher cannot tie a window to its icon, and nothing anywhere reports
+        # the mismatch. It is exactly the sort of thing that gets renamed in two
+        # places out of four.
+        run: |
+          id=org.crake.metascrub
+          fail=0
+          grep -q "^StartupWMClass=$id$" packaging/linux/org.crake.metascrub.desktop || { echo "::error::desktop StartupWMClass"; fail=1; }
+          grep -q "<id>$id</id>" packaging/linux/org.crake.metascrub.metainfo.xml || { echo "::error::metainfo id"; fail=1; }
+          grep -q "^Icon=$id$" packaging/linux/org.crake.metascrub.desktop || { echo "::error::desktop Icon name"; fail=1; }
+          grep -q "APP_ID: &str = \"$id\"" crates/metascrub-gui/src/main.rs || { echo "::error::APP_ID in main.rs"; fail=1; }
+          test -f "packaging/linux/icons/hicolor/256x256/apps/$id.png" || { echo "::error::icon file name"; fail=1; }
+          exit $fail
+      - name: The icons must be the ones the generator produces
+        # A hand-edited icon would drift away from the mark the application
+        # draws in its own window, and nobody would notice until the two were
+        # side by side.
+        run: |
+          python3 packaging/linux/make-icons.py >/dev/null
+          git diff --exit-code -- packaging/linux/icons \
+            || { echo "::error::committed icons differ from make-icons.py output"; exit 1; }
+
+  # Build the artifacts people actually download, in a container old enough
+  # that they start on the distributions they are aimed at. Runs on demand and
+  # on a tag rather than on every pull request, because it compiles the whole
+  # tree from scratch twice per architecture.
+  linux-artifacts:
+    if: github.event_name == 'workflow_dispatch' || startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [amd64, arm64]
+    steps:
+      - uses: actions/checkout@v4
+      # arm64 is built by running the same bullseye container under emulation,
+      # which is slow and correct, rather than cross-linking, which is fast and
+      # an entirely separate thing to get wrong.
+      - name: Set up emulation for the non-native architecture
+        if: matrix.arch == 'arm64'
+        uses: docker/setup-qemu-action@v3
+      - name: Build against an old glibc
+        run: packaging/linux/build-in-container.sh --arch ${{ matrix.arch }}
+      - name: Package
+        # Fixed timestamp so two builds of the same commit produce the same
+        # archives. Taken from the commit itself, not from the clock.
+        run: |
+          export SOURCE_DATE_EPOCH="$(git log -1 --pretty=%ct)"
+          packaging/linux/package.sh --arch ${{ matrix.arch }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-${{ matrix.arch }}
+          path: |
+            dist/*.tar.gz
+            dist/*.deb
+          if-no-files-found: error

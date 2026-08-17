@@ -17,3 +17,7 @@
 
 # Built native libraries (produced by build-apk.sh)
 android/app/src/main/jniLibs/
+
+# Release artefacts, built by packaging/linux/. Everything here is
+# reproducible from the tag, so none of it belongs in the history.
+/dist
