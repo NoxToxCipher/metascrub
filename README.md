@@ -9,8 +9,9 @@ the editing-session identifiers that link two documents to one machine. Sending
 a file sends all of it.
 
 > **Status: working, not yet released.**
-> Desktop application and command line tool, 173 tests, 20,000 fuzz cases with
-> no panics. No installer or icon yet, and no signed builds.
+> Desktop application, command line tool, and phone apps for Android and Ubuntu
+> Touch. 237 tests, 20,000 fuzz cases with no panics. No installer yet, and no
+> signed builds.
 
 ## What makes this different
 
@@ -80,6 +81,19 @@ metascrub --json *.jpg        # machine-readable
 
 Exit status `2` means a file was left uncleaned because its format is not
 supported, so a script cannot mistake "not understood" for success.
+
+**Phones.** The same Rust core runs on three, each with a native interface and
+its own readme saying honestly how far it has been tested.
+
+| Platform | Interface | State |
+|---|---|---|
+| [Android](android/) | One activity, share-sheet driven, zero permissions | Builds and runs; APK requests no permissions at all, which is checkable with `aapt2` |
+| [Ubuntu Touch](ubuntu-touch/) | Lomiri QML over a C ABI, ten languages | Runs, scrubs end to end, and packages as a real `.click`. Not yet installed on a phone |
+| [Sailfish OS](sailfish/) | Silica QML over the same C ABI | Scaffolded, never compiled: the SDK's build engine will not boot on the development machine (see [`sailfish/BUILD.md`](sailfish/BUILD.md)) |
+
+The two Qt platforms share one backend, [`native/`](native/), so the rule that a
+file which could not be taken apart is never written out as a cleaned copy lives
+in a single place.
 
 ## Building
 

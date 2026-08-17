@@ -215,11 +215,27 @@ Still not verified:
 - **Desktop Lomiri is not the phone.** These modules come from Ubuntu 24.04,
   while the click targets the focal image. Versions differ; layout on a real
   screen, at a real grid unit, with a real on-screen keyboard, is untested.
-- **No Content Hub transfer has ever completed.** The picker instantiates and
-  correctly reports that no peer app is installed here, but choosing a peer,
-  building `ContentItem`s and charging a transfer are all unexercised, in both
-  directions. Import, share-in and export-back remain the likeliest place for a
-  first-run bug on a device.
+- **No Content Hub transfer has ever completed**, though the desktop got closer
+  than expected. Running the real `content-hub-service` on a session bus, with
+  `APP_ID=metascrub.noxtoxcipher_metascrub_0.1.0` and this app's
+  `metascrub-contenthub.json` copied to
+  `/usr/share/content-hub/peers/<that app id>`:
+  - the app registers its Content Hub handler (the `APP_ID isn't set, the
+    handler can not be registered` warning goes away), so the `ContentHub`
+    connection in `Main.qml` is wired up correctly;
+  - the service finds the peer file and tries to resolve it, so the JSON and the
+    app-id naming are right;
+  - it then fails with `Failed to create Application for
+    metascrub.noxtoxcipher_metascrub_0.1.0`, because lomiri-app-launch resolves
+    peers through the click database, and installing a click needs the phone's
+    own install path (`pkcon` / click-service and PolicyKit). `click install`
+    refuses off-device.
+
+  So choosing a peer, building `ContentItem`s and charging a transfer remain
+  unexercised in both directions. That is where to look first if something
+  misbehaves on a phone. The two states a transfer produces — files handed in,
+  and another app waiting for a file — do render correctly; both banners were
+  forced on locally and photographed.
 - **The framework and policy version** (`ubuntu-sdk-20.04`, `20.04`) target
   focal. A 24.04 image will want both bumped, in `CMakeLists.txt` and
   `metascrub.apparmor`.
