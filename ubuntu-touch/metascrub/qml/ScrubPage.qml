@@ -77,6 +77,9 @@ Page {
     }
 
     function primaryText() {
+        if (app.saving) {
+            return i18n.tr("Cleaning %1 of %2…").arg(app.saveDone + 1).arg(app.saveTotal)
+        }
         if (!app.scrubbed) {
             return i18n.tr("Scrub %1 file", "Scrub %1 files", app.queue.count).arg(app.queue.count)
         }
@@ -90,21 +93,16 @@ Page {
     }
 
     function runPrimary() {
+        if (app.saving) {
+            return
+        }
         if (!app.scrubbed) {
             app.scrubAll()
             return
         }
-        var paths = app.saveCleaned()
-        if (paths.length === 0) {
-            app.flash = i18n.tr("Nothing to save — none of these files could be cleaned.")
-            return
-        }
-        if (app.pendingExport) {
-            app.handBack(paths)
-            return
-        }
-        stack.push(Qt.resolvedUrl("ExportPage.qml"),
-                   { "app": app, "stack": stack, "paths": paths })
+        // The writing runs on a worker thread; where the cleaned copies go next
+        // is decided when it reports back.
+        app.startSave()
     }
 
     Flickable {
@@ -377,6 +375,7 @@ Page {
                 width: parent.width - units.gu(4)
                 anchors.horizontalCenter: parent.horizontalCenter
                 visible: app.queue.count > 0
+                enabled: !app.saving
                 color: Style.teal
                 text: page.primaryText()
                 onClicked: page.runPrimary()

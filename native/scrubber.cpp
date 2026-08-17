@@ -7,6 +7,9 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QStringList>
+#include <QtConcurrent>
+#include <QVector>
+#include <QPair>
 #include <QVariantList>
 #include <cstring>
 
@@ -48,7 +51,15 @@ const uint8_t *bytesOf(const QByteArray &b)
 
 } // namespace
 
-Scrubber::Scrubber(QObject *parent) : QObject(parent) {}
+Scrubber::Scrubber(QObject *parent) : QObject(parent)
+{
+    // The worker thread emits saveAllFinished; this lands back here, on the
+    // thread that owns the object, so m_busy has exactly one writer.
+    connect(this, &Scrubber::saveAllFinished, this, [this]() {
+        m_busy = false;
+        emit busyChanged();
+    });
+}
 
 QVariantMap Scrubber::inspect(const QString &path, bool keepColour, bool keepOrientation)
 {
@@ -178,6 +189,54 @@ QString Scrubber::save(const QString &srcPath, const QString &destPath, bool kee
         return QStringLiteral("The file was not fully written.");
     }
     return QString(); // success
+}
+
+void Scrubber::saveAll(const QVariantList &jobs, bool keepColour, bool keepOrientation,
+                       bool fingerprint, int strength)
+{
+    if (m_busy) {
+        return;
+    }
+
+    // Copy everything out of QML's structures here, on this thread. The worker
+    // must not touch a QVariantList the engine may be changing underneath it.
+    QVector<QPair<QString, QString>> work;
+    work.reserve(jobs.size());
+    for (const QVariant &entry : jobs) {
+        const QVariantMap job = entry.toMap();
+        const QString src = job.value(QStringLiteral("src")).toString();
+        const QString dest = job.value(QStringLiteral("dest")).toString();
+        if (!src.isEmpty() && !dest.isEmpty()) {
+            work.append(qMakePair(src, dest));
+        }
+    }
+    if (work.isEmpty()) {
+        emit saveAllFinished(QStringList(), 0);
+        return;
+    }
+
+    m_busy = true;
+    emit busyChanged();
+
+    // save() holds no state, so running it off the main thread is safe, and it
+    // keeps the guard that refuses to write a file the core could not take
+    // apart in exactly one place.
+    QtConcurrent::run([this, work, keepColour, keepOrientation, fingerprint, strength]() {
+        QStringList written;
+        int failed = 0;
+        for (int i = 0; i < work.size(); ++i) {
+            emit saveProgress(i, work.size());
+            const QString error = save(work[i].first, work[i].second, keepColour,
+                                       keepOrientation, fingerprint, strength);
+            if (error.isEmpty()) {
+                written << work[i].second;
+            } else {
+                ++failed;
+            }
+        }
+        emit saveProgress(work.size(), work.size());
+        emit saveAllFinished(written, failed);
+    });
 }
 
 bool Scrubber::isWashable(const QString &path) const

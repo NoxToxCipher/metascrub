@@ -28,7 +28,7 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
-find_package(Qt5 5.9 REQUIRED COMPONENTS Core Gui Qml Quick)
+find_package(Qt5 5.9 REQUIRED COMPONENTS Core Concurrent Gui Qml Quick)
 
 # --- where things are -------------------------------------------------------
 # The repository root, two levels up. The Qt backend and the C header live there
@@ -95,7 +95,7 @@ target_link_libraries(${APP_NAME} PRIVATE
     ${CMAKE_DL_LIBS}
     pthread
     m
-    Qt5::Core Qt5::Gui Qt5::Qml Qt5::Quick)
+    Qt5::Core Qt5::Concurrent Qt5::Gui Qt5::Qml Qt5::Quick)
 
 # --- packaging --------------------------------------------------------------
 configure_file(manifest.json.in ${CMAKE_CURRENT_BINARY_DIR}/manifest.json @ONLY)
@@ -127,6 +127,6 @@ if(METASCRUB_TESTS)
         ${METASCRUB_NATIVE_DIR}
         ${METASCRUB_FFI_INCLUDE})
     target_link_libraries(scrubber_smoke PRIVATE
-        ${METASCRUB_FFI_LIB} ${CMAKE_DL_LIBS} pthread m Qt5::Core Qt5::Gui)
+        ${METASCRUB_FFI_LIB} ${CMAKE_DL_LIBS} pthread m Qt5::Core Qt5::Concurrent Qt5::Gui)
     add_test(NAME scrubber_smoke COMMAND scrubber_smoke)
 endif()

@@ -140,6 +140,10 @@ lomiri-content-hub QML module 1.1.1 from the Ubuntu 24.04 archive:
   `.dat` came back `NOT CLEANED` with nothing written for it. ExifTool, a
   separate codebase, finds none of those fields in the saved copies, which were
   written under random names.
+- **Writing does not block the interface.** With the camera fingerprint wash
+  turned on, a 4000x3000 photo was cleaned while the app kept drawing and
+  showed "Cleaning 1 of 2". It came out downscaled and re-encoded, as that
+  option says it will, and carrying none of its GPS, make or model.
 - `cmake --install` lays out a click tree with the binary, the QML, the icon and
   all four metadata files in the right places, and the app runs from that tree.
 - Every QML file parses (`qmllint`), and every JSON file in the package is valid.
@@ -175,9 +179,6 @@ shipped app has no way to be handed a file except through the Content Hub.
   has to match whatever OpenStore account publishes it.
 - **Clearing working files is an ordinary delete.** On flash storage the blocks
   may survive until they are reused. The About screen says so.
-- **Everything runs on the interface thread.** Inspecting is cheap — the core
-  walks containers and never decodes an image — but the optional camera
-  fingerprint wash does decode, denoise and re-encode, so a thorough wash of a
-  large photo will freeze the interface for a few seconds on a phone. Moving
-  `Scrubber::save` onto a worker thread is the job to do before release, and it
-  belongs in `native/` where both Qt platforms get it.
+- **A batch cannot be cancelled once it starts.** `Scrubber::saveAll` runs to
+  the end of its list. For a handful of photos that is fine; for fifty with the
+  wash on it is not, and there is no way out but to wait.

@@ -7,7 +7,7 @@
 
 TARGET = harbour-metascrub
 CONFIG += sailfishapp
-QT += quick
+QT += quick concurrent
 
 # The Scrubber backend lives in native/ at the repository root, because the
 # Ubuntu Touch app links the very same file. The guard that re-inspects bytes

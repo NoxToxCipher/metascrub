@@ -53,6 +53,9 @@ MainView {
     property var lastExport: null          // keeps a charged transfer alive
     property string flash: ""              // one honest line under the buttons
     property int lastFailed: 0
+    property int saveDone: 0               // progress while the worker writes
+    property int saveTotal: 0
+    readonly property bool saving: scrubberBackend.busy
 
     // Options. Random names default on: a file name is metadata too.
     property bool optRandomNames: true
@@ -196,31 +199,60 @@ MainView {
     }
 
     /*
-     * Write the cleaned copies into the app's own storage and return their
-     * paths. Nothing is handed anywhere yet — that is the user's next choice.
-     * save() re-checks the bytes before writing, so a file that cannot be
-     * cleaned is never written out as if it had been.
+     * Write the cleaned copies into the app's own storage, on a worker thread.
+     * Nothing is handed anywhere yet — that is the user's next choice.
+     *
+     * Choosing the destination names is instant and happens here. The writing is
+     * not: with the fingerprint wash on, each photo is decoded, denoised and
+     * re-encoded, which is seconds of work per image on a phone. Done on this
+     * thread the app would simply stop drawing, and a privacy tool that appears
+     * to have crashed mid-clean is a tool nobody trusts again.
+     *
+     * saveAll() keeps the guard that re-checks the bytes before writing, so a
+     * file that cannot be cleaned is still never written out as if it had been.
      */
-    function saveCleaned() {
-        var written = []
-        var failed = 0
+    function startSave() {
+        var jobs = []
         for (var i = 0; i < queueModel.count; ++i) {
             var item = queueModel.get(i)
             if (!item.writable) {
                 continue
             }
             var willWash = optFingerprint && scrubberBackend.isWashable(item.path)
-            var dest = workspaceBackend.destinationFor(item.path, optRandomNames, willWash)
-            var error = scrubberBackend.save(item.path, dest, optKeepColour, optKeepOrientation,
-                                             optFingerprint, optStrength)
-            if (error === "") {
-                written.push(dest)
-            } else {
-                failed += 1
-            }
+            jobs.push({ "src": item.path,
+                        "dest": workspaceBackend.destinationFor(item.path, optRandomNames,
+                                                                willWash) })
         }
-        lastFailed = failed
-        return written
+        if (jobs.length === 0) {
+            flash = i18n.tr("Nothing to save — none of these files could be cleaned.")
+            return
+        }
+        saveDone = 0
+        saveTotal = jobs.length
+        flash = ""
+        scrubberBackend.saveAll(jobs, optKeepColour, optKeepOrientation,
+                                optFingerprint, optStrength)
+    }
+
+    Connections {
+        target: scrubberBackend
+        onSaveProgress: {
+            root.saveDone = done
+            root.saveTotal = total
+        }
+        onSaveAllFinished: {
+            root.lastFailed = failed
+            if (written.length === 0) {
+                root.flash = i18n.tr("Nothing could be saved.") + root.failureTail()
+                return
+            }
+            if (root.pendingExport) {
+                root.handBack(written)
+                return
+            }
+            pageStack.push(Qt.resolvedUrl("ExportPage.qml"),
+                           { "app": root, "stack": pageStack, "paths": written })
+        }
     }
 
     /*
