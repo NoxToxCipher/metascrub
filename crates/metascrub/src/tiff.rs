@@ -1099,6 +1099,21 @@ mod tests {
     }
 
     #[test]
+    fn a_kept_tag_with_a_dangling_out_of_line_value_is_declined() {
+        // A kept tag whose value is too big to sit inline (here X_RESOLUTION
+        // crafted as a 2-element LONG, 8 bytes) has its value out of line, and
+        // this one's offset points past the end of the file. It must be declined
+        // cleanly: never a panic, an out-of-bounds read, or a silent pass carrying
+        // an unreadable value forward.
+        let input = tiff(false, &[(T_X_RESOLUTION, 4, 2, 0xFFFF_FF00)], &[1, 2, 3, 4]);
+        let mut report = Report::new(Format::Tiff, input.len());
+        assert!(
+            sanitize(&input, &crate::Policy::default(), &mut report).is_err(),
+            "a kept tag pointing past the file must be declined, not kept or panicked on"
+        );
+    }
+
+    #[test]
     fn a_self_referential_ifd_chain_terminates() {
         // IFD0's next-pointer points back at IFD0.
         let mut input = tiff(false, &[], &[1, 2, 3, 4]);
