@@ -18,9 +18,10 @@ QtObject {
     readonly property color surface: "#172025"
     readonly property color stroke: "#26343B"
 
-    // Brand
+    // Brand. inkOnTeal is what to write *on* teal: a QML property may not be
+    // called onTeal, because that parses as a handler for a signal called teal.
     readonly property color teal: "#5FB0BA"
-    readonly property color onTeal: "#052027"
+    readonly property color inkOnTeal: "#052027"
 
     // Text
     readonly property color text: "#EAF1F2"

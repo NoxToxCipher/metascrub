@@ -1,6 +1,6 @@
 import QtQuick 2.9
 import Lomiri.Components 1.3
-import Lomiri.Content 0.1
+import Lomiri.Content 1.3
 import "."
 
 /*

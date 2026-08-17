@@ -168,9 +168,11 @@ Page {
             // --- options ----------------------------------------------------
             ListItem {
                 divider.visible: false
-                height: units.gu(6)
+                // Sized to its own layout: a fixed height clipped the subtitle.
+                height: randomLayout.height
                 color: "transparent"
                 ListItemLayout {
+                    id: randomLayout
                     title.text: i18n.tr("Give cleaned files random names")
                     title.color: Style.text
                     subtitle.text: i18n.tr("A file name is metadata too")
@@ -185,9 +187,11 @@ Page {
 
             ListItem {
                 divider.visible: false
-                height: units.gu(6)
+                // Sized to its own layout: a fixed height clipped the subtitle.
+                height: colourLayout.height
                 color: "transparent"
                 ListItemLayout {
+                    id: colourLayout
                     title.text: i18n.tr("Keep colour profile")
                     title.color: Style.text
                     subtitle.text: i18n.tr("Keeps colours accurate, and is itself identifying")
@@ -202,9 +206,11 @@ Page {
 
             ListItem {
                 divider.visible: false
-                height: units.gu(6)
+                // Sized to its own layout: a fixed height clipped the subtitle.
+                height: orientLayout.height
                 color: "transparent"
                 ListItemLayout {
+                    id: orientLayout
                     title.text: i18n.tr("Keep image orientation")
                     title.color: Style.text
                     subtitle.text: i18n.tr("Stops photos appearing rotated")
@@ -219,9 +225,11 @@ Page {
 
             ListItem {
                 divider.visible: false
-                height: units.gu(6)
+                // Sized to its own layout: a fixed height clipped the subtitle.
+                height: fingerLayout.height
                 color: "transparent"
                 ListItemLayout {
+                    id: fingerLayout
                     title.text: i18n.tr("Reduce camera fingerprint (photos)")
                     title.color: Style.text
                     subtitle.text: i18n.tr("Reduces linkability. Does not remove it.")
