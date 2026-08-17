@@ -1937,6 +1937,17 @@ fn main() -> eframe::Result<()> {
 
     // A binary installed in $PATH will be run with --help by somebody, and
     // opening a window in reply is not an answer.
+    //
+    // Not on Windows, and this is not an oversight. A release build there sets
+    // `windows_subsystem = "windows"` a few lines up, which means the process
+    // has no console attached and `println!` goes nowhere. Handling the flag
+    // would make `metascrub-gui.exe --help` print nothing and exit, which is
+    // worse than the window it replaced: the user gets silence and no way to
+    // tell a working program from a broken one. Getting a console back needs
+    // AttachConsole, which needs `unsafe`, which this crate forbids. So on
+    // Windows the flags are ignored and the window opens, which is what every
+    // other Windows application does anyway.
+    #[cfg(not(windows))]
     for arg in std::env::args().skip(1) {
         match arg.as_str() {
             "-h" | "--help" => {

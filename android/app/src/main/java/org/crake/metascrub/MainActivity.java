@@ -15,6 +15,7 @@ import android.provider.OpenableColumns;
 import android.util.TypedValue;
 import android.view.Gravity;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.LinearLayout;
@@ -149,6 +150,31 @@ public class MainActivity extends Activity {
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
+
+        // Keep this screen out of the recent-apps thumbnail.
+        //
+        // Android photographs an activity when it goes to the background and
+        // keeps that image on disk, so it can draw the card in the app
+        // switcher. For most apps that is a convenience. Here the picture is of
+        // a screen listing the name of the file somebody just cleaned and,
+        // often, the line "Recorded where it was taken." Pressing the recents
+        // button is then enough to see which photograph was thought worth
+        // scrubbing, and the image outlives the app being closed.
+        //
+        // That is the same leak the desktop build removes from the operating
+        // system's recent-files list, and it is worse here, because the phone
+        // is the thing somebody else picks up. This app is meant to be useful
+        // to a person whose device gets searched.
+        //
+        // FLAG_SECURE stops the snapshot. It also blocks screenshots and screen
+        // recording of this app, and blocks it from being mirrored to an
+        // untrusted display. That is a real cost: it means a user cannot
+        // screenshot a report to show somebody else. It is the right trade for
+        // a tool whose whole subject is files you did not mean to share, and it
+        // is what Signal, banking apps and password managers all do.
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_SECURE,
+                             WindowManager.LayoutParams.FLAG_SECURE);
+
         setContentView(R.layout.activity_main);
 
         findings = findViewById(R.id.findings_container);

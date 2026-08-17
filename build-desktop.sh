@@ -88,6 +88,14 @@ needles=(".cargo/registry" ".cargo\\registry" "/home/" "/Users/" "C:\\Users\\")
 # when $HOME is implausibly short, so a stray "/" never matches everything.
 [ "${#HOME}" -gt 4 ] && needles+=("$HOME")
 [ "${#CARGO_HOME}" -gt 4 ] && needles+=("$CARGO_HOME")
+# Under MSYS these are POSIX paths (/c/Users/someone) while the binary carries
+# the Windows form (C:\Users\someone), because that is what was passed to
+# --remap-path-prefix. Without converting them, the only thing catching a
+# Windows leak would be the generic "C:\Users\" prefix above.
+if [ "$host" = windows ]; then
+  [ "${#HOME}" -gt 4 ] && needles+=("$(win "$HOME")")
+  [ "${#CARGO_HOME}" -gt 4 ] && needles+=("$(win "$CARGO_HOME")")
+fi
 
 for b in $artifacts; do
   [ -f "$b" ] || { echo "   MISSING $b"; fail=1; continue; }
@@ -130,7 +138,10 @@ GLIBC_FLOOR="${METASCRUB_GLIBC_FLOOR:-2.31}"
 
 ver_gt() { [ "$(printf '%s\n%s\n' "$1" "$2" | sort -V | tail -1)" = "$1" ] && [ "$1" != "$2" ]; }
 
-if [ "$host" = linux ] && command -v objdump >/dev/null; then
+# Guarded on readelf, which is what the check actually runs. Guarding on
+# objdump instead meant a machine with one and not the other skipped the glibc
+# check silently, which is the failure mode this whole section exists to stop.
+if [ "$host" = linux ] && command -v readelf >/dev/null; then
   echo
   echo "==> checking the glibc floor (max allowed $GLIBC_FLOOR)"
   for b in $artifacts; do
