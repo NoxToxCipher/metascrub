@@ -12,35 +12,37 @@ BuildRequires:  pkgconfig(Qt5Core)
 BuildRequires:  pkgconfig(Qt5Qml)
 BuildRequires:  pkgconfig(Qt5Quick)
 BuildRequires:  desktop-file-utils
-# The core is Rust; the Sailfish build environment needs a Rust toolchain with
-# the target for this arch installed (rustup target add ...). See README.md.
-BuildRequires:  rust
-BuildRequires:  cargo
+# No Rust toolchain is required in the build engine: the Rust core is prebuilt as
+# a static library on a modern-Rust host (the engine's Rust is too old for the
+# workspace's edition-2024 deps) and only linked here. See the build section below
+# and BUILD.md.
 
 %description
-metascrub removes the hidden data a file carries about you — where a photo was
-taken, which camera and account made a document, the editing history — and tells
-you honestly how much it could remove. Everything happens on the device. Nothing
-is uploaded, and the app asks for no network access.
+metascrub removes the hidden data a file carries about you: where a photo was
+taken, which camera and account made a document, the editing history. It tells
+you honestly how much it could remove. Everything happens on the device.
+Nothing is uploaded, and the app asks for no network access.
 
 %prep
 %setup -q -n %{name}-%{version}
 
 %build
-# 1) Build the metascrub core as a C-ABI static library for this arch.
-#    The Rust target is chosen from the RPM target CPU.
-case "%{_target_cpu}" in
-    armv7hl)  RUST_TARGET=armv7-unknown-linux-gnueabihf ;;
-    aarch64)  RUST_TARGET=aarch64-unknown-linux-gnu ;;
-    i486|i686) RUST_TARGET=i686-unknown-linux-gnu ;;
-    *) echo "unmapped target cpu %{_target_cpu}" >&2; exit 1 ;;
-esac
-# The crates live in the workspace above this app. RUST_WORKSPACE defaults to the
-# repository root two levels up (adjust when packaging a standalone tarball).
-RUST_WORKSPACE=%{_sourcedir}/../..
-cargo build --release --manifest-path "$RUST_WORKSPACE/Cargo.toml" \
-    -p metascrub-ffi --target "$RUST_TARGET"
-RUST_LIB_DIR="$RUST_WORKSPACE/target/$RUST_TARGET/release"
+# 1) Locate the prebuilt metascrub core (crate metascrub-ffi) as a C-ABI static
+#    library for this arch. It is built OUTSIDE the Sailfish build engine, on a
+#    modern-Rust host, because the engine's Rust (1.75 in 5.1.0.11) is older than
+#    the workspace's edition-2024 dependencies (e.g. lopdf 0.44) can be compiled
+#    by. A staticlib needs no linker to produce, so that cross-build is clean; the
+#    final link against the Sailfish sysroot happens in step 2. Build it first
+#    with sailfish/build-ffi.sh %{_target_cpu} (see BUILD.md).
+#
+#    %{_sourcedir} is the project's rpm/ dir under mb2, so the libs live one level
+#    up in rustlib/<target-cpu>/.
+RUST_LIB_DIR=%{_sourcedir}/../rustlib/%{_target_cpu}
+if [ ! -f "$RUST_LIB_DIR/libmetascrub_ffi.a" ]; then
+    echo "error: prebuilt libmetascrub_ffi.a for %{_target_cpu} not found in $RUST_LIB_DIR" >&2
+    echo "build it first on a modern-Rust host: sailfish/build-ffi.sh %{_target_cpu}" >&2
+    exit 1
+fi
 
 # 2) Build the Silica app, linking the static library from step 1.
 %qmake5 RUST_LIB_DIR="$RUST_LIB_DIR"

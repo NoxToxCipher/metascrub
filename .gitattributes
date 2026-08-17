@@ -1,0 +1,11 @@
+# Keep line endings LF for files that break with CRLF. The repo is developed on
+# Windows (autocrlf), but the Sailfish build engine's shell chokes on CRLF in the
+# spec, and rpmlint errors on CRLF inside the packaged QML/JSON/SVG. Scoped to the
+# Sailfish app and shell scripts so the rest of the tree is not renormalized here.
+*.sh          text eol=lf
+*.spec        text eol=lf
+*.pro         text eol=lf
+*.desktop     text eol=lf
+sailfish/**/*.qml   text eol=lf
+sailfish/**/*.json  text eol=lf
+sailfish/**/*.svg   text eol=lf

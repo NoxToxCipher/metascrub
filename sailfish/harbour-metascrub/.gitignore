@@ -1,0 +1,15 @@
+# qmake / mb2 build output — none of this belongs in git.
+Makefile
+.qmake.stash
+.mb2/
+installroot/
+RPMS/
+RPMS.*
+documentation.list
+harbour-metascrub
+*.o
+moc_*.cpp
+moc_*.h
+qrc_*.cpp
+# Prebuilt, arch-specific FFI static libs (built by ../build-ffi.sh).
+rustlib/

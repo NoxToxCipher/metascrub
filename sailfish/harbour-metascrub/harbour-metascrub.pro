@@ -41,7 +41,10 @@ qml.path = /usr/share/$$TARGET
 INSTALLS += qml
 
 # A scalable SVG launcher icon, so no rasterization step is needed; Lipstick
-# resolves it through the hicolor theme from the .desktop's Icon= name.
-icon.files = icons/harbour-metascrub.svg
-icon.path = /usr/share/icons/hicolor/scalable/apps
-INSTALLS += icon
+# resolves it through the hicolor theme from the .desktop's Icon= name. The
+# install target is deliberately NOT named `icon`: CONFIG += sailfishapp defines
+# its own `icon` target (for rasterized PNGs), and a same-named target silently
+# overrides ours, dropping the SVG from the package.
+svgicon.files = icons/harbour-metascrub.svg
+svgicon.path = /usr/share/icons/hicolor/scalable/apps
+INSTALLS += svgicon

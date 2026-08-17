@@ -1,61 +1,88 @@
-# Building metascrub for Sailfish OS — real state on this machine
+# Building metascrub for Sailfish OS
 
-The SDK is installed and the native app scaffold is complete. The remaining work
-is the **build environment**, and this machine has one hard constraint that
-shapes everything below.
+The SDK is installed and the native app scaffold is complete. This machine has one
+hard constraint, and the build path below works around it entirely.
 
-## What's installed and working
-- **Sailfish SDK 3.13.5** at `C:\SailfishOS` (note: root of C:, not under the user
-  folder). `sfdk` at `C:\SailfishOS\bin\sfdk.exe`.
-- **VirtualBox 7.2.14**, with two VMs registered: `Sailfish SDK Build Engine`
-  and the `SailfishOS-5.1.0.11` emulator.
-- Rust cross-targets installed on the host: `i686-unknown-linux-gnu` (emulator),
-  `armv7-unknown-linux-gnueabihf`, `aarch64-unknown-linux-gnu`.
+## The constraint: VBS vs VirtualBox
 
-## The hard constraint: VBS vs VirtualBox
-This machine runs **Virtualization-Based Security** — Memory Integrity (HVCI),
-System Guard, SMM measurement — all on. VBS owns the CPU's AMD-V, so VirtualBox
-falls back to the Windows Hypervisor Platform (NEM) backend, and the Sailfish VMs
-**hang at ~0.07 s of kernel boot** (confirmed: `VBox.log` shows "HM: Attempting
-fall back to NEM: AMD-V is not available"; the build-engine console freezes right
-after the Spectre line). SSH to the build engine on port 2222 connects but never
-gets a banner — the guest never finishes booting.
+This machine runs Virtualization-Based Security (Memory Integrity / HVCI). VBS
+owns the CPU's virtualization extensions, so VirtualBox falls back to the Windows
+Hypervisor Platform (NEM) backend and the Sailfish VMs **hang at ~0.07 s of kernel
+boot**. So the SDK's own VirtualBox build engine and the on-screen emulator cannot
+run here while VBS is on (`VBox.log` shows "HM: Attempting fall back to NEM").
 
-**Net:** the VirtualBox build engine and the emulator cannot boot here while VBS
-is on. Two ways forward, one per priority:
+The build path below **does not use the VirtualBox engine at all** — it builds in
+a Docker container — so it works with all security on. The emulator still needs
+VirtualBox, so on-screen testing waits for a device or a less-locked machine.
 
-### Path A — run the emulator (weakens security, reversible)
-Only if you want the on-screen emulator test on *this* machine.
-1. Windows Security → Device security → Core isolation → **Memory integrity: Off**.
-2. If VBS is still on after reboot (System Guard can hold it), also turn off
-   **Firmware protection**, and as a backstop set (admin):
-   `bcdedit /set hypervisorlaunchtype off`.
-3. Reboot. Confirm off: `Get-CimInstance -Namespace root\Microsoft\Windows\DeviceGuard -ClassName Win32_DeviceGuard` → `VirtualizationBasedSecurityStatus` should be 0.
-4. `sfdk engine start` → should connect. Then Path C below.
-5. Re-enable Memory Integrity afterwards.
+## The build path (Docker, no VirtualBox, no SDK reconfigure)
 
-### Path B — keep all security on, build only (no emulator here)
-The build-engine backend is **locked at install** (`sfdk` can't switch it), so:
-1. Install **Docker Desktop** (WSL2 backend — runs fine alongside VBS).
-2. Reconfigure the SDK's build engine to Docker: re-run
-   `C:\SailfishOS\SDKMaintenanceTool.exe` (or the SDK installer) and choose the
-   **Docker** build engine. (VirtualBox and Docker engines can't coexist for one
-   SDK, and the type can't be flipped in place.)
-3. `sfdk engine start` (Docker engine) → then Path C.
-4. The **emulator still needs VirtualBox**, so on-screen testing waits for a
-   less-locked-down machine or a real device.
+Everything runs on the CLI against a working Docker engine (Docker Desktop with
+the WSL2 backend runs fine alongside VBS). It does not touch the installed
+`C:\SailfishOS` SDK.
 
-## Path C — the actual build (after A or B gives a working engine)
-The one genuinely novel step: the **Rust cross-compile inside the build engine**.
-1. Make sure Rust is available in the engine, or cross with the target sysroot.
-   `sailfish/build-ffi.sh emulator` drives the cargo build for `i686`.
-2. `sfdk config target=SailfishOS-5.1.0.11-i486`
-3. `sfdk build sailfish/harbour-metascrub` (the RPM `%build` runs the cargo step,
-   then links `libmetascrub_ffi` into the Silica app).
-4. Path A only: `sfdk deploy --sdk` to install the RPM on the running emulator.
+### One-time: the platform-SDK image
 
-## Recommendation
-Path B is the security-preserving one, but it's a fresh setup session (Docker
-install + SDK reconfigure) on top of the Rust cross-compile. Do it focused, not
-at the tail of a long night. Everything above it — SDK, scaffold, diagnosis — is
-done and waiting.
+```bash
+docker pull coderus/sailfishos-platform-sdk:5.1.0.11
+```
+
+This ~20 GB image carries the 5.1.0.11 targets (aarch64 / armv7hl / i486), `mb2`,
+and the Sailfish cross toolchains. The tag is version-matched to the installed
+SDK's target.
+
+### Step 1 — prebuild the Rust core (on the host)
+
+The engine's Rust is 1.75, older than the workspace's edition-2024 dependencies
+(e.g. `lopdf 0.44`) can be compiled by. So the core (`metascrub-ffi`) is
+cross-compiled to a **static library** with the host's modern Rust. A staticlib is
+just an archive of object files, so this needs no cross-linker — only the target
+std. The final link against the Sailfish sysroot happens in step 2.
+
+```bash
+sailfish/build-ffi.sh aarch64      # or armv7 / emulator
+# -> stages libmetascrub_ffi.a in sailfish/harbour-metascrub/rustlib/<cpu>/
+```
+
+`Cargo.lock` is pinned to lockfile **version 3** so the same lock is usable by the
+older cargo, should you ever build the Rust inside the engine instead.
+
+### Step 2 — build the RPM in the container
+
+Mount the whole repo (the app's `.pro`/spec reach up into `crates/`) and run
+`mb2` for the target. The spec's `%build` links the prebuilt `.a` from step 1; no
+Rust runs in the engine.
+
+```bash
+docker run --rm --privileged \
+  -v "C:/Users/lochr/metascrub:/home/mersdk/share" \
+  coderus/sailfishos-platform-sdk:5.1.0.11 \
+  bash -lc 'cd /home/mersdk/share/sailfish/harbour-metascrub \
+            && sed -i "s/\r\$//" rpm/harbour-metascrub.spec \
+            && mb2 -t SailfishOS-5.1.0.11-aarch64 build'
+# -> sailfish/harbour-metascrub/RPMS/harbour-metascrub-0.1.0-1.aarch64.rpm
+```
+
+The `sed` strips CRLF from the spec (Windows checkout); `.gitattributes` keeps the
+committed copies LF. Build output (`RPMS/`, `.mb2/`, `installroot/`, `*.o`, the
+binary) is gitignored.
+
+## State
+
+- **aarch64 RPM builds.** ~800 KB, links the prebuilt Rust core, installs the
+  Silica UI, QML and icon.
+- **Not yet done (rpmlint polish, none blocking the build):** renormalize the
+  working tree to LF and rebuild so the packaged QML/SVG are LF (rpmlint errors on
+  CRLF); add a `%changelog`; provide rasterized PNG icons at the harbour sizes
+  (the scalable SVG builds but harbour wants PNGs); strip the binary.
+- **armv7hl / i486** targets are wired the same way; only aarch64 has been built.
+- **On-screen test** needs the VirtualBox emulator (blocked by VBS) or a device.
+
+## Installing on a device
+
+```bash
+# On a Sailfish device with Developer Mode on:
+scp RPMS/harbour-metascrub-0.1.0-1.aarch64.rpm nemo@<device>:
+# then, on the device:
+devel-su pkcon install-local harbour-metascrub-0.1.0-1.aarch64.rpm
+```

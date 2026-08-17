@@ -17,3 +17,6 @@
 
 # Built native libraries (produced by build-apk.sh)
 android/app/src/main/jniLibs/
+
+# Prebuilt Sailfish FFI static libs (built by sailfish/build-ffi.sh, arch-specific binaries)
+sailfish/harbour-metascrub/rustlib/
