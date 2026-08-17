@@ -41,6 +41,20 @@ JAR="$ANDROID_HOME/platforms/android-$TARGET_SDK/android.jar"
 # Windows paths for the Java/Windows tools, POSIX for the shell.
 win() { if command -v cygpath >/dev/null; then cygpath -w "$1"; else printf '%s' "$1"; fi; }
 
+# Some build tools are a Java launcher: a .bat on Windows and an extensionless
+# shell script everywhere else, both in the same directory. Pick whichever is
+# actually there, so the same script runs on a Linux box (and one day in CI)
+# without a second copy of the build that can drift from this one.
+bt() {
+    local name="$1"; shift
+    if [ -f "$BT/$name.bat" ]; then "$BT/$name.bat" "$@"; else "$BT/$name" "$@"; fi
+}
+
+# python is called "python" on the Windows box this is usually built on and
+# "python3" on most Linux ones; zip-time.py runs under either.
+PY="${PYTHON:-python}"
+command -v "$PY" >/dev/null || PY=python3
+
 # Clean this build's intermediates and this ABI's own previous APK, but leave
 # any other ABI's finished APK in place — a release ships several, and they are
 # built one `build-apk.sh <abi>` at a time.
@@ -70,7 +84,20 @@ export CARGO_TARGET_DIR="$root/target-android"
 # `trim-paths` in [profile.release] is the tidy form of this, but it is not
 # stable in Cargo 1.97.1 and this workspace pins stable on purpose.
 : "${CARGO_HOME:=$HOME/.cargo}"
-export RUSTFLAGS="${RUSTFLAGS:-} --remap-path-prefix=$(win "$CARGO_HOME")=/cargo --remap-path-prefix=$(win "$root")=/src"
+
+# Link the library for 16 KB memory pages.
+#
+# Android has always had 4 KB pages; newer arm64 devices have 16 KB ones, and an
+# app targeting 35 or above is expected to load on both. A .so laid out for 4 KB
+# pages cannot be mapped by a kernel using 16 KB ones, so the app dies at
+# System.loadLibrary with a message about the library not being page-aligned.
+#
+# NDK r28 and later already link this way, but the flag is passed explicitly
+# rather than assumed, because the NDK here is whichever one env.sh resolved and
+# a build that quietly depends on the toolchain version is a build that breaks
+# on someone else's machine. `zipalign -P 16` further down does the other half:
+# the library must also sit on a 16 KB boundary inside the archive.
+export RUSTFLAGS="${RUSTFLAGS:-} -C link-arg=-Wl,-z,max-page-size=16384 --remap-path-prefix=$(win "$CARGO_HOME")=/cargo --remap-path-prefix=$(win "$root")=/src"
 
 # cargo-ndk writes the stripped .so straight into the staging tree.
 (cd "$root" && cargo ndk -t "$ABI" -o "$(win "$out/apk/lib")" build --release -p metascrub-android)
@@ -94,7 +121,7 @@ echo "==> resources"
     --manifest "$app/AndroidManifest.xml" \
     --java "$out/gen" \
     --min-sdk-version "$MIN_SDK" --target-sdk-version "$TARGET_SDK" \
-    --version-code 1 --version-name 0.1.0 \
+    --version-code "$VERSION_CODE" --version-name "$VERSION_NAME" \
     "$out/compiled/res.zip"
 
 echo "==> java"
@@ -108,20 +135,29 @@ echo "==> java"
     $(find "$out/gen" -name '*.java')
 
 echo "==> dex"
-"$BT/d8.bat" --min-api "$MIN_SDK" --release \
+bt d8 --min-api "$MIN_SDK" --release \
     --output "$(win "$out/dex")" \
     $(find "$out/classes" -name '*.class')
 
 echo "==> package"
 # Native libraries are stored (not deflated) and page-aligned so the app can
-# load its own .so on newer Android; --no-compress plus `zipalign -p` does that.
+# load its own .so straight out of the archive; --no-compress plus `zipalign -P`
+# does that, and the manifest's extractNativeLibs="false" is what asks for it.
 cp "$out/base.apk" "$out/unaligned.apk"
 cp "$out/dex/classes.dex" "$out/apk/classes.dex"
 (cd "$out/apk" && "$JAVA_HOME/bin/jar" --update --no-compress \
     --file "$(win "$out/unaligned.apk")" classes.dex "lib")
 
 echo "==> align"
-"$BT/zipalign" -p -f 4 "$out/unaligned.apk" "$out/aligned.apk"
+# -P 16 places the stored .so on a 16 KB boundary, which is what a device with
+# 16 KB pages needs in order to map it without extracting it first. It replaces
+# the older `-p` (which means 4 KB) and needs build-tools 35 or newer.
+"$BT/zipalign" -P 16 -f 4 "$out/unaligned.apk" "$out/aligned.apk"
+
+# Checked, not assumed. A wrongly aligned library is invisible until the app
+# starts on a 16 KB device, which is exactly the kind of failure that reaches a
+# user before it reaches us.
+"$BT/zipalign" -c -P 16 4 "$out/aligned.apk"
 
 echo "==> flatten timestamps"
 # ZIP records modification times as MS-DOS date/time, which has no timezone
@@ -133,24 +169,42 @@ echo "==> flatten timestamps"
 #
 # Between align and sign, and in that order for two reasons: the v2/v3
 # signature covers these bytes, and the patcher edits them in place so
-# `zipalign -p`'s page alignment of the .so survives untouched.
-python "$here/zip-time.py" "$out/aligned.apk"
+# `zipalign -P 16`'s page alignment of the .so survives untouched.
+"$PY" "$here/zip-time.py" "$out/aligned.apk"
 
 echo "==> sign"
-# A local debug key, generated on first run and never committed. A public
-# release is signed with a key kept off this machine — see README.md.
-KS="$here/debug.keystore"
-if [ ! -f "$KS" ]; then
-    "$JAVA_HOME/bin/keytool" -genkeypair -v \
-        -keystore "$(win "$KS")" -storepass android -keypass android \
-        -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
-        -dname "CN=Crake Debug, OU=, O=, L=, S=, C=" >/dev/null
+# By default a local debug key, generated on first run and never committed:
+# enough to put the app on a handset, and rejected by any store, which is the
+# correct behaviour for a key that lives on the build machine.
+#
+# Set METASCRUB_KEYSTORE and METASCRUB_KEY_ALIAS to sign with the real release
+# key instead (for a direct download; a store upload goes through
+# build-bundle.sh). The passwords are deliberately NOT read from the
+# environment: leave them unset and apksigner asks at the terminal, so the
+# release passphrase never sits in a shell history, a process listing or a
+# .bash_profile. METASCRUB_KS_PASS / METASCRUB_KEY_PASS exist for an unattended
+# build and take apksigner's own syntax (`file:...`, `env:VAR`, `pass:...`).
+sign_args=(--v1-signing-enabled false --v2-signing-enabled true --v3-signing-enabled true)
+if [ -n "${METASCRUB_KEYSTORE:-}" ]; then
+    : "${METASCRUB_KEY_ALIAS:?set METASCRUB_KEY_ALIAS alongside METASCRUB_KEYSTORE}"
+    [ -f "$METASCRUB_KEYSTORE" ] || { echo "no such keystore: $METASCRUB_KEYSTORE" >&2; exit 1; }
+    echo "    release key: $METASCRUB_KEYSTORE ($METASCRUB_KEY_ALIAS)"
+    sign_args+=(--ks "$(win "$METASCRUB_KEYSTORE")" --ks-key-alias "$METASCRUB_KEY_ALIAS")
+    if [ -n "${METASCRUB_KS_PASS:-}" ]; then sign_args+=(--ks-pass "$METASCRUB_KS_PASS"); fi
+    if [ -n "${METASCRUB_KEY_PASS:-}" ]; then sign_args+=(--key-pass "$METASCRUB_KEY_PASS"); fi
+else
+    KS="$here/debug.keystore"
+    if [ ! -f "$KS" ]; then
+        "$JAVA_HOME/bin/keytool" -genkeypair -v \
+            -keystore "$(win "$KS")" -storepass android -keypass android \
+            -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=Crake Debug, OU=, O=, L=, S=, C=" >/dev/null
+    fi
+    echo "    DEBUG key — for a handset, never for a release"
+    sign_args+=(--ks "$(win "$KS")" --ks-pass pass:android --key-pass pass:android)
 fi
-"$BT/apksigner.bat" sign \
-    --ks "$(win "$KS")" --ks-pass pass:android --key-pass pass:android \
-    --v1-signing-enabled false --v2-signing-enabled true --v3-signing-enabled true \
-    --out "$out/metascrub-$ABI.apk" "$out/aligned.apk"
-"$BT/apksigner.bat" verify --print-certs "$out/metascrub-$ABI.apk" | head -3
+bt apksigner sign "${sign_args[@]}" --out "$out/metascrub-$ABI.apk" "$out/aligned.apk"
+bt apksigner verify --print-certs "$out/metascrub-$ABI.apk" | head -3
 
 # Leave only the signed APK(s) behind, not the staging tree.
 rm -rf "$out/compiled" "$out/classes" "$out/dex" "$out/apk" "$out/gen" \
