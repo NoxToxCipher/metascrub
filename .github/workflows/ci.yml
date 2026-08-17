@@ -66,6 +66,7 @@ jobs:
                 -DCMAKE_INSTALL_PREFIX=ubuntu-touch/metascrub/build/install
           cmake --build ubuntu-touch/metascrub/build -j
           ./ubuntu-touch/metascrub/build/scrubber_smoke
+          ./ubuntu-touch/metascrub/build/workspace_smoke
       - name: Check the interface parses
         run: qmllint ubuntu-touch/metascrub/qml/*.qml
       # A .po that no longer matches the interface silently drops translations,

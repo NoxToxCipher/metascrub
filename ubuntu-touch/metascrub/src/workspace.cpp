@@ -44,16 +44,29 @@ int emptyDir(const QString &path)
         return 0;
     }
     int removed = 0;
-    const QFileInfoList entries =
-        dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden);
+    // AllEntries plus System, which is what includes a broken symbolic link.
+    // Listing only Files and Dirs would walk straight past one, leaving it in
+    // place while the interface reported everything cleared. Same set Qt's own
+    // QDir::removeRecursively uses.
+    const QFileInfoList entries = dir.entryInfoList(
+        QDir::AllEntries | QDir::Hidden | QDir::System | QDir::NoDotAndDotDot);
     for (const QFileInfo &entry : entries) {
-        if (entry.isDir()) {
-            // The Content Hub gives each transfer its own numbered directory.
-            removed += emptyDir(entry.absoluteFilePath());
-            QDir(entry.absoluteFilePath()).removeRecursively();
-        } else if (QFile::remove(entry.absoluteFilePath())) {
-            ++removed;
+        // A symbolic link is deleted as a link and never followed. QFileInfo
+        // resolves links, so isDir() is true for a link pointing at a
+        // directory, and recursing into it would delete whatever is on the
+        // other end. The files this clears arrive from other applications
+        // through the Content Hub; a link planted among them would otherwise
+        // turn "clear working files" into a delete somewhere else entirely.
+        // Qt's own QDir::removeRecursively takes the same precaution.
+        if (entry.isSymLink() || !entry.isDir()) {
+            if (QFile::remove(entry.absoluteFilePath())) {
+                ++removed;
+            }
+            continue;
         }
+        // The Content Hub gives each transfer its own numbered directory.
+        removed += emptyDir(entry.absoluteFilePath());
+        QDir(entry.absoluteFilePath()).removeRecursively();
     }
     return removed;
 }
@@ -65,10 +78,17 @@ int countFiles(const QString &path)
         return 0;
     }
     int n = 0;
-    const QFileInfoList entries =
-        dir.entryInfoList(QDir::Files | QDir::Dirs | QDir::NoDotAndDotDot | QDir::Hidden);
+    // AllEntries plus System, which is what includes a broken symbolic link.
+    // Listing only Files and Dirs would walk straight past one, leaving it in
+    // place while the interface reported everything cleared. Same set Qt's own
+    // QDir::removeRecursively uses.
+    const QFileInfoList entries = dir.entryInfoList(
+        QDir::AllEntries | QDir::Hidden | QDir::System | QDir::NoDotAndDotDot);
     for (const QFileInfo &entry : entries) {
-        n += entry.isDir() ? countFiles(entry.absoluteFilePath()) : 1;
+        // Counted the same way it is deleted: a link counts as the one file it
+        // is, and is not followed. Following would also let a link pointing at
+        // its own parent spin here forever.
+        n += (entry.isDir() && !entry.isSymLink()) ? countFiles(entry.absoluteFilePath()) : 1;
     }
     return n;
 }

@@ -167,4 +167,15 @@ if(METASCRUB_TESTS)
     target_link_libraries(scrubber_smoke PRIVATE
         ${METASCRUB_FFI_LIB} ${CMAKE_DL_LIBS} pthread m Qt5::Core Qt5::Concurrent Qt5::Gui)
     add_test(NAME scrubber_smoke COMMAND scrubber_smoke)
+
+    # The app's own storage: that a handed-over file name cannot steer where a
+    # cleaned copy is written, and that clearing deletes inside the app's
+    # directories and nowhere else.
+    add_executable(workspace_smoke
+        tests/workspace_smoke.cpp
+        src/workspace.cpp
+        src/workspace.h)
+    target_include_directories(workspace_smoke PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+    target_link_libraries(workspace_smoke PRIVATE Qt5::Core)
+    add_test(NAME workspace_smoke COMMAND workspace_smoke)
 endif()
