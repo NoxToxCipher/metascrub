@@ -22,16 +22,17 @@ Page {
     property bool scrubbed: false
     property string saveMessage: ""
 
-    // Native pickers, pushed on demand. The exact selection signals differ a
-    // little across Pickers versions — confirm against the installed one.
+    // Native pickers, pushed on demand. Multi-file selection is a Dialog
+    // (MultiFilePickerDialog): its chosen files arrive in the selectedContent
+    // model when the dialog is accepted, each row carrying filePath/fileName.
     Component {
         id: filePickerPage
-        MultiFilePickerPage {
+        MultiFilePickerDialog {
             title: qsTr("Choose files")
-            onSelectedContentPropertiesChanged: {
+            onAccepted: {
                 var urls = []
-                for (var i = 0; i < selectedContentProperties.count; ++i)
-                    urls.push(selectedContentProperties.get(i).filePath)
+                for (var i = 0; i < selectedContent.count; ++i)
+                    urls.push(selectedContent.get(i).filePath)
                 addFiles(urls)
             }
         }
